@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supply & Demand Shifts</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #FAF7F2; color: #1a1a1a; min-height: 100vh; padding: 24px; }
+h1 { font-size: 20px; font-weight: 500; color: #5A1BA6; margin-bottom: 20px; }
+.grid { display: grid; grid-template-columns: 230px 1fr; gap: 18px; align-items: start; max-width: 960px; }
+.panels { display: flex; flex-direction: column; gap: 10px; }
+.panel { background: #fff; border: 1px solid #e5e0d8; border-radius: 12px; padding: 13px 15px; }
+.panel-title { font-size: 11px; font-weight: 500; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #f0ebe3; }
+.good-toggle { display: flex; gap: 6px; margin-bottom: 10px; }
+.good-toggle button { flex: 1; font-size: 12px; padding: 5px 0; border-radius: 6px; border: 1px solid #d0c8bc; background: transparent; cursor: pointer; color: #666; font-family: inherit; }
+.good-toggle button.active { background: #5A1BA6; color: #fff; border-color: #5A1BA6; }
+.ctrl { margin-bottom: 9px; }
+.ctrl-label { display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-bottom: 3px; }
+.ctrl-label span:last-child { font-weight: 500; color: #1a1a1a; min-width: 28px; text-align: right; }
+input[type=range] { width: 100%; accent-color: #5A1BA6; cursor: pointer; }
+.eq-box { background: #f5f1eb; border-radius: 8px; padding: 9px 11px; font-size: 12px; }
+.eq-row { display: flex; justify-content: space-between; padding: 3px 0; }
+.eq-row span:first-child { color: #666; }
+.eq-row span:last-child { font-weight: 500; }
+.eq-row.highlight span:last-child { color: #5A1BA6; font-size: 13px; }
+.reset-btn { width: 100%; margin-top: 9px; padding: 7px; font-size: 12px; border-radius: 8px; border: 1px solid #d0c8bc; background: transparent; cursor: pointer; color: #555; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.reset-btn:hover { background: #f5f1eb; }
+.chart-wrap { background: #fff; border: 1px solid #e5e0d8; border-radius: 12px; padding: 16px; }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 10px; font-size: 12px; color: #666; }
+.leg-item { display: flex; align-items: center; gap: 6px; }
+.leg-solid { width: 24px; height: 2px; }
+.leg-dash { width: 24px; height: 2px; background: repeating-linear-gradient(to right, currentColor 0, currentColor 5px, transparent 5px, transparent 9px); }
+.shift-note { font-size: 11px; color: #888; margin-top: 8px; min-height: 16px; font-style: italic; }
+</style>
+</head>
+<body>
+
+<h1>Supply &amp; Demand — Curve Shifts and Equilibrium</h1>
+
+<div class="grid">
+  <div class="panels">
+
+    <div class="panel">
+      <div class="panel-title">Good type</div>
+      <div class="good-toggle">
+        <button class="active" id="btn-normal" onclick="setGood('normal')">Normal good</button>
+        <button id="btn-inferior" onclick="setGood('inferior')">Inferior good</button>
+      </div>
+      <div style="font-size:11px; color:#888;" id="good-desc">Income↑ → demand↑</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Demand shifters</div>
+      <div class="ctrl">
+        <div class="ctrl-label"><span>Price of substitute</span><span id="lbl-ps">0</span></div>
+        <input type="range" min="-5" max="5" step="1" value="0" id="sl-ps" oninput="update()">
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-label"><span>Price of complement</span><span id="lbl-pc">0</span></div>
+        <input type="range" min="-5" max="5" step="1" value="0" id="sl-pc" oninput="update()">
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-label"><span>Income</span><span id="lbl-inc">0</span></div>
+        <input type="range" min="-5" max="5" step="1" value="0" id="sl-inc" oninput="update()">
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-label"><span>Number of buyers</span><span id="lbl-nb">0</span></div>
+        <input type="range" min="-5" max="5" step="1" value="0" id="sl-nb" oninput="update()">
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Supply shifters</div>
+      <div class="ctrl">
+        <div class="ctrl-label"><span>Input cost</span><span id="lbl-ic">0</span></div>
+        <input type="range" min="-5" max="5" step="1" value="0" id="sl-ic" oninput="update()">
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-label"><span>Technology</span><span id="lbl-tech">0</span></div>
+        <input type="range" min="-5" max="5" step="1" value="0" id="sl-tech" oninput="update()">
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-label"><span>Number of sellers</span><span id="lbl-ns">0</span></div>
+        <input type="range" min="-5" max="5" step="1" value="0" id="sl-ns" oninput="update()">
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-label"><span>Expected future price</span><span id="lbl-ep">0</span></div>
+        <input type="range" min="-5" max="5" step="1" value="0" id="sl-ep" oninput="update()">
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Equilibrium</div>
+      <div class="eq-box">
+        <div class="eq-row highlight"><span>Price (P*)</span><span id="eq-p">50</span></div>
+        <div class="eq-row highlight"><span>Quantity (Q*)</span><span id="eq-q">50</span></div>
+        <div class="eq-row"><span>Demand shift</span><span id="eq-ds">0</span></div>
+        <div class="eq-row"><span>Supply shift</span><span id="eq-ss">0</span></div>
+      </div>
+      <button class="reset-btn" onclick="resetAll()">↺ Reset all sliders</button>
+    </div>
+
+  </div>
+
+  <div class="chart-wrap">
+    <div class="legend">
+      <div class="leg-item"><div class="leg-solid" style="background:#5A1BA6;"></div><span>Demand (original)</span></div>
+      <div class="leg-item" style="color:#5A1BA6;"><div class="leg-dash"></div><span style="color:#666;">Demand (shifted)</span></div>
+      <div class="leg-item"><div class="leg-solid" style="background:#A03A2C;"></div><span>Supply (original)</span></div>
+      <div class="leg-item" style="color:#A03A2C;"><div class="leg-dash"></div><span style="color:#666;">Supply (shifted)</span></div>
+    </div>
+    <div style="position: relative; height: 420px;">
+      <canvas id="chart"></canvas>
+    </div>
+    <div class="shift-note" id="shift-note"></div>
+  </div>
+</div>
+
+<script>
+let goodType = 'normal';
+let chart;
+
+function setGood(type) {
+  goodType = type;
+  document.getElementById('btn-normal').classList.toggle('active', type === 'normal');
+  document.getElementById('btn-inferior').classList.toggle('active', type === 'inferior');
+  document.getElementById('good-desc').textContent = type === 'normal' ? 'Income↑ → demand↑' : 'Income↑ → demand↓';
+  update();
+}
+
+function vals() {
+  return {
+    ps:   +document.getElementById('sl-ps').value,
+    pc:   +document.getElementById('sl-pc').value,
+    inc:  +document.getElementById('sl-inc').value,
+    nb:   +document.getElementById('sl-nb').value,
+    ic:   +document.getElementById('sl-ic').value,
+    tech: +document.getElementById('sl-tech').value,
+    ns:   +document.getElementById('sl-ns').value,
+    ep:   +document.getElementById('sl-ep').value,
+  };
+}
+
+function setLabel(id, v) {
+  const el = document.getElementById(id);
+  el.textContent = (v > 0 ? '+' : '') + v;
+  el.style.color = v > 0 ? '#5A1BA6' : v < 0 ? '#A03A2C' : '#1a1a1a';
+}
+
+function buildLine(intercept, slope, steps) {
+  const pts = [];
+  for (let i = 0; i <= steps; i++) {
+    const q = i * (100 / steps);
+    const p = intercept + slope * q;
+    if (p >= 0 && p <= 110) pts.push({ x: +q.toFixed(1), y: +p.toFixed(1) });
+  }
+  return pts;
+}
+
+function equilibrium(dInt, dSlope, sInt, sSlope) {
+  const q = (sInt - dInt) / (dSlope - sSlope);
+  const p = dInt + dSlope * q;
+  return { q: +q.toFixed(1), p: +p.toFixed(1) };
+}
+
+function update() {
+  const v = vals();
+  setLabel('lbl-ps', v.ps); setLabel('lbl-pc', v.pc);
+  setLabel('lbl-inc', v.inc); setLabel('lbl-nb', v.nb);
+  setLabel('lbl-ic', v.ic); setLabel('lbl-tech', v.tech);
+  setLabel('lbl-ns', v.ns); setLabel('lbl-ep', v.ep);
+
+  const incEffect = goodType === 'normal' ? v.inc : -v.inc;
+  const dShift = v.ps * 3 - v.pc * 3 + incEffect * 4 + v.nb * 3;
+  const sShift = v.ic * 3 - v.tech * 3 - v.ns * 3 + v.ep * 3;
+
+  const D0_INT = 100, D0_SLOPE = -1;
+  const S0_INT = 0,   S0_SLOPE = 1;
+  const D1_INT = D0_INT + dShift;
+  const S1_INT = S0_INT + sShift;
+
+  const eq0 = equilibrium(D0_INT, D0_SLOPE, S0_INT, S0_SLOPE);
+  const eq1 = equilibrium(D1_INT, D0_SLOPE, S1_INT, S0_SLOPE);
+
+  document.getElementById('eq-p').textContent = eq1.p;
+  document.getElementById('eq-q').textContent = eq1.q;
+  document.getElementById('eq-ds').textContent = (dShift >= 0 ? '+' : '') + dShift.toFixed(0);
+  document.getElementById('eq-ss').textContent = (sShift >= 0 ? '+' : '') + (-sShift).toFixed(0);
+
+  const notes = [];
+  if (dShift > 0) notes.push('Demand shifted right');
+  if (dShift < 0) notes.push('Demand shifted left');
+  if (sShift < 0) notes.push('Supply shifted right');
+  if (sShift > 0) notes.push('Supply shifted left');
+  document.getElementById('shift-note').textContent = notes.join(' · ');
+
+  const d0 = buildLine(D0_INT, D0_SLOPE, 100);
+  const d1 = buildLine(D1_INT, D0_SLOPE, 100);
+  const s0 = buildLine(S0_INT, S0_SLOPE, 100);
+  const s1 = buildLine(S1_INT, S0_SLOPE, 100);
+
+  const showShifted = dShift !== 0 || sShift !== 0;
+  const commonLine = { showLine: true, pointRadius: 0, pointHoverRadius: 0, fill: false, tension: 0 };
+
+  if (!chart) {
+    const ctx = document.getElementById('chart').getContext('2d');
+    chart = new Chart(ctx, {
+      type: 'scatter',
+      data: {
+        datasets: [
+          { ...commonLine, label: 'D₀', data: d0, borderColor: '#5A1BA6', borderWidth: 2.5 },
+          { ...commonLine, label: 'D₁', data: d1, borderColor: '#5A1BA6', borderWidth: showShifted ? 1.5 : 0, borderDash: [6,4] },
+          { ...commonLine, label: 'S₀', data: s0, borderColor: '#A03A2C', borderWidth: 2.5 },
+          { ...commonLine, label: 'S₁', data: s1, borderColor: '#A03A2C', borderWidth: showShifted ? 1.5 : 0, borderDash: [6,4] },
+          { label: 'Eq₀', data: [{ x: eq0.q, y: eq0.p }], showLine: false, pointRadius: 7, pointHoverRadius: 8, pointBackgroundColor: '#888', borderColor: '#888', borderWidth: 2 },
+          { label: 'Eq₁', data: [{ x: eq1.q, y: eq1.p }], showLine: false, pointRadius: showShifted ? 8 : 0, pointHoverRadius: showShifted ? 9 : 0, pointBackgroundColor: '#5A1BA6', borderColor: '#5A1BA6', borderWidth: 2 }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 250 },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            filter: item => item.dataset.label.startsWith('Eq'),
+            callbacks: {
+              label: ctx => `${ctx.dataset.label}: P = ${ctx.parsed.y}, Q = ${ctx.parsed.x}`
+            }
+          }
+        },
+        scales: {
+          x: {
+            title: { display: true, text: 'Quantity', color: '#888', font: { size: 13 } },
+            min: 0, max: 100,
+            grid: { color: 'rgba(0,0,0,0.06)' }
+          },
+          y: {
+            title: { display: true, text: 'Price', color: '#888', font: { size: 13 } },
+            min: 0, max: 110,
+            grid: { color: 'rgba(0,0,0,0.06)' }
+          }
+        }
+      }
+    });
+  } else {
+    chart.data.datasets[0].data = d0;
+    chart.data.datasets[1].data = d1;
+    chart.data.datasets[1].borderWidth = showShifted ? 1.5 : 0;
+    chart.data.datasets[2].data = s0;
+    chart.data.datasets[3].data = s1;
+    chart.data.datasets[3].borderWidth = showShifted ? 1.5 : 0;
+    chart.data.datasets[4].data = [{ x: eq0.q, y: eq0.p }];
+    chart.data.datasets[5].data = [{ x: eq1.q, y: eq1.p }];
+    chart.data.datasets[5].pointRadius = showShifted ? 8 : 0;
+    chart.data.datasets[5].pointHoverRadius = showShifted ? 9 : 0;
+    chart.update('active');
+  }
+}
+
+function resetAll() {
+  ['sl-ps','sl-pc','sl-inc','sl-nb','sl-ic','sl-tech','sl-ns','sl-ep'].forEach(id => {
+    document.getElementById(id).value = 0;
+  });
+  update();
+}
+
+update();
+</script>
+</body>
+</html>
