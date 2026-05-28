@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Price Controls — Markets NYUAD</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#FAF7F2;color:#2C2C2A;min-height:100vh;}
+.page{max-width:960px;margin:0 auto;padding:24px 20px;}
+h1{font-size:22px;font-weight:500;color:#5A1BA6;margin-bottom:4px;}
+.subtitle{font-size:14px;color:#5F5E5A;margin-bottom:20px;}
+.wrap{display:grid;grid-template-columns:280px 1fr;gap:0;border:0.5px solid #D3D1C7;border-radius:12px;background:#fff;overflow:hidden;}
+.sidebar{padding:18px 16px;border-right:0.5px solid #D3D1C7;display:flex;flex-direction:column;gap:14px;background:#fff;}
+.chart-area{padding:16px 16px 8px;display:flex;flex-direction:column;gap:10px;background:#FAF7F2;}
+.section-label{font-size:11px;font-weight:500;color:#888780;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;}
+.param-row{display:flex;align-items:center;gap:8px;}
+.param-label{font-size:13px;color:#2C2C2A;width:80px;flex-shrink:0;}
+.param-val{font-size:13px;font-weight:500;color:#2C2C2A;width:32px;text-align:right;flex-shrink:0;}
+.param-row input[type=range]{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:#D3D1C7;outline:none;}
+.param-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#5A1BA6;cursor:pointer;}
+.param-row input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#5A1BA6;cursor:pointer;border:none;}
+.toggle-group{display:flex;gap:0;border:0.5px solid #B4B2A9;border-radius:6px;overflow:hidden;}
+.toggle-btn{flex:1;padding:7px 10px;font-size:13px;background:transparent;border:none;cursor:pointer;color:#5F5E5A;transition:background .15s,color .15s;}
+.toggle-btn.active-ceil{background:#5A1BA6;color:#fff;}
+.toggle-btn.active-floor{background:#A03A2C;color:#fff;}
+.price-row{display:flex;align-items:center;gap:8px;}
+.price-label{font-size:13px;color:#2C2C2A;width:80px;flex-shrink:0;}
+.price-val{font-size:13px;font-weight:500;width:32px;text-align:right;flex-shrink:0;}
+.price-row input[type=range]{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:#D3D1C7;outline:none;}
+.price-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#5F5E5A;cursor:pointer;}
+.price-row input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#5F5E5A;cursor:pointer;border:none;}
+.divider{height:0.5px;background:#D3D1C7;}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.stat-card{background:#F1EFE8;border-radius:6px;padding:9px 11px;}
+.stat-label{font-size:11px;color:#888780;margin-bottom:3px;}
+.stat-val{font-size:17px;font-weight:500;color:#2C2C2A;}
+.badge{display:inline-block;padding:3px 9px;border-radius:4px;font-size:11px;font-weight:500;}
+.badge-binding{background:#EDE7F6;color:#5A1BA6;}
+.badge-nonbinding{background:#F1F8E9;color:#388E3C;}
+.badge-shortage{background:#FFF3E0;color:#E65100;}
+.badge-surplus{background:#FFF8E1;color:#F57F17;}
+.back-link-wrap{margin-top:32px;padding-top:16px;border-top:1px solid #e5e0d8;}
+.back-link{font-size:13px;color:#5A1BA6;text-decoration:none;}
+@media(max-width:680px){.wrap{grid-template-columns:1fr;}.chart-area{padding:12px;}}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Price Controls</h1>
+  <p class="subtitle">Tool 3 — Price ceiling and price floor effects on equilibrium, surplus, and deadweight loss</p>
+  <div class="wrap">
+    <div class="sidebar">
+      <div>
+        <div class="section-label">Demand: P = a − bQ</div>
+        <div class="param-row"><span class="param-label">a (intercept)</span><input type="range" id="sl-a" min="50" max="100" value="80" step="1" oninput="update()"><span class="param-val" id="vl-a">80</span></div>
+        <div class="param-row"><span class="param-label">b (slope)</span><input type="range" id="sl-b" min="0.1" max="2" value="0.8" step="0.1" oninput="update()"><span class="param-val" id="vl-b">0.8</span></div>
+      </div>
+      <div>
+        <div class="section-label">Supply: P = c + dQ</div>
+        <div class="param-row"><span class="param-label">c (intercept)</span><input type="range" id="sl-c" min="0" max="50" value="10" step="1" oninput="update()"><span class="param-val" id="vl-c">10</span></div>
+        <div class="param-row"><span class="param-label">d (slope)</span><input type="range" id="sl-d" min="0.9" max="5" value="1.4" step="0.1" oninput="update()"><span class="param-val" id="vl-d">1.4</span></div>
+      </div>
+      <div class="divider"></div>
+      <div>
+        <div class="section-label">Control type</div>
+        <div class="toggle-group">
+          <button class="toggle-btn active-ceil" id="btn-ceil" onclick="setType('ceiling')">Price ceiling</button>
+          <button class="toggle-btn" id="btn-floor" onclick="setType('floor')">Price floor</button>
+        </div>
+      </div>
+      <div>
+        <div class="section-label" id="price-section-label">Ceiling price</div>
+        <div class="price-row"><span class="price-label" id="pf-label">P<sub>ceiling</sub></span><input type="range" id="sl-pf" min="0" max="100" value="35" step="1" oninput="update()"><span class="price-val" id="vl-pf">35</span></div>
+      </div>
+      <div class="divider"></div>
+      <div>
+        <div id="binding-badge"></div>
+        <div style="margin-top:6px;" id="imbalance-badge"></div>
+      </div>
+      <div class="stats-grid" id="stats-grid"></div>
+    </div>
+    <div class="chart-area">
+      <svg id="diagram" width="100%" viewBox="0 0 420 380" role="img">
+        <title>Supply and demand diagram with price control</title>
+        <desc>Interactive diagram showing supply, demand, equilibrium and price control effects</desc>
+      </svg>
+      <div class="back-link-wrap">
+        <a href="https://amitkumargoyal.github.io/nyuad/markets/" class="back-link">← Back to Markets</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const PAD={top:18,right:20,bottom:44,left:48};
+const W=420,H=380;
+const QMAX=100,PMAX=100;
+let controlType='ceiling';
+
+function sx(q){return PAD.left+(q/QMAX)*(W-PAD.left-PAD.right);}
+function sy(p){return PAD.top+(1-p/PMAX)*(H-PAD.top-PAD.bottom);}
+
+function setType(t){
+  controlType=t;
+  document.getElementById('btn-ceil').className='toggle-btn'+(t==='ceiling'?' active-ceil':'');
+  document.getElementById('btn-floor').className='toggle-btn'+(t==='floor'?' active-floor':'');
+  document.getElementById('price-section-label').textContent=t==='ceiling'?'Ceiling price':'Floor price';
+  document.getElementById('pf-label').innerHTML=t==='ceiling'?'P<sub>ceiling</sub>':'P<sub>floor</sub>';
+  update();
+}
+
+function fmt(x){return x===null?'—':x.toFixed(2);}
+
+function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v));}
+
+function lineClip(p0,v){
+  const[x0,y0]=p0,[vx,vy]=v;
+  let tmin=0,tmax=1e9;
+  if(vx!==0){tmax=Math.min(tmax,vx>0?(QMAX-x0)/vx:(0-x0)/vx);}
+  else if(x0<0||x0>QMAX)return null;
+  if(vy!==0){tmax=Math.min(tmax,vy>0?(PMAX-y0)/vy:(0-y0)/vy);tmin=Math.max(tmin,vy>0?(0-y0)/vy:(PMAX-y0)/vy);}
+  else if(y0<0||y0>PMAX)return null;
+  if(vx!==0){tmin=Math.max(tmin,vx>0?(0-x0)/vx:(QMAX-x0)/vx);}
+  if(tmin>tmax)return null;
+  return[[x0+tmin*vx,y0+tmin*vy],[x0+tmax*vx,y0+tmax*vy]];
+}
+
+function update(){
+  const a=+document.getElementById('sl-a').value;
+  const b=+document.getElementById('sl-b').value;
+  const c=+document.getElementById('sl-c').value;
+  const d=+document.getElementById('sl-d').value;
+  const pf=+document.getElementById('sl-pf').value;
+
+  document.getElementById('vl-a').textContent=a;
+  document.getElementById('vl-b').textContent=b.toFixed(1);
+  document.getElementById('vl-c').textContent=c;
+  document.getElementById('vl-d').textContent=d.toFixed(1);
+  document.getElementById('vl-pf').textContent=pf;
+
+  const qStar=(a-c)/(b+d);
+  const pStar=a-b*qStar;
+  const inView=qStar>=0&&qStar<=QMAX&&pStar>=0&&pStar<=PMAX;
+
+  const isCeiling=controlType==='ceiling';
+  const binding=isCeiling?(pf<pStar):(pf>pStar);
+
+  let Qt,Qd,Qs,csVal,psVal,dwlVal,priceShown;
+
+  if(!inView){
+    Qt=null;Qd=null;Qs=null;csVal=null;psVal=null;dwlVal=null;priceShown=null;
+  } else if(!binding){
+    Qt=qStar;Qd=qStar;Qs=qStar;
+    priceShown=pStar;
+    csVal=0.5*(a-pStar)*qStar;
+    psVal=0.5*(pStar-c)*qStar;
+    dwlVal=0;
+  } else {
+    if(isCeiling){
+      Qs=(pf-c)/d;
+      Qd=(a-pf)/b;
+      Qt=Math.max(0,Qs);
+    } else {
+      Qd=(a-pf)/b;
+      Qs=(pf-c)/d;
+      Qt=Math.max(0,Qd);
+    }
+    priceShown=pf;
+    Qt=Math.max(0,Qt);
+    Qd=Math.max(0,Qd);
+    Qs=Math.max(0,Qs);
+    const pDQt=a-b*Qt;
+    const pSQt=c+d*Qt;
+    if(isCeiling){
+      csVal=(a-pf)*Qt - b*Qt*Qt/2;
+      psVal=0.5*(pf-c)*Qt;
+    } else {
+      csVal=0.5*(a-pf)*Qt;
+      psVal=(pf-c)*Qt - d*Qt*Qt/2;
+    }
+    dwlVal=0.5*(qStar-Qt)*(pDQt-pSQt);
+    if(dwlVal<0)dwlVal=0;
+  }
+
+  const imbalance=(!inView||!binding)?0:Math.abs(Qd-Qs);
+  drawDiagram(a,b,c,d,pStar,qStar,pf,isCeiling,binding,Qt,Qd,Qs,inView,priceShown);
+
+  const bb=document.getElementById('binding-badge');
+  if(!inView){bb.innerHTML='<span class="badge badge-nonbinding">Equilibrium off-screen</span>';}
+  else if(binding){bb.innerHTML=`<span class="badge badge-binding">${isCeiling?'Binding ceiling':'Binding floor'}</span>`;}
+  else{bb.innerHTML='<span class="badge badge-nonbinding">Non-binding — no effect</span>';}
+
+  const ib=document.getElementById('imbalance-badge');
+  if(inView&&binding&&imbalance>0.01){
+    if(isCeiling)ib.innerHTML=`<span class="badge badge-shortage">Excess demand: ${imbalance.toFixed(1)} units</span>`;
+    else ib.innerHTML=`<span class="badge badge-surplus">Excess supply: ${imbalance.toFixed(1)} units</span>`;
+  } else {ib.innerHTML='';}
+
+  const sg=document.getElementById('stats-grid');
+  const tsVal=(csVal===null||psVal===null)?null:csVal+psVal;
+  sg.innerHTML=`
+    <div class="stat-card"><div class="stat-label">Price (P)</div><div class="stat-val">${fmt(priceShown)}</div></div>
+    <div class="stat-card"><div class="stat-label">Qty traded (Q)</div><div class="stat-val">${fmt(Qt)}</div></div>
+    <div class="stat-card"><div class="stat-label" style="color:#5A1BA6">Consumer surplus</div><div class="stat-val">${fmt(csVal)}</div></div>
+    <div class="stat-card"><div class="stat-label" style="color:#A03A2C">Producer surplus</div><div class="stat-val">${fmt(psVal)}</div></div>
+    <div class="stat-card"><div class="stat-label">Total surplus</div><div class="stat-val">${fmt(tsVal)}</div></div>
+    <div class="stat-card"><div class="stat-label">Deadweight loss</div><div class="stat-val">${fmt(dwlVal)}</div></div>
+  `;
+}
+
+function drawDiagram(a,b,c,d,pStar,qStar,pf,isCeiling,binding,Qt,Qd,Qs,inView,priceShown){
+  const svg=document.getElementById('diagram');
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  const ns='http://www.w3.org/2000/svg';
+  function el(tag,attrs,parent){
+    const e=document.createElementNS(ns,tag);
+    for(const[k,v]of Object.entries(attrs))e.setAttribute(k,v);
+    (parent||svg).appendChild(e);return e;
+  }
+  function txt(content,attrs,parent){const e=el('text',attrs,parent);e.textContent=content;return e;}
+  function polyPath(pts,attrs,parent){
+    const d=pts.map((p,i)=>(i===0?'M':'L')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+    return el('path',{d,...attrs},parent);
+  }
+
+  const textCol='#3d3d3a';
+  const gridCol='rgba(0,0,0,0.07)';
+  const axisCol='rgba(0,0,0,0.3)';
+
+  el('rect',{x:0,y:0,width:W,height:H,fill:'#FAF7F2'});
+
+  for(let q=20;q<=100;q+=20){
+    el('line',{x1:sx(q),y1:PAD.top,x2:sx(q),y2:H-PAD.bottom,stroke:gridCol,'stroke-width':'0.5'});
+    txt(q,{x:sx(q),y:H-PAD.bottom+14,'text-anchor':'middle','font-size':'11',fill:textCol});
+  }
+  for(let p=20;p<=100;p+=20){
+    el('line',{x1:PAD.left,y1:sy(p),x2:W-PAD.right,y2:sy(p),stroke:gridCol,'stroke-width':'0.5'});
+    txt(p,{x:PAD.left-6,y:sy(p)+4,'text-anchor':'end','font-size':'11',fill:textCol});
+  }
+  el('line',{x1:PAD.left,y1:PAD.top,x2:PAD.left,y2:H-PAD.bottom,stroke:axisCol,'stroke-width':'1'});
+  el('line',{x1:PAD.left,y1:H-PAD.bottom,x2:W-PAD.right,y2:H-PAD.bottom,stroke:axisCol,'stroke-width':'1'});
+  txt('Q',{x:W-PAD.right+4,y:H-PAD.bottom+4,'font-size':'12',fill:textCol});
+  txt('P',{x:PAD.left-6,y:PAD.top-4,'font-size':'12',fill:textCol});
+
+  const dSeg=lineClip([0,a],[(1/b)*1,(-1)]);
+  if(dSeg){const[[q1,p1],[q2,p2]]=dSeg;el('line',{x1:sx(q1),y1:sy(p1),x2:sx(q2),y2:sy(p2),stroke:'#5A1BA6','stroke-width':'2'});}
+  const sSeg=lineClip([0,c],[1,d]);
+  if(sSeg){const[[q1,p1],[q2,p2]]=sSeg;el('line',{x1:sx(q1),y1:sy(p1),x2:sx(q2),y2:sy(p2),stroke:'#A03A2C','stroke-width':'2'});}
+
+  txt('D',{x:sx(Math.min(QMAX,(a)/b))-8,y:sy(0)+4,'font-size':'12','font-weight':'500',fill:'#5A1BA6'});
+  txt('S',{x:sx(Math.min(QMAX,(PMAX-c)/d))-8,y:sy(PMAX)+16,'font-size':'12','font-weight':'500',fill:'#A03A2C'});
+
+  if(inView){
+    if(!binding){
+      polyPath([[sx(0),sy(a)],[sx(qStar),sy(pStar)],[sx(0),sy(pStar)]],{fill:'rgba(90,27,166,0.13)',stroke:'rgba(90,27,166,0.35)','stroke-width':'0.8','stroke-linejoin':'round'});
+      polyPath([[sx(0),sy(c)],[sx(qStar),sy(pStar)],[sx(0),sy(pStar)]],{fill:'rgba(160,58,44,0.13)',stroke:'rgba(160,58,44,0.35)','stroke-width':'0.8','stroke-linejoin':'round'});
+      el('line',{x1:sx(qStar),y1:sy(pStar),x2:sx(qStar),y2:H-PAD.bottom,stroke:axisCol,'stroke-width':'0.8','stroke-dasharray':'4 3'});
+      el('line',{x1:PAD.left,y1:sy(pStar),x2:sx(qStar),y2:sy(pStar),stroke:axisCol,'stroke-width':'0.8','stroke-dasharray':'4 3'});
+      el('circle',{cx:sx(qStar),cy:sy(pStar),r:'5',fill:'#888780',stroke:'#fff','stroke-width':'1.5'});
+    } else {
+      const pfY=sy(pf);
+      el('line',{x1:PAD.left,y1:pfY,x2:W-PAD.right,y2:pfY,stroke:isCeiling?'#5A1BA6':'#A03A2C','stroke-width':'1.5','stroke-dasharray':'6 3'});
+      const QtC=clamp(Qt,0,QMAX),pfC=clamp(pf,0,PMAX),aC=clamp(a,0,PMAX),cC=clamp(c,0,PMAX);
+      const qStarC=clamp(qStar,0,QMAX),pStarC=clamp(pStar,0,PMAX);
+      const pDQt=clamp(a-b*QtC,0,PMAX);
+      const pSQt=clamp(c+d*QtC,0,PMAX);
+      if(isCeiling){
+        polyPath([[sx(0),sy(aC)],[sx(QtC),sy(pDQt)],[sx(QtC),sy(pfC)],[sx(0),sy(pfC)]],{fill:'rgba(90,27,166,0.13)',stroke:'rgba(90,27,166,0.35)','stroke-width':'0.8','stroke-linejoin':'round'});
+        polyPath([[sx(0),sy(cC)],[sx(QtC),sy(pfC)],[sx(0),sy(pfC)]],{fill:'rgba(160,58,44,0.13)',stroke:'rgba(160,58,44,0.35)','stroke-width':'0.8','stroke-linejoin':'round'});
+        polyPath([[sx(QtC),sy(pDQt)],[sx(qStarC),sy(pStarC)],[sx(QtC),sy(pSQt)]],{fill:'rgba(100,100,100,0.2)',stroke:'rgba(80,80,80,0.55)','stroke-width':'0.8','stroke-linejoin':'round'});
+      } else {
+        polyPath([[sx(0),sy(aC)],[sx(QtC),sy(pfC)],[sx(0),sy(pfC)]],{fill:'rgba(90,27,166,0.13)',stroke:'rgba(90,27,166,0.35)','stroke-width':'0.8','stroke-linejoin':'round'});
+        polyPath([[sx(0),sy(cC)],[sx(QtC),sy(pSQt)],[sx(QtC),sy(pfC)],[sx(0),sy(pfC)]],{fill:'rgba(160,58,44,0.13)',stroke:'rgba(160,58,44,0.35)','stroke-width':'0.8','stroke-linejoin':'round'});
+        polyPath([[sx(QtC),sy(pDQt)],[sx(qStarC),sy(pStarC)],[sx(QtC),sy(pSQt)]],{fill:'rgba(100,100,100,0.2)',stroke:'rgba(80,80,80,0.55)','stroke-width':'0.8','stroke-linejoin':'round'});
+      }
+      el('line',{x1:sx(QtC),y1:sy(pfC),x2:sx(QtC),y2:H-PAD.bottom,stroke:axisCol,'stroke-width':'0.8','stroke-dasharray':'4 3'});
+      el('line',{x1:sx(qStarC),y1:sy(pStarC),x2:sx(qStarC),y2:H-PAD.bottom,stroke:axisCol,'stroke-width':'0.6','stroke-dasharray':'3 3'});
+      el('line',{x1:PAD.left,y1:sy(pStarC),x2:sx(qStarC),y2:sy(pStarC),stroke:axisCol,'stroke-width':'0.6','stroke-dasharray':'3 3'});
+      el('circle',{cx:sx(qStarC),cy:sy(pStarC),r:'4',fill:'#888780',stroke:'#fff','stroke-width':'1.5'});
+      el('circle',{cx:sx(QtC),cy:sy(pfC),r:'5',fill:isCeiling?'#5A1BA6':'#A03A2C',stroke:'#fff','stroke-width':'1.5'});
+      if(Qt>0.5){
+        if(isCeiling&&Qd>Qt+1){
+          const arrowY=pfY-10;
+          el('line',{x1:sx(QtC),y1:arrowY,x2:Math.min(sx(Math.min(Qd,QMAX))-2,W-PAD.right-4),y2:arrowY,stroke:'#E65100','stroke-width':'1','stroke-dasharray':'3 2'});
+          txt('excess demand',{x:(sx(QtC)+Math.min(sx(Math.min(Qd,QMAX)),W-PAD.right))/2,y:arrowY-5,'text-anchor':'middle','font-size':'10',fill:'#E65100'});
+        }
+        if(!isCeiling&&Qs>Qt+1){
+          const arrowY=pfY+12;
+          el('line',{x1:sx(QtC),y1:arrowY,x2:Math.min(sx(Math.min(Qs,QMAX))-2,W-PAD.right-4),y2:arrowY,stroke:'#F57F17','stroke-width':'1','stroke-dasharray':'3 2'});
+          txt('excess supply',{x:(sx(QtC)+Math.min(sx(Math.min(Qs,QMAX)),W-PAD.right))/2,y:arrowY+11,'text-anchor':'middle','font-size':'10',fill:'#F57F17'});
+        }
+      }
+    }
+  }
+
+  const legendY=H-6;
+  el('rect',{x:PAD.left+2,y:legendY-8,width:10,height:10,fill:'rgba(90,27,166,0.25)',stroke:'rgba(90,27,166,0.5)','stroke-width':'0.6'});
+  txt('CS',{x:PAD.left+16,y:legendY,'font-size':'10',fill:'#5A1BA6'});
+  el('rect',{x:PAD.left+38,y:legendY-8,width:10,height:10,fill:'rgba(160,58,44,0.25)',stroke:'rgba(160,58,44,0.5)','stroke-width':'0.6'});
+  txt('PS',{x:PAD.left+52,y:legendY,'font-size':'10',fill:'#A03A2C'});
+  el('rect',{x:PAD.left+74,y:legendY-8,width:10,height:10,fill:'rgba(100,100,100,0.25)',stroke:'rgba(80,80,80,0.5)','stroke-width':'0.6'});
+  txt('DWL',{x:PAD.left+88,y:legendY,'font-size':'10',fill:'#3d3d3a'});
+}
+
+update();
+</script>
+</body>
+</html>
