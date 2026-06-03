@@ -14,6 +14,7 @@ h1{font-size:22px;font-weight:500;color:#5A1BA6;margin-bottom:4px;}
 .sidebar{padding:18px 16px;border-right:0.5px solid #D3D1C7;display:flex;flex-direction:column;gap:14px;background:#fff;}
 .chart-area{padding:16px 16px 8px;display:flex;flex-direction:column;gap:10px;background:#FAF7F2;}
 .section-label{font-size:11px;font-weight:500;color:#888780;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;}
+.section-label .eqn{text-transform:none;letter-spacing:0;}
 .param-row{display:flex;align-items:center;gap:8px;}
 .param-label{font-size:13px;color:#2C2C2A;width:80px;flex-shrink:0;}
 .param-val{font-size:13px;font-weight:500;color:#2C2C2A;width:32px;text-align:right;flex-shrink:0;}
@@ -55,12 +56,12 @@ h1{font-size:22px;font-weight:500;color:#5A1BA6;margin-bottom:4px;}
   <div class="wrap">
     <div class="sidebar">
       <div>
-        <div class="section-label">Demand: P = a − bQ</div>
+        <div class="section-label">Demand: <span class="eqn">P = a − bQ</span></div>
         <div class="param-row"><span class="param-label">a (intercept)</span><input type="range" id="sl-a" min="50" max="100" value="80" step="1" oninput="update()"><span class="param-val" id="vl-a">80</span></div>
         <div class="param-row"><span class="param-label">b (slope)</span><input type="range" id="sl-b" min="0.1" max="2" value="0.8" step="0.1" oninput="update()"><span class="param-val" id="vl-b">0.8</span></div>
       </div>
       <div>
-        <div class="section-label">Supply: P = c + dQ</div>
+        <div class="section-label">Supply: <span class="eqn">P = c + dQ</span></div>
         <div class="param-row"><span class="param-label">c (intercept)</span><input type="range" id="sl-c" min="0" max="50" value="10" step="1" oninput="update()"><span class="param-val" id="vl-c">10</span></div>
         <div class="param-row"><span class="param-label">d (slope)</span><input type="range" id="sl-d" min="0.9" max="5" value="1.4" step="0.1" oninput="update()"><span class="param-val" id="vl-d">1.4</span></div>
       </div>
