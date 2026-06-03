@@ -12,6 +12,7 @@ h1 { font-size: 18px; font-weight: 500; color: #5A1BA6; margin-bottom: 20px; }
 .sidebar { display: flex; flex-direction: column; gap: 10px; }
 .card { background: #fff; border: 1px solid #e5e0d8; border-radius: 12px; padding: 13px 15px; }
 .card-title { font-size: 11px; font-weight: 500; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #f0ebe3; }
+.card-title .eqn { text-transform: none; letter-spacing: 0; }
 .ctrl { margin-bottom: 9px; }
 .ctrl:last-of-type { margin-bottom: 0; }
 .ctrl-label { display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-bottom: 3px; }
@@ -33,6 +34,10 @@ input[type=range] { width: 100%; accent-color: #5A1BA6; cursor: pointer; }
 .footer { margin-top: 32px; font-size: 12px; color: #6b6358; }
 .footer a { color: #5A1BA6; text-decoration: none; }
 .footer a:hover { text-decoration: underline; }
+@media (max-width: 640px) {
+  body { padding: 16px; }
+  .layout { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
@@ -41,7 +46,7 @@ input[type=range] { width: 100%; accent-color: #5A1BA6; cursor: pointer; }
   <div class="sidebar">
 
     <div class="card">
-      <div class="card-title">Demand — P = a &minus; bQ</div>
+      <div class="card-title">Demand <span class="eqn">— P = a &minus; bQ</span></div>
       <div class="ctrl">
         <div class="ctrl-label"><span>a</span><span class="ctrl-val" id="va">80</span></div>
         <input type="range" min="50" max="100" step="1" value="80" id="sa" oninput="update()">
@@ -54,7 +59,7 @@ input[type=range] { width: 100%; accent-color: #5A1BA6; cursor: pointer; }
     </div>
 
     <div class="card">
-      <div class="card-title">Supply — P = c + dQ</div>
+      <div class="card-title">Supply <span class="eqn">— P = c + dQ</span></div>
       <div class="ctrl">
         <div class="ctrl-label"><span>c</span><span class="ctrl-val" id="vc">10</span></div>
         <input type="range" min="0" max="50" step="1" value="10" id="sc" oninput="update()">
