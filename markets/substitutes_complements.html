@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Optimal choice — substitutes &amp; complements</title>
+<style>
+  :root{
+    --violet:#5A1BA6; --terra:#A03A2C; --sage:#9CAF88; --cream:#FAF7F2;
+    --muted:#6b6358; --charcoal:#3a3a3a; --ink:#2a2a2a; --rule:#e5e0d8;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--cream); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; line-height:1.5;}
+  .wrap{max-width:1040px; margin:0 auto; padding:28px 22px 40px;}
+  h1{color:var(--violet); font-size:24px; font-weight:650; margin:0 0 12px; letter-spacing:-0.01em;}
+  .sub{color:var(--muted); font-size:14px; margin:0 0 22px; max-width:64ch;}
+  .math{font-family:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,serif;}
+  var,.var{font-family:"Iowan Old Style",Palatino,Georgia,serif; font-style:italic;}
+
+  .seg{display:inline-flex; border:1px solid var(--rule); border-radius:10px; overflow:hidden; margin:0 0 14px;}
+  .seg button{background:#fff; border:none; padding:9px 18px; font-size:14px; color:var(--muted); cursor:pointer; transition:background .12s,color .12s;}
+  .seg button.active{background:var(--violet); color:#fff;}
+  .seg button + button{border-left:1px solid var(--rule);}
+
+  .layout{display:grid; grid-template-columns:1.25fr 1fr; gap:26px; align-items:start;}
+  @media(max-width:820px){.layout{grid-template-columns:1fr;}}
+  .panel{background:#fff; border:1px solid var(--rule); border-radius:12px; padding:18px 18px 20px;}
+  svg{display:block; width:100%; height:auto;}
+
+  .controls{display:flex; flex-direction:column; gap:16px;}
+  .ctl label{display:flex; justify-content:space-between; align-items:baseline; font-size:13.5px; margin-bottom:5px;}
+  .ctl .val{font-family:"Iowan Old Style",Palatino,Georgia,serif; font-style:italic; color:var(--violet); font-size:15px;}
+  input[type=range]{-webkit-appearance:none; width:100%; height:4px; border-radius:3px; background:var(--rule); outline:none;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:17px; height:17px; border-radius:50%; background:var(--violet); cursor:pointer; border:2px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,.25);}
+  input[type=range]::-moz-range-thumb{width:15px; height:15px; border-radius:50%; background:var(--violet); cursor:pointer; border:2px solid #fff;}
+
+  .badge{display:inline-block; font-size:12.5px; font-weight:600; padding:4px 10px; border-radius:999px; margin-bottom:10px;}
+  .badge.x{background:rgba(90,27,166,.12); color:var(--violet);}
+  .badge.y{background:rgba(160,58,44,.12); color:var(--terra);}
+  .badge.k{background:rgba(156,175,136,.28); color:#4a5a39;}
+  .rule-line{font-size:13.5px; color:var(--ink); margin:2px 0 12px;}
+  .divider{height:1px; background:var(--sage); opacity:.6; margin:14px 0;}
+  table.kv{width:100%; border-collapse:collapse; font-size:13.5px;}
+  table.kv td{padding:3px 0; vertical-align:baseline;}
+  table.kv td.k{color:var(--muted); padding-right:10px;}
+  table.kv td.v{text-align:right; font-family:"Iowan Old Style",Palatino,Georgia,serif;}
+  .big{font-size:16px; color:var(--violet);}
+  .check{color:#4a5a39; font-size:12.5px;}
+
+  .btn{margin-top:16px; background:none; border:1px solid var(--rule); color:var(--muted); padding:7px 14px; border-radius:8px; font-size:13px; cursor:pointer;}
+  .btn:hover{border-color:var(--violet); color:var(--violet);}
+
+  .footer{margin-top:32px; font-size:12px; color:var(--muted);}
+  .footer a{color:var(--violet); text-decoration:none;}
+  .footer a:hover{text-decoration:underline;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Optimal choice — perfect substitutes &amp; complements</h1>
+
+  <div class="seg" id="seg">
+    <button data-mode="subs" class="active">Perfect substitutes</button>
+    <button data-mode="comp">Perfect complements</button>
+  </div>
+
+  <p class="sub" id="desc"></p>
+
+  <div class="layout">
+    <div class="panel">
+      <svg id="chart" viewBox="0 0 580 470" role="img" aria-label="Budget line and indifference curves"></svg>
+    </div>
+
+    <div>
+      <div class="panel controls">
+        <div class="ctl">
+          <label><span class="name" id="kName"></span><span class="val" id="kVal">2.00</span></label>
+          <input type="range" id="k" min="0.1" max="5" step="0.05" value="2">
+        </div>
+        <div class="ctl">
+          <label><span class="name">Price of <var>x</var> &nbsp;(<var>p<sub>x</sub></var>)</span><span class="val" id="pxVal">2.0</span></label>
+          <input type="range" id="px" min="1" max="5" step="0.5" value="2">
+        </div>
+        <div class="ctl">
+          <label><span class="name">Price of <var>y</var> &nbsp;(<var>p<sub>y</sub></var>)</span><span class="val" id="pyVal">2.0</span></label>
+          <input type="range" id="py" min="1" max="5" step="0.5" value="2">
+        </div>
+        <div class="ctl">
+          <label><span class="name">Income &nbsp;(<var>M</var>)</span><span class="val" id="mVal">80</span></label>
+          <input type="range" id="m" min="40" max="100" step="5" value="80">
+        </div>
+        <button class="btn" id="reset">Reset</button>
+      </div>
+
+      <div class="panel" id="readout" style="margin-top:16px;"></div>
+    </div>
+  </div>
+
+  <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #e5e0d8;">
+    <a href="https://amitkumargoyal.github.io/nyuad/markets/" style="font-size: 13px; color: #5A1BA6; text-decoration: none;">&larr; Back to Markets</a>
+  </div>
+  <div class="footer">Built with Claude &middot; Amit Goyal &middot; <a href="mailto:amit.goyal@nyu.edu">amit.goyal@nyu.edu</a></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const QMAX=100, PMAX=100;
+  const PAD={top:18,right:22,bottom:44,left:50};
+  const W=580, H=470;
+  const plotW=W-PAD.left-PAD.right, plotH=H-PAD.top-PAD.bottom;
+  const EPS=1e-6;
+  const COL={violet:"#5A1BA6", terra:"#A03A2C", budget:"#3a3a3a",
+    faint:"rgba(90,27,166,0.32)", grid:"#efe9df", axis:"#cdbfae", text:"#6b6358",
+    dot:"#A03A2C", ray:"#9CAF88"};
+
+  const sx=q=>PAD.left + (q/QMAX)*plotW;
+  const sy=p=>PAD.top + plotH - (p/PMAX)*plotH;
+  const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+  const fmt=(v,d=2)=>v.toFixed(d);
+
+  function clipLine(m,b){
+    const pts=[];
+    const push=(x,y)=>{ if(x>=-1e-7&&x<=QMAX+1e-7&&y>=-1e-7&&y<=PMAX+1e-7) pts.push([clamp(x,0,QMAX),clamp(y,0,PMAX)]); };
+    push(0,b); push(QMAX,m*QMAX+b);
+    if(Math.abs(m)>1e-12){ push((0-b)/m,0); push((PMAX-b)/m,PMAX); }
+    if(pts.length<2) return null;
+    pts.sort((a,c)=>a[0]-c[0]||a[1]-c[1]);
+    const A=pts[0], B=pts[pts.length-1];
+    if(Math.hypot(A[0]-B[0],A[1]-B[1])<1e-5) return null;
+    return [A,B];
+  }
+  const segSVG=(seg,attrs)=>seg?`<line x1="${sx(seg[0][0]).toFixed(2)}" y1="${sy(seg[0][1]).toFixed(2)}" x2="${sx(seg[1][0]).toFixed(2)}" y2="${sy(seg[1][1]).toFixed(2)}" ${attrs}/>`:"";
+
+  // L-shaped indifference curve for u = min{kx, y}: corner at (u/k, u), arms up and right.
+  function Lshape(u,k,attrs){
+    const cx=u/k, cy=u;
+    if(cx<-1e-9||cy<-1e-9||cx>QMAX+1e-9||cy>PMAX+1e-9) return "";
+    let s="";
+    s+=`<line x1="${sx(cx).toFixed(2)}" y1="${sy(cy).toFixed(2)}" x2="${sx(cx).toFixed(2)}" y2="${sy(PMAX).toFixed(2)}" ${attrs}/>`;
+    s+=`<line x1="${sx(cx).toFixed(2)}" y1="${sy(cy).toFixed(2)}" x2="${sx(QMAX).toFixed(2)}" y2="${sy(cy).toFixed(2)}" ${attrs}/>`;
+    return s;
+  }
+
+  function axes(){
+    let s=`<rect x="${PAD.left}" y="${PAD.top}" width="${plotW}" height="${plotH}" fill="#fff"/>`;
+    for(let t=20;t<=100;t+=20){
+      s+=`<line x1="${sx(t)}" y1="${PAD.top}" x2="${sx(t)}" y2="${PAD.top+plotH}" stroke="${COL.grid}" stroke-width="1"/>`;
+      s+=`<line x1="${PAD.left}" y1="${sy(t)}" x2="${PAD.left+plotW}" y2="${sy(t)}" stroke="${COL.grid}" stroke-width="1"/>`;
+    }
+    s+=`<line x1="${PAD.left}" y1="${sy(0)}" x2="${PAD.left+plotW}" y2="${sy(0)}" stroke="${COL.axis}" stroke-width="1.4"/>`;
+    s+=`<line x1="${PAD.left}" y1="${PAD.top}" x2="${PAD.left}" y2="${PAD.top+plotH}" stroke="${COL.axis}" stroke-width="1.4"/>`;
+    for(let t=0;t<=100;t+=20){
+      s+=`<text x="${sx(t)}" y="${PAD.top+plotH+16}" font-size="11" fill="${COL.text}" text-anchor="middle">${t}</text>`;
+      if(t>0) s+=`<text x="${PAD.left-8}" y="${sy(t)+4}" font-size="11" fill="${COL.text}" text-anchor="end">${t}</text>`;
+    }
+    s+=`<text x="${PAD.left+plotW/2}" y="${H-8}" font-size="12.5" fill="${COL.text}" text-anchor="middle" font-style="italic">x &nbsp;(good X)</text>`;
+    s+=`<text transform="translate(14,${PAD.top+plotH/2}) rotate(-90)" font-size="12.5" fill="${COL.text}" text-anchor="middle" font-style="italic">y &nbsp;(good Y)</text>`;
+    return s;
+  }
+
+  function kvTable(rows){
+    let s='<table class="kv">';
+    rows.forEach(r=>{ s+=`<tr><td class="k">${r.k}</td><td class="v ${r.cls||''}">${r.v}</td></tr>`; });
+    return s+'</table>';
+  }
+  function setReadout(badgeCls,badgeTxt,ruleTxt,topRows,botRows){
+    document.getElementById("readout").innerHTML =
+      `<span class="badge ${badgeCls}">${badgeTxt}</span>`+
+      `<p class="rule-line">${ruleTxt}</p>`+
+      kvTable(topRows)+`<div class="divider"></div>`+kvTable(botRows);
+  }
+
+  const DESC={
+    subs:`This consumer <b>prefers more to less</b> and is always willing to substitute 1 unit of <var>x</var> for <var>k</var> units of <var>y</var> without affecting their satisfaction — and the trade-off is the same at every bundle. Preferences like these can be represented by the utility function <span class="math">u(<var>x</var>,&nbsp;<var>y</var>) = <var>k&#8202;x</var> + <var>y</var></span>, whose indifference curves are straight lines of slope &minus;<var>k</var>. The most preferred affordable bundle is then found by comparing the trade-off rate <var>k</var> (the MRS) with the price ratio <var>p<sub>x</sub></var>&#8201;/&#8201;<var>p<sub>y</sub></var>.`,
+    comp:`This consumer wants the two goods in a <b>fixed proportion</b>: exactly <var>k</var> units of <var>y</var> for every unit of <var>x</var>. Extra units of one good on their own add nothing — satisfaction rises only when both goods grow together. Preferences like these can be represented by the utility function <span class="math">u(<var>x</var>,&nbsp;<var>y</var>) = min{<var>k&#8202;x</var>,&thinsp;<var>y</var>}</span>, whose indifference curves are L-shaped with kinks along the ray <span class="math"><var>y</var> = <var>k&#8202;x</var></span>. The most preferred affordable bundle always sits at a kink, where <span class="math"><var>k&#8202;x</var> = <var>y</var></span> and neither good is wasted.`
+  };
+  const KNAME={
+    subs:`Preference weight on <var>x</var> &nbsp;(<var>k</var> = MRS)`,
+    comp:`Fixed proportion &nbsp;(<var>k</var> = units of <var>y</var> per unit of <var>x</var>)`
+  };
+
+  let mode="subs";
+
+  function render(){
+    const k=parseFloat(document.getElementById("k").value);
+    const px=parseFloat(document.getElementById("px").value);
+    const py=parseFloat(document.getElementById("py").value);
+    const M=parseFloat(document.getElementById("m").value);
+
+    document.getElementById("kVal").textContent=fmt(k);
+    document.getElementById("pxVal").textContent=fmt(px,1);
+    document.getElementById("pyVal").textContent=fmt(py,1);
+    document.getElementById("mVal").textContent=M;
+    document.getElementById("kName").innerHTML=KNAME[mode];
+    document.getElementById("desc").innerHTML=DESC[mode];
+
+    if(mode==="subs") renderSubs(k,px,py,M);
+    else renderComp(k,px,py,M);
+  }
+
+  function renderSubs(k,px,py,M){
+    const ratio=px/py, xint=M/px, yint=M/py;
+    let regime;
+    if(Math.abs(k-ratio)<EPS) regime="knife";
+    else if(k>ratio) regime="x"; else regime="y";
+    const uOpt=Math.max(k*xint, yint);
+
+    let g=axes();
+    g+=segSVG(clipLine(-px/py, yint), `stroke="${COL.budget}" stroke-width="2"`);
+    g+=segSVG(clipLine(-k, uOpt*0.55), `stroke="${COL.faint}" stroke-width="1.5"`);
+    g+=segSVG(clipLine(-k, uOpt*1.45), `stroke="${COL.faint}" stroke-width="1.5" stroke-dasharray="5 4"`);
+
+    if(regime==="knife"){
+      g+=segSVG(clipLine(-px/py, yint), `stroke="${COL.violet}" stroke-width="3.5" stroke-linecap="round"`);
+      g+=`<circle cx="${sx(xint)}" cy="${sy(0)}" r="5" fill="${COL.dot}"/>`;
+      g+=`<circle cx="${sx(0)}" cy="${sy(yint)}" r="5" fill="${COL.dot}"/>`;
+      g+=`<text x="${sx(xint*0.5)+6}" y="${sy(yint*0.5)-8}" font-size="12" fill="${COL.violet}" font-weight="600">every point optimal</text>`;
+    }else{
+      g+=segSVG(clipLine(-k, uOpt), `stroke="${COL.violet}" stroke-width="2.5"`);
+      const xd=regime==="x"?xint:0, yd=regime==="x"?0:yint;
+      g+=`<circle cx="${sx(xd)}" cy="${sy(yd)}" r="5.5" fill="${COL.dot}" stroke="#fff" stroke-width="1.5"/>`;
+      const lx=regime==="x"?sx(xd)-6:sx(xd)+10, ly=regime==="x"?sy(yd)-10:sy(yd)+4, anc=regime==="x"?"end":"start";
+      g+=`<text x="${lx}" y="${ly}" font-size="12.5" fill="${COL.terra}" text-anchor="${anc}" font-weight="600">(${fmt(xd)},\u2009${fmt(yd)})</text>`;
+    }
+    const bSeg=clipLine(-px/py,yint);
+    if(bSeg) g+=`<text x="${sx(bSeg[1][0])-4}" y="${sy(bSeg[1][1])-6}" font-size="11.5" fill="${COL.budget}" text-anchor="end">budget</text>`;
+    document.getElementById("chart").innerHTML=g;
+
+    let badgeCls,badgeTxt,ruleTxt,xd,yd;
+    if(regime==="x"){badgeCls="x"; badgeTxt="MRS > price ratio  →  spend all on x";
+      ruleTxt="Good <var>x</var> delivers more utility per unit of money, so the budget is poured entirely into <var>x</var>."; xd=xint; yd=0;}
+    else if(regime==="y"){badgeCls="y"; badgeTxt="MRS < price ratio  →  spend all on y";
+      ruleTxt="Good <var>y</var> delivers more utility per unit of money, so the budget is poured entirely into <var>y</var>."; xd=0; yd=yint;}
+    else{badgeCls="k"; badgeTxt="MRS = price ratio  →  knife-edge";
+      ruleTxt="The two goods give identical utility per unit of money. <b>Any</b> bundle on the budget line is optimal.";}
+
+    const top=[
+      {k:"MRS<sub>xy</sub> = <var>k</var>", v:fmt(k)},
+      {k:"Price ratio <var>p<sub>x</sub></var>/<var>p<sub>y</sub></var>", v:fmt(ratio)},
+      {k:'"Bang per buck" on <var>x</var>: <var>k</var>/<var>p<sub>x</sub></var>', v:fmt(k/px,3)},
+      {k:'"Bang per buck" on <var>y</var>: 1/<var>p<sub>y</sub></var>', v:fmt(1/py,3)}
+    ];
+    let bot;
+    if(regime==="knife"){
+      bot=[{k:"Optimal bundle (<var>x<sup>d</sup></var>, <var>y<sup>d</sup></var>)", v:"any point on the budget line", cls:""},
+           {k:"Utility <var>u</var><sup>*</sup>", v:fmt(uOpt)},
+           {k:"Spending", v:fmt(M)+" = M \u2713", cls:"check"}];
+    }else{
+      bot=[{k:"Optimal bundle (<var>x<sup>d</sup></var>, <var>y<sup>d</sup></var>)", v:"("+fmt(xd)+", "+fmt(yd)+")", cls:"big"},
+           {k:"Utility <var>u</var><sup>*</sup>", v:fmt(uOpt)},
+           {k:"Spending <var>p<sub>x</sub>x<sup>d</sup></var>+<var>p<sub>y</sub>y<sup>d</sup></var>", v:fmt(px*xd+py*yd)+" = M \u2713", cls:"check"}];
+    }
+    setReadout(badgeCls,badgeTxt,ruleTxt,top,bot);
+  }
+
+  function renderComp(k,px,py,M){
+    const denom=px+k*py;
+    const xstar=M/denom, ystar=k*xstar, uStar=ystar;
+
+    let g=axes();
+    // ray y = kx (fixed-proportion path)
+    g+=segSVG(clipLine(k,0), `stroke="${COL.ray}" stroke-width="1.5" stroke-dasharray="4 4"`);
+    const raySeg=clipLine(k,0);
+    if(raySeg) g+=`<text x="${sx(raySeg[1][0])-4}" y="${sy(raySeg[1][1])+14}" font-size="11" fill="#5d6e4a" text-anchor="end" font-style="italic">y = kx</text>`;
+    // budget line
+    g+=segSVG(clipLine(-px/py, M/py), `stroke="${COL.budget}" stroke-width="2"`);
+    // reference L-curves
+    g+=Lshape(uStar*0.55,k,`stroke="${COL.faint}" stroke-width="1.5" fill="none"`);
+    g+=Lshape(uStar*1.45,k,`stroke="${COL.faint}" stroke-width="1.5" stroke-dasharray="5 4" fill="none"`);
+    // optimal L-curve
+    g+=Lshape(uStar,k,`stroke="${COL.violet}" stroke-width="2.5" fill="none"`);
+    // optimal corner dot
+    g+=`<circle cx="${sx(xstar)}" cy="${sy(ystar)}" r="5.5" fill="${COL.dot}" stroke="#fff" stroke-width="1.5"/>`;
+    g+=`<text x="${sx(xstar)-8}" y="${sy(ystar)+16}" font-size="12.5" fill="${COL.terra}" text-anchor="end" font-weight="600">(${fmt(xstar)},\u2009${fmt(ystar)})</text>`;
+    const bSeg=clipLine(-px/py,M/py);
+    if(bSeg) g+=`<text x="${sx(bSeg[1][0])-4}" y="${sy(bSeg[1][1])-6}" font-size="11.5" fill="${COL.budget}" text-anchor="end">budget</text>`;
+    document.getElementById("chart").innerHTML=g;
+
+    const top=[
+      {k:"Proportion <var>y</var> : <var>x</var>", v:fmt(k)+" : 1"},
+      {k:"Optimum condition", v:"<var>k&#8202;x</var> = <var>y</var>"},
+      {k:"Price of one combo (1 <var>x</var> + <var>k</var> <var>y</var>): <var>p<sub>x</sub></var>+<var>k&#8202;p<sub>y</sub></var>", v:fmt(denom)}
+    ];
+    const bot=[
+      {k:"Optimal bundle (<var>x<sup>d</sup></var>, <var>y<sup>d</sup></var>)", v:"("+fmt(xstar)+", "+fmt(ystar)+")", cls:"big"},
+      {k:"Utility <var>u</var><sup>*</sup>", v:fmt(uStar)},
+      {k:"Spending <var>p<sub>x</sub>x<sup>d</sup></var>+<var>p<sub>y</sub>y<sup>d</sup></var>", v:fmt(px*xstar+py*ystar)+" = M \u2713", cls:"check"}
+    ];
+    setReadout("k","Fixed proportion · optimum at the kink",
+      "The goods are consumed together in a fixed ratio. The best affordable bundle is the kink where <var>k&#8202;x</var> = <var>y</var>, so neither good is wasted.",
+      top,bot);
+  }
+
+  // wiring
+  document.getElementById("seg").addEventListener("click",e=>{
+    const b=e.target.closest("button"); if(!b) return;
+    mode=b.dataset.mode;
+    [...document.querySelectorAll("#seg button")].forEach(x=>x.classList.toggle("active",x===b));
+    render();
+  });
+  ["k","px","py","m"].forEach(id=>document.getElementById(id).addEventListener("input",render));
+  document.getElementById("reset").addEventListener("click",()=>{
+    document.getElementById("k").value=2; document.getElementById("px").value=2;
+    document.getElementById("py").value=2; document.getElementById("m").value=80;
+    render();
+  });
+  render();
+})();
+</script>
+</body>
+</html>
