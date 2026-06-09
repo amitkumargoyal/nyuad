@@ -340,9 +340,9 @@ function render(){
   let labels='';
   if(!m.degenerate && !m.closed){
     const lab=(p,txt,col)=>`<text x="${sx(0)+4}" y="${sy(p)-3}" font-size="10.5" fill="${col}" font-weight="600">${txt}</text>`;
-    labels+=lab(m.Pd,'P_d',V)+lab(m.Ps,'P_s',T);
+    labels+=lab(m.Pd,'P<tspan dy="2.5" font-size="8">d</tspan>',V)+lab(m.Ps,'P<tspan dy="2.5" font-size="8">s</tspan>',T);
     if(Math.abs(m.Pstar-m.Pd)>5 && Math.abs(m.Pstar-m.Ps)>5) labels+=lab(m.Pstar,'P*','#7a7367');
-    labels+=`<text x="${sx(m.Qt)}" y="${sy(0)+27}" font-size="10" fill="#7a7367" text-anchor="middle">Q_t</text>`;
+    labels+=`<text x="${sx(m.Qt)}" y="${sy(0)+27}" font-size="10" fill="#7a7367" text-anchor="middle">Q<tspan dy="2.5" font-size="8">t</tspan></text>`;
   }
 
   document.getElementById('diagram').innerHTML =
