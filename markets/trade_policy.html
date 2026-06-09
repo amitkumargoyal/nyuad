@@ -67,17 +67,17 @@
   .badge.imp{background:rgba(160,58,44,.12); color:var(--terra);}
   .badge.exp{background:rgba(90,27,166,.12); color:var(--violet);}
   .badge.aut{background:rgba(124,143,104,.18); color:#5f7048;}
-  .regime-note{font-size:13px; color:var(--muted); margin:0 0 14px;}
+  .regime-note{font-size:13px; color:var(--muted); margin:0 0 10px;}
 
-  .blk{margin-bottom:14px;}
-  .blk h3{font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:0 0 6px; font-weight:600;}
-  .divider{border:0; border-top:1.5px solid var(--sage); margin:14px 0;}
-  .row{display:flex; justify-content:space-between; font-size:13.5px; padding:2px 0; font-variant-numeric:tabular-nums;}
+  .blk{margin-bottom:10px;}
+  .blk h3{font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:0 0 4px; font-weight:600;}
+  .divider{border:0; border-top:1.5px solid var(--sage); margin:10px 0;}
+  .row{display:flex; justify-content:space-between; font-size:13.5px; padding:1px 0; font-variant-numeric:tabular-nums;}
   .row .k{color:var(--muted);} .row .v{font-weight:600;}
   .row.em .v{color:var(--violet);}
 
   table.welfare{width:100%; border-collapse:collapse; font-size:13px; font-variant-numeric:tabular-nums; margin-top:4px;}
-  table.welfare th, table.welfare td{padding:5px 6px; text-align:right;}
+  table.welfare th, table.welfare td{padding:3px 6px; text-align:right;}
   table.welfare th:first-child, table.welfare td:first-child{text-align:left; color:var(--muted);}
   table.welfare thead th{font-weight:600; font-size:11.5px; color:var(--muted); border-bottom:1px solid var(--line); text-transform:uppercase; letter-spacing:.03em;}
   table.welfare tr.ts td{border-top:1px solid var(--line); font-weight:700; padding-top:7px;}
@@ -168,10 +168,13 @@
         <div class="row"><span class="k">Government revenue</span><span class="v" id="rRev"></span></div>
       </div>
 
-      <hr class="divider">
+    </div>
+  </div>
 
-      <div class="blk">
-        <h3>Welfare</h3>
+  <div class="panel" style="margin-top:18px;">
+    <div class="blk" style="margin-bottom:0;">
+      <h3>Welfare</h3>
+      <div style="max-width:880px;">
         <table class="welfare">
           <thead><tr><th></th><th>Autarky</th><th>Free trade</th><th>Policy</th></tr></thead>
           <tbody>
@@ -187,14 +190,14 @@
         </div>
         <p class="offnote" id="offnote">Some quantities exceed Q = 100; the chart is clipped to the window but the figures above are exact.</p>
       </div>
-
-      <div class="blk" id="wglblk">
-        <h3 id="wglhead">Who gains, who loses</h3>
-        <div class="wglbar">
-          <div class="wgl-track" id="wglTrack"></div>
-          <div class="wgl-legend" id="wglLegend"></div>
-          <p class="wgl-caption" id="wglCaption"></p>
-        </div>
+    </div>
+    <hr class="divider">
+    <div class="blk" id="wglblk" style="margin-bottom:0;">
+      <h3 id="wglhead">Who gains, who loses</h3>
+      <div class="wglbar">
+        <div class="wgl-track" id="wglTrack"></div>
+        <div class="wgl-legend" id="wglLegend"></div>
+        <p class="wgl-caption" id="wglCaption"></p>
       </div>
     </div>
   </div>
@@ -551,8 +554,8 @@
     const strip=document.getElementById("eqstrip");
     const b=s.b.toFixed(2), d=s.d.toFixed(2);
     let html='';
-    html+='<span class="eq dem"><span class="lab">inverse demand</span>P = '+s.a.toFixed(0)+' − '+b+'Q</span>';
-    html+='<span class="eq sup"><span class="lab">inverse supply</span>P = '+s.c.toFixed(0)+' + '+d+'Q</span>';
+    html+='<span class="eq dem"><span class="lab">inverse demand</span>P = a − bQ = '+s.a.toFixed(0)+' − '+b+'Q</span>';
+    html+='<span class="eq sup"><span class="lab">inverse supply</span>P = c + dQ = '+s.c.toFixed(0)+' + '+d+'Q</span>';
     html+='<span class="eq world"><span class="lab">world</span>P<sub>W</sub> = '+s.pw.toFixed(0)+'</span>';
     if((s.regime==='importer'||s.regime==='exporter') && s.t>1e-9){
       if(s.regime==='importer')
