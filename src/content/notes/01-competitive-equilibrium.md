@@ -2,6 +2,7 @@
 title: "Competitive equilibrium and surplus"
 description: "Derive the equilibrium of a linear market, then measure the gains from trade with consumer and producer surplus."
 date: 2026-06-10
+draft: true
 order: 1
 ---
 

@@ -2,6 +2,7 @@
 title: "Problem set 1 — Equilibrium and welfare"
 description: "Compute equilibria, surpluses, and the welfare cost of a price ceiling in linear markets."
 date: 2026-06-10
+draft: true
 order: 1
 ---
 
