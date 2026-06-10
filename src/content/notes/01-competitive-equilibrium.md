@@ -2,11 +2,10 @@
 title: "Competitive equilibrium and surplus"
 description: "Derive the equilibrium of a linear market, then measure the gains from trade with consumer and producer surplus."
 date: 2026-06-10
-draft: true
 order: 1
 ---
 
-A market clears when buyers and sellers face the same price and neither side wants to change behaviour. Before any algebra, the idea is simple: at a high price sellers offer more than buyers want; at a low price buyers want more than sellers offer; somewhere in between, plans are consistent. This note makes that point exact for the linear case used throughout the course, and then measures *how much* the market accomplishes.
+A market clears when buyers and sellers face the same price and choose the same quantity. Before any algebra, the idea is simple: at a high price sellers offer more than buyers want; at a low price buyers want more than sellers offer; somewhere in between, plans are consistent. This note makes that point exact for the linear case used throughout the course, and then measures *how much* the market accomplishes.
 
 ## The linear market
 
@@ -60,7 +59,7 @@ TS &= CS + PS \\
 \end{aligned}
 $$
 
-Notice that $P^*$ drops out: total surplus depends only on the gap between the curves and the quantity traded. The price decides how the pie is *divided*; the quantity decides how *large* the pie is. This is why every policy tool in the course — price controls, taxes, tariffs — works by changing $Q$, and why each distortion shows up as a deadweight-loss triangle.
+Notice that $P^*$ drops out: total surplus depends only on the gap between the curves and the quantity traded. The price decides how the pie is *divided*; the quantity decides how *large* the pie is. 
 
 ---
 

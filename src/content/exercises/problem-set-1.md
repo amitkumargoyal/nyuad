@@ -2,7 +2,6 @@
 title: "Problem set 1 — Equilibrium and welfare"
 description: "Compute equilibria, surpluses, and the welfare cost of a price ceiling in linear markets."
 date: 2026-06-10
-draft: true
 order: 1
 ---
 
@@ -16,20 +15,8 @@ Let $a = 90$, $b = 1$, $c = 10$, $d = 1$.
 2. Compute $CS$, $PS$, and $TS$.
 3. Verify $TS = \tfrac{1}{2}(a - c)\,Q^*$ without using your answer to part 2.
 
-## Problem 2 — Comparative statics
 
-Keep $a = 90$, $c = 10$, $d = 1$, but treat $b > 0$ as a parameter.
-
-1. Express $Q^*(b)$ and $P^*(b)$, and sign $\dfrac{dQ^*}{db}$ and $\dfrac{dP^*}{db}$.
-2. Show that consumer surplus
-
-   $$
-   CS(b) = \frac{b}{2}\left(\frac{a - c}{b + d}\right)^{2}
-   $$
-
-   is **not** monotone in $b$. Find the value of $b$ that maximises it, and give the economic intuition in one or two sentences.
-
-## Problem 3 — A binding price ceiling
+## Problem 2 — A binding price ceiling
 
 Let $a = 80$, $b = 0.8$, $c = 20$, $d = 1.2$, and impose a price ceiling $\bar{P} = 44$.
 
