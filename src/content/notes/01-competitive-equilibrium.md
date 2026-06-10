@@ -5,7 +5,7 @@ date: 2026-06-10
 order: 1
 ---
 
-A market clears when buyers and sellers face the same price and choose the same quantity. Before any algebra, the idea is simple: at a high price sellers offer more than buyers want; at a low price buyers want more than sellers offer; somewhere in between, plans are consistent. This note makes that point exact for the linear case used throughout the course, and then measures *how much* the market accomplishes.
+A market clears when buyers and sellers face the same price and wish to trade the same quantity. Before any algebra, the idea is simple: at a high price sellers offer more than buyers want; at a low price buyers want more than sellers offer; somewhere in between, plans are consistent. This note makes that point exact for the linear case used throughout the course, and then measures *how much* the market accomplishes.
 
 ## The linear market
 
