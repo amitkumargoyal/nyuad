@@ -1,0 +1,27 @@
+---
+import Course from '../layouts/Course.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+<Course
+  title="Amit Goyal — NYU Abu Dhabi"
+  eyebrow="NYU Abu Dhabi"
+  heading="Amit Goyal"
+  lede="Materials for courses."
+>
+  <section class="section">
+    <div class="section-head">
+      <h2 class="section-title">Courses</h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="tools-grid">
+      <a class="tool card-plain" href={`${base}/markets/`}>
+        <div>
+          <div class="tool-tag">Course</div>
+          <div class="tool-title">Markets</div>
+          <div class="tool-desc">Interactive tools, lecture notes, and exercises covering supply and demand, equilibrium, and welfare analysis.</div>
+        </div>
+      </a>
+    </div>
+  </section>
+</Course>

@@ -1,0 +1,57 @@
+---
+import '../styles/site.css';
+import '@fontsource/stix-two-text/400.css';
+import '@fontsource/stix-two-text/400-italic.css';
+import '@fontsource/stix-two-text/500.css';
+import '@fontsource/stix-two-text/500-italic.css';
+import '@fontsource/stix-two-text/600.css';
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/500.css';
+
+interface Props {
+  title: string;          // <title> tag
+  eyebrow: string;        // mono label above the heading
+  heading: string;        // violet h1
+  lede?: string;          // italic line under the heading
+  article?: boolean;      // narrower container, quieter header
+  backlink?: boolean;     // show "← Back to Markets" above the footer
+}
+
+const { title, eyebrow, heading, lede, article = false, backlink = false } = Astro.props;
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const marketsHome = `${base}/markets/`;
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+</head>
+<body>
+  <div class:list={['container', { 'container--article': article }]}>
+    <header class:list={['hero', { 'hero--article': article }]}>
+      <div>
+        <div class="eyebrow">{eyebrow}</div>
+        <h1>{heading}</h1>
+        {lede && <p class="lede">{lede}</p>}
+      </div>
+      <slot name="figure" />
+    </header>
+
+    <slot />
+
+    {backlink && (
+      <div class="backlink-block">
+        <a href={marketsHome}>← Back to Markets</a>
+      </div>
+    )}
+
+    <footer class:list={['footer', backlink ? 'footer--inner' : 'footer--hub']}>
+      <div>Built with Claude · Amit Goyal · <a href="mailto:amit.goyal@nyu.edu">amit.goyal@nyu.edu</a></div>
+      <div class="footer-axiom">More is preferred to less.</div>
+    </footer>
+  </div>
+</body>
+</html>

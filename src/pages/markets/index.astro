@@ -1,0 +1,162 @@
+---
+import Course from '../../layouts/Course.astro';
+import HeroDiagram from '../../components/HeroDiagram.astro';
+import { getCollection } from 'astro:content';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// ----- Interactive tools (standalone HTML files in public/markets/) -----
+// Each glyph is a miniature of the tool's own diagram.
+const axes = `<path d="M16 10 V64 H70" stroke="#d8d2c6" stroke-width="1.6" stroke-linecap="round"/>`;
+
+const tools = [
+  {
+    file: 'supply_demand_shifts.html',
+    title: 'Supply & demand — curve shifts',
+    desc: 'Explore how changes in income, substitute prices, input costs, technology, and other factors shift demand and supply curves, and trace the effect on equilibrium price and quantity.',
+    glyph: `${axes}
+      <path d="M18 22 L62 58" stroke="#5A1BA6" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M30 18 L72 52" stroke="#5A1BA6" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="5 4" opacity="0.65"/>
+      <path d="M44 30 L52 26 M52 26 L49 33 M52 26 L45 24" stroke="#9CAF88" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>`,
+  },
+  {
+    file: 'competitive_equilibrium.html',
+    title: 'Competitive equilibrium & surplus',
+    desc: 'Set the parameters of linear inverse demand P = a − bQ and supply P = c + dQ. See the equilibrium, and the consumer and producer surplus triangles, update in real time.',
+    glyph: `${axes}
+      <path d="M16 24 L42 40 L16 40 Z" fill="rgba(90,27,166,0.18)"/>
+      <path d="M16 56 L42 40 L16 40 Z" fill="rgba(160,58,44,0.18)"/>
+      <path d="M18 25 L64 53" stroke="#5A1BA6" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M18 55 L64 27" stroke="#A03A2C" stroke-width="2.6" stroke-linecap="round"/>
+      <circle cx="42" cy="40" r="3.4" fill="#5A1BA6" stroke="#FAF7F2" stroke-width="1.6"/>`,
+  },
+  {
+    file: 'price_controls.html',
+    title: 'Price controls',
+    desc: 'Impose a price ceiling or floor and set the control price with a slider. See whether it binds, how much excess demand or excess supply it creates, and how consumer surplus, producer surplus, and deadweight loss shift relative to the free-market equilibrium.',
+    glyph: `${axes}
+      <path d="M18 25 L64 53" stroke="#5A1BA6" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M18 55 L64 27" stroke="#A03A2C" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M16 50 H68" stroke="#3a3a3a" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M30 58 H54" stroke="#9CAF88" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="2.5 3"/>`,
+  },
+  {
+    file: 'tax_incidence.html',
+    title: 'Tax incidence',
+    desc: "Apply a per-unit tax and see why the statutory side doesn't matter: identical prices and quantity whichever curve shifts. Watch the consumer/producer burden split track the slopes, alongside revenue and deadweight loss.",
+    glyph: `${axes}
+      <rect x="16" y="33" width="20" height="14" fill="rgba(156,175,136,0.4)"/>
+      <path d="M18 25 L64 53" stroke="#5A1BA6" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M18 55 L64 27" stroke="#A03A2C" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M14 51 L60 23" stroke="#A03A2C" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="5 4" opacity="0.65"/>
+      <path d="M36 33 V47" stroke="#3a3a3a" stroke-width="1.8" stroke-linecap="round"/>`,
+  },
+  {
+    file: 'trade_policy.html',
+    title: 'Trade, tariffs & export taxes',
+    desc: 'Open a closed economy to the world market: set the world price above or below the autarky price to make the country an exporter or importer, then impose an export tax or import tariff and watch surplus, trade volume, government revenue, and deadweight loss respond.',
+    glyph: `${axes}
+      <path d="M18 25 L64 53" stroke="#5A1BA6" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M18 55 L64 27" stroke="#A03A2C" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M16 52 H68" stroke="#2F6F8F" stroke-width="2.4" stroke-linecap="round"/>
+      <path d="M26 58 H58 M26 58 L30 55.5 M26 58 L30 60.5 M58 58 L54 55.5 M58 58 L54 60.5" stroke="#6b6358" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`,
+  },
+  {
+    file: 'substitutes_complements.html',
+    title: 'Perfect substitutes & complements',
+    desc: 'Choose perfect substitutes or perfect complements, set the preference parameter k along with prices and income, and watch the optimal bundle settle at a corner, spread along the whole budget line at the knife-edge price ratio, or sit at the kink of an L-shaped indifference curve.',
+    glyph: `${axes}
+      <path d="M18 22 L62 60" stroke="#3a3a3a" stroke-width="2.4" stroke-linecap="round"/>
+      <path d="M34 16 V38 H66" stroke="#5A1BA6" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="34" cy="38" r="3.4" fill="#A03A2C" stroke="#FAF7F2" stroke-width="1.6"/>`,
+  },
+];
+
+// ----- Notes & exercises from the content collections -----
+const byOrderThenDate = (a, b) =>
+  (a.data.order ?? Infinity) - (b.data.order ?? Infinity) ||
+  a.data.date.valueOf() - b.data.date.valueOf();
+
+const notes = (await getCollection('notes', ({ data }) => !data.draft)).sort(byOrderThenDate);
+const exercises = (await getCollection('exercises', ({ data }) => !data.draft)).sort(byOrderThenDate);
+
+const fmtDate = (d: Date) =>
+  d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+<Course
+  title="Markets — NYUAD"
+  eyebrow="NYU Abu Dhabi · Course site"
+  heading="Markets"
+  lede="Interactive tools, notes, and exercises on supply and demand, equilibrium, and the welfare consequences of policy."
+>
+  <HeroDiagram slot="figure" />
+
+  <section class="section">
+    <div class="section-head">
+      <h2 class="section-title">Interactive tools</h2>
+      <div class="section-rule"></div>
+      <div class="section-note">{tools.length} tools</div>
+    </div>
+    <div class="tools-grid">
+      {tools.map((t, i) => (
+        <a class="tool" href={`${base}/markets/${t.file}`}>
+          <svg class="glyph" viewBox="0 0 80 80" fill="none" aria-hidden="true" set:html={t.glyph} />
+          <div>
+            <div class="tool-tag">Tool {pad(i + 1)}</div>
+            <div class="tool-title">{t.title}</div>
+            <div class="tool-desc">{t.desc}</div>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2 class="section-title">Notes</h2>
+      <div class="section-rule"></div>
+      <div class="section-note">Lecture write-ups</div>
+    </div>
+    {notes.length === 0 ? (
+      <p class="empty-note">Notes will appear here as the course progresses.</p>
+    ) : (
+      <div class="toc">
+        {notes.map((n, i) => (
+          <a class="toc-row" href={`${base}/markets/notes/${n.id}/`}>
+            <div class="toc-num">{pad(i + 1)}</div>
+            <div>
+              <div class="toc-title">{n.data.title}</div>
+              <div class="toc-desc">{n.data.description}</div>
+            </div>
+            <div class="toc-date">{fmtDate(n.data.date)}</div>
+          </a>
+        ))}
+      </div>
+    )}
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2 class="section-title">Exercises</h2>
+      <div class="section-rule"></div>
+      <div class="section-note">Problem sets</div>
+    </div>
+    {exercises.length === 0 ? (
+      <p class="empty-note">Problem sets will appear here as the course progresses.</p>
+    ) : (
+      <div class="toc">
+        {exercises.map((e, i) => (
+          <a class="toc-row" href={`${base}/markets/exercises/${e.id}/`}>
+            <div class="toc-num">PS {i + 1}</div>
+            <div>
+              <div class="toc-title">{e.data.title}</div>
+              <div class="toc-desc">{e.data.description}</div>
+            </div>
+            <div class="toc-date">{fmtDate(e.data.date)}</div>
+          </a>
+        ))}
+      </div>
+    )}
+  </section>
+</Course>

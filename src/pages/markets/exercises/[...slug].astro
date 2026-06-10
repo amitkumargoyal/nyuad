@@ -1,0 +1,31 @@
+---
+import Course from '../../../layouts/Course.astro';
+import { getCollection, render } from 'astro:content';
+import 'katex/dist/katex.min.css';
+
+export async function getStaticPaths() {
+  const exercises = await getCollection('exercises', ({ data }) => !data.draft);
+  return exercises.map((note) => ({
+    params: { slug: note.id },
+    props: { note },
+  }));
+}
+
+const { note } = Astro.props;
+const { Content } = await render(note);
+
+const fmtDate = (d: Date) =>
+  d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+---
+<Course
+  title={`${note.data.title} — Markets, NYUAD`}
+  eyebrow="Markets · Exercises"
+  heading={note.data.title}
+  article
+  backlink
+>
+  <div class="article-meta">{fmtDate(note.data.date)}</div>
+  <div class="article">
+    <Content />
+  </div>
+</Course>
