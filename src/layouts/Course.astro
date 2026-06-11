@@ -14,13 +14,11 @@ interface Props {
   heading: string;        // violet h1
   lede?: string;          // italic line under the heading
   article?: boolean;      // narrower container, quieter header
-  backlink?: boolean;     // show "← Back to Markets" above the footer
+  backlinkHref?: string;  // if set, show a back-link above the footer
+  backlinkLabel?: string;
 }
 
-const { title, eyebrow, heading, lede, article = false, backlink = false } = Astro.props;
-
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const marketsHome = `${base}/markets/`;
+const { title, eyebrow, heading, lede, article = false, backlinkHref, backlinkLabel = '← Back' } = Astro.props;
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -42,13 +40,13 @@ const marketsHome = `${base}/markets/`;
 
     <slot />
 
-    {backlink && (
+    {backlinkHref && (
       <div class="backlink-block">
-        <a href={marketsHome}>← Back to Markets</a>
+        <a href={backlinkHref}>{backlinkLabel}</a>
       </div>
     )}
 
-    <footer class:list={['footer', backlink ? 'footer--inner' : 'footer--hub']}>
+    <footer class:list={['footer', backlinkHref ? 'footer--inner' : 'footer--hub']}>
       <div>Built with Claude · Amit Goyal · <a href="mailto:amit.goyal@nyu.edu">amit.goyal@nyu.edu</a></div>
       <div class="footer-axiom">More is preferred to less.</div>
     </footer>

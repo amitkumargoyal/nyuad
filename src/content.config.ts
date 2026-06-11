@@ -11,14 +11,14 @@ const schema = z.object({
   draft: z.boolean().default(false),
 });
 
-const notes = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/notes' }),
-  schema,
-});
+const col = (base: string) =>
+  defineCollection({ loader: glob({ pattern: '**/*.md', base }), schema });
 
-const exercises = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/exercises' }),
-  schema,
-});
-
-export const collections = { notes, exercises };
+export const collections = {
+  markets_notes: col('./src/content/markets/notes'),
+  markets_exercises: col('./src/content/markets/exercises'),
+  agt_notes: col('./src/content/game-theory/notes'),
+  agt_exercises: col('./src/content/game-theory/exercises'),
+  micro_notes: col('./src/content/microeconomics/notes'),
+  micro_exercises: col('./src/content/microeconomics/exercises'),
+};

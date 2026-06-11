@@ -1,0 +1,104 @@
+---
+import Course from '../../layouts/Course.astro';
+import HeroGameTheory from '../../components/HeroGameTheory.astro';
+import { getCollection } from 'astro:content';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// ----- Interactive tools (standalone HTML files in public/game-theory/) -----
+// Add entries as tools are built: { file, title, desc, glyph } — see the
+// markets page for the glyph pattern (80×80 inline SVG miniature).
+const tools = [];
+
+// ----- Notes & exercises from the content collections -----
+const byOrderThenDate = (a, b) =>
+  (a.data.order ?? Infinity) - (b.data.order ?? Infinity) ||
+  a.data.date.valueOf() - b.data.date.valueOf();
+
+const notes = (await getCollection('agt_notes', ({ data }) => !data.draft)).sort(byOrderThenDate);
+const exercises = (await getCollection('agt_exercises', ({ data }) => !data.draft)).sort(byOrderThenDate);
+
+const fmtDate = (d: Date) =>
+  d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+<Course
+  title="Game Theory — NYUAD"
+  eyebrow="NYU Abu Dhabi · Course site"
+  heading="Game Theory"
+  lede="Interactive tools, notes, and exercises on strategic interaction, equilibrium, and the design of incentives."
+>
+  <HeroGameTheory slot="figure" />
+
+  <section class="section">
+    <div class="section-head">
+      <h2 class="section-title">Interactive tools</h2>
+      <div class="section-rule"></div>
+      <div class="section-note">{tools.length > 0 ? `${tools.length} tools` : 'Coming soon'}</div>
+    </div>
+    {tools.length === 0 ? (
+      <p class="empty-note">Interactive tools will appear here as the course progresses.</p>
+    ) : (
+      <div class="tools-grid">
+        {tools.map((t, i) => (
+          <a class="tool" href={`${base}/game-theory/${t.file}`}>
+            <svg class="glyph" viewBox="0 0 80 80" fill="none" aria-hidden="true" set:html={t.glyph} />
+            <div>
+              <div class="tool-tag">Tool {pad(i + 1)}</div>
+              <div class="tool-title">{t.title}</div>
+              <div class="tool-desc">{t.desc}</div>
+            </div>
+          </a>
+        ))}
+      </div>
+    )}
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2 class="section-title">Notes</h2>
+      <div class="section-rule"></div>
+      <div class="section-note">Lecture write-ups</div>
+    </div>
+    {notes.length === 0 ? (
+      <p class="empty-note">Notes will appear here as the course progresses.</p>
+    ) : (
+      <div class="toc">
+        {notes.map((n, i) => (
+          <a class="toc-row" href={`${base}/game-theory/notes/${n.id}/`}>
+            <div class="toc-num">{pad(i + 1)}</div>
+            <div>
+              <div class="toc-title">{n.data.title}</div>
+              <div class="toc-desc">{n.data.description}</div>
+            </div>
+            <div class="toc-date">{fmtDate(n.data.date)}</div>
+          </a>
+        ))}
+      </div>
+    )}
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2 class="section-title">Exercises</h2>
+      <div class="section-rule"></div>
+      <div class="section-note">Problem sets</div>
+    </div>
+    {exercises.length === 0 ? (
+      <p class="empty-note">Problem sets will appear here as the course progresses.</p>
+    ) : (
+      <div class="toc">
+        {exercises.map((e, i) => (
+          <a class="toc-row" href={`${base}/game-theory/exercises/${e.id}/`}>
+            <div class="toc-num">PS {i + 1}</div>
+            <div>
+              <div class="toc-title">{e.data.title}</div>
+              <div class="toc-desc">{e.data.description}</div>
+            </div>
+            <div class="toc-date">{fmtDate(e.data.date)}</div>
+          </a>
+        ))}
+      </div>
+    )}
+  </section>
+</Course>

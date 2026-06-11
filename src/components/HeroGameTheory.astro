@@ -1,0 +1,26 @@
+---
+// Decorative 2×2 payoff matrix (prisoner's dilemma) for the course hero.
+// The highlighted cell is the Nash equilibrium.
+---
+<svg class="hero-diagram" viewBox="0 0 230 178" fill="none" aria-hidden="true">
+  <g stroke="#ece6db" stroke-width="1">
+    <path d="M58 18 V146 M88 18 V146 M118 18 V146 M148 18 V146 M178 18 V146 M208 18 V146"/>
+    <path d="M28 44 H214 M28 70 H214 M28 96 H214 M28 122 H214"/>
+  </g>
+  <!-- NE cell highlight -->
+  <rect x="124" y="86" width="62" height="48" fill="rgba(90,27,166,0.13)" stroke="#5A1BA6" stroke-width="1.6"/>
+  <!-- matrix frame -->
+  <path class="draw" d="M62 38 H186 V134 H62 Z" stroke="#221d16" stroke-width="1.8" stroke-linecap="round"/>
+  <path class="draw d2" d="M124 38 V134 M62 86 H186" stroke="#221d16" stroke-width="1.4"/>
+  <!-- strategy labels -->
+  <text x="93" y="32" text-anchor="middle" font-family="'STIX Two Text',serif" font-style="italic" font-size="11" fill="#6b6358">C</text>
+  <text x="155" y="32" text-anchor="middle" font-family="'STIX Two Text',serif" font-style="italic" font-size="11" fill="#6b6358">D</text>
+  <text x="52" y="66" text-anchor="middle" font-family="'STIX Two Text',serif" font-style="italic" font-size="11" fill="#6b6358">C</text>
+  <text x="52" y="114" text-anchor="middle" font-family="'STIX Two Text',serif" font-style="italic" font-size="11" fill="#6b6358">D</text>
+  <!-- payoffs (row, column) -->
+  <text x="93" y="66" text-anchor="middle" font-family="'STIX Two Text',serif" font-size="12" fill="#221d16">3, 3</text>
+  <text x="155" y="66" text-anchor="middle" font-family="'STIX Two Text',serif" font-size="12" fill="#221d16">0, 5</text>
+  <text x="93" y="114" text-anchor="middle" font-family="'STIX Two Text',serif" font-size="12" fill="#221d16">5, 0</text>
+  <text x="155" y="114" text-anchor="middle" font-family="'STIX Two Text',serif" font-size="12" font-weight="600" fill="#5A1BA6">1, 1</text>
+  <text x="186" y="148" text-anchor="end" font-family="'STIX Two Text',serif" font-style="italic" font-size="10" fill="#8a8276">Nash equilibrium</text>
+</svg>

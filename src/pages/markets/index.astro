@@ -77,8 +77,8 @@ const byOrderThenDate = (a, b) =>
   (a.data.order ?? Infinity) - (b.data.order ?? Infinity) ||
   a.data.date.valueOf() - b.data.date.valueOf();
 
-const notes = (await getCollection('notes', ({ data }) => !data.draft)).sort(byOrderThenDate);
-const exercises = (await getCollection('exercises', ({ data }) => !data.draft)).sort(byOrderThenDate);
+const notes = (await getCollection('markets_notes', ({ data }) => !data.draft)).sort(byOrderThenDate);
+const exercises = (await getCollection('markets_exercises', ({ data }) => !data.draft)).sort(byOrderThenDate);
 
 const fmtDate = (d: Date) =>
   d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });

@@ -4,8 +4,8 @@ import { getCollection, render } from 'astro:content';
 import 'katex/dist/katex.min.css';
 
 export async function getStaticPaths() {
-  const notes = await getCollection('markets_notes', ({ data }) => !data.draft);
-  return notes.map((note) => ({
+  const entries = await getCollection('micro_exercises', ({ data }) => !data.draft);
+  return entries.map((note) => ({
     params: { slug: note.id },
     props: { note },
   }));
@@ -18,12 +18,12 @@ const fmtDate = (d: Date) =>
   d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 ---
 <Course
-  title={`${note.data.title} — Markets, NYUAD`}
-  eyebrow="Markets · Notes"
+  title={`${note.data.title} — Microeconomics, NYUAD`}
+  eyebrow="Microeconomics · Exercises"
   heading={note.data.title}
   article
-  backlinkHref={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/markets/`}
-  backlinkLabel="← Back to Markets"
+  backlinkHref={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/microeconomics/`}
+  backlinkLabel="← Back to Microeconomics"
 >
   <div class="article-meta">{fmtDate(note.data.date)}</div>
   <div class="article">

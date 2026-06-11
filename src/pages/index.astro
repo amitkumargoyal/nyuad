@@ -2,6 +2,24 @@
 import Course from '../layouts/Course.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const courses = [
+  {
+    slug: 'markets',
+    title: 'Markets',
+    desc: 'Interactive tools, lecture notes, and exercises covering supply and demand, equilibrium, and welfare analysis.',
+  },
+  {
+    slug: 'game-theory',
+    title: 'Game Theory',
+    desc: 'Interactive tools, lecture notes, and problem sets on strategic interaction, equilibrium concepts, and the design of incentives.',
+  },
+  {
+    slug: 'microeconomics',
+    title: 'Microeconomics',
+    desc: 'Interactive tools, lecture notes, and problem sets on consumer theory, producer theory, and the behaviour of markets.',
+  },
+];
 ---
 <Course
   title="Amit Goyal — NYU Abu Dhabi"
@@ -13,15 +31,18 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     <div class="section-head">
       <h2 class="section-title">Courses</h2>
       <div class="section-rule"></div>
+      <div class="section-note">{courses.length} courses</div>
     </div>
     <div class="tools-grid">
-      <a class="tool card-plain" href={`${base}/markets/`}>
-        <div>
-          <div class="tool-tag">Course</div>
-          <div class="tool-title">Markets</div>
-          <div class="tool-desc">Interactive tools, lecture notes, and exercises covering supply and demand, equilibrium, and welfare analysis.</div>
-        </div>
-      </a>
+      {courses.map((c) => (
+        <a class="tool card-plain" href={`${base}/${c.slug}/`}>
+          <div>
+            <div class="tool-tag">Course</div>
+            <div class="tool-title">{c.title}</div>
+            <div class="tool-desc">{c.desc}</div>
+          </div>
+        </a>
+      ))}
     </div>
   </section>
 </Course>
