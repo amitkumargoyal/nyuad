@@ -136,8 +136,10 @@ h1 {
 }
 .tool-desc { font-size: 13.5px; color: var(--muted); line-height: 1.5; }
 
-/* Plain card (no glyph) — used on the root hub for course links */
-.card-plain { grid-template-columns: 1fr; }
+/* Plain card (no glyph) — used on the root hub for course links.
+   .tool.card-plain (two classes) outranks the mobile .tool grid override,
+   so the single text block always spans the full card width. */
+.tool.card-plain { grid-template-columns: 1fr; }
 
 /* ---------- Notes / exercises: table of contents ---------- */
 .toc { border-top: 1px solid var(--border); }
