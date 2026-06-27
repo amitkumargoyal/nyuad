@@ -12,7 +12,7 @@ A market clears when buyers and sellers face the same price and wish to trade th
 Inverse demand and inverse supply are
 
 $$
-P = a - bQ \qquad \text{and} \qquad P = c + dQ,
+p = a - bq \qquad \text{and} \qquad p = c + dq,
 $$
 
 with $a > c \ge 0$, $b > 0$, $d > 0$. The intercept $a$ is the most any buyer is willing to pay; $c$ is the lowest price at which any seller is willing to produce.
@@ -22,31 +22,31 @@ with $a > c \ge 0$, $b > 0$, $d > 0$. The intercept $a$ is the most any buyer is
 Setting the two prices equal,
 
 $$
-a - bQ = c + dQ
+a - bq = c + dq
 \quad\Longrightarrow\quad
-Q^* = \frac{a - c}{b + d},
+q^* = \frac{a - c}{b + d},
 \qquad
-P^* = a - bQ^*.
+p^* = a - bq^*.
 $$
 
-Since $a > c$, we have $Q^* > 0$: there are mutually beneficial trades, and the market finds them. (When $a = c$ the curves meet on the price axis and $Q^* = 0$ — the degenerate case shown as $0.00$ in [Tool 2](../../competitive_equilibrium.html).)
+Since $a > c$, we have $q^* > 0$: there are mutually beneficial trades, and the market finds them. (When $a = c$ the curves meet on the price axis and $q^* = 0$ — the degenerate case shown as $0.00$ in [Tool 2](../../competitive_equilibrium.html).)
 
 ## Consumer surplus
 
-A buyer who would have paid $P = a - bQ$ for the $Q$-th unit, but pays only $P^*$, gains the difference. Adding these gains over all units traded,
+A buyer who would have paid $p = a - bq$ for the $q$-th unit, but pays only $p^*$, gains the difference. Adding these gains over all units traded,
 
 $$
-CS = \int_0^{Q^*} \big[(a - bQ) - P^*\big]\, \mathrm{d}Q = \tfrac{1}{2}\,(a - P^*)\,Q^*,
+CS = \int_0^{q^*} \big[(a - bq) - p^*\big]\, \mathrm{d}q = \tfrac{1}{2}\,(a - p^*)\,q^*,
 $$
 
 the area of the triangle between the demand curve and the price line.
 
 ## Producer surplus
 
-Symmetrically, the seller of the $Q$-th unit would have accepted $c + dQ$ but receives $P^*$:
+Symmetrically, the seller of the $q$-th unit would have accepted $c + dq$ but receives $p^*$:
 
 $$
-PS = \int_0^{Q^*} \big[P^* - (c + dQ)\big]\, \mathrm{d}Q = \tfrac{1}{2}\,(P^* - c)\,Q^*.
+PS = \int_0^{q^*} \big[p^* - (c + dq)\big]\, \mathrm{d}q = \tfrac{1}{2}\,(p^* - c)\,q^*.
 $$
 
 ## Total surplus
@@ -54,13 +54,13 @@ $$
 $$
 \begin{aligned}
 TS &= CS + PS \\
-   &= \tfrac{1}{2}(a - P^*)Q^* + \tfrac{1}{2}(P^* - c)Q^* \\
-   &= \tfrac{1}{2}(a - c)\,Q^*.
+   &= \tfrac{1}{2}(a - p^*)q^* + \tfrac{1}{2}(p^* - c)q^* \\
+   &= \tfrac{1}{2}(a - c)\,q^*.
 \end{aligned}
 $$
 
-Notice that $P^*$ drops out: total surplus depends only on the gap between the curves and the quantity traded. The price decides how the pie is *divided*; the quantity decides how *large* the pie is. 
+Notice that $p^*$ drops out: total surplus depends only on the gap between the curves and the quantity traded. The price decides how the pie is *divided*; the quantity decides how *large* the pie is. 
 
 ---
 
-**Try it yourself.** Open [Tool 2](../../competitive_equilibrium.html), set $a = 80$, $b = 0.8$, $c = 20$, $d = 1.2$, and verify: $Q^* = 30$, $P^* = 56$, $CS = 360$, $PS = 540$, $TS = 900$.
+**Try it yourself.** Open [Tool 2](../../competitive_equilibrium.html), set $a = 80$, $b = 0.8$, $c = 20$, $d = 1.2$, and verify: $q^* = 30$, $p^* = 56$, $CS = 360$, $PS = 540$, $TS = 900$.
