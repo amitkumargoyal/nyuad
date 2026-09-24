@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sets, relations, and functions</title>
+<style>
+@font-face{font-family:'STIX Two Text';src:url('fonts/stix-two-text-latin-400-normal.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:'STIX Two Text';src:url('fonts/stix-two-text-latin-400-italic.woff2') format('woff2');font-weight:400;font-style:italic;font-display:swap;}
+@font-face{font-family:'STIX Two Text';src:url('fonts/stix-two-text-latin-500-normal.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap;}
+@font-face{font-family:'STIX Two Text';src:url('fonts/stix-two-text-latin-600-normal.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap;}
+@font-face{font-family:'IBM Plex Mono';src:url('fonts/ibm-plex-mono-latin-400-normal.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:'IBM Plex Mono';src:url('fonts/ibm-plex-mono-latin-500-normal.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap;}
+
+  :root{
+    --violet:#5A1BA6; --terra:#A03A2C; --sage:#9CAF88; --cream:#FAF7F2;
+    --muted:#6b6358; --charcoal:#3a3a3a; --ink:#2a2a2a; --rule:#e5e0d8; --soft:#8a8276;
+    --serif:'STIX Two Text',Georgia,serif; --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--cream); color:#221d16; font-family:var(--serif); line-height:1.5;}
+  .tool-head{border-bottom:2px solid #221d16; padding-bottom:14px; margin-bottom:18px;}
+  .eyebrow{font-family:var(--mono); font-size:10px; font-weight:500; letter-spacing:0.16em; text-transform:uppercase; color:#6b6358; margin-bottom:6px;}
+  .wrap{max-width:1080px; margin:0 auto; padding:28px 22px 40px;}
+  h1{color:var(--violet); font-size:26px; font-weight:600; margin:0 0 6px; letter-spacing:-0.01em;}
+  .sub{color:var(--muted); font-style:italic; font-size:14px; margin:0 0 8px; max-width:72ch;}
+
+  .seg{display:inline-flex; flex-wrap:wrap; border:1px solid var(--rule); border-radius:10px; overflow:hidden; margin:0 0 14px; background:#fff;}
+  .seg button{background:#fff; border:none; border-right:1px solid var(--rule); padding:9px 15px; font-family:var(--serif); font-size:14px; color:var(--muted); cursor:pointer; transition:background .12s,color .12s;}
+  .seg button:last-child{border-right:none;}
+  .seg button.active{background:var(--violet); color:#fff;}
+  .seg button:focus-visible{outline:2px solid var(--violet); outline-offset:-2px;}
+
+  .layout{display:grid; grid-template-columns:1.35fr 1fr; gap:26px; align-items:start;}
+  @media(max-width:860px){.layout{grid-template-columns:1fr;}}
+  .panel{background:#fff; border:1px solid var(--rule); border-radius:12px; padding:18px 18px 20px; min-width:0;}
+  .lbl{font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--soft); margin:0 0 8px;}
+  .instr{font-style:italic; color:var(--muted); font-size:13.5px; margin:0 0 14px;}
+  .divider{height:1px; background:var(--sage); opacity:.6; margin:14px 0;}
+  .prec{font-size:12.5px; color:var(--soft); font-style:italic; margin:6px 0 0;}
+  .prec i{font-style:normal;}
+
+  .f{font-family:var(--serif); font-size:20px; line-height:1.9; overflow-wrap:anywhere;}
+  .f i{font-style:italic;}
+  .f .op{padding:0 .12em;}
+  .fq{font-size:18px;}
+  .constraint{font-size:14px; color:#3f4d33; background:rgba(156,175,136,.22); border-radius:8px; padding:7px 12px; margin:6px 0 12px;}
+  .constraint p{margin:0;}
+  .constraint p + p{margin-top:3px;}
+  .constraint i{font-style:italic;}
+  .constraint .f{font-size:15px; line-height:1;}
+  .equiv{color:var(--muted); padding:0 .5em;}
+  .sentence{font-size:18px; margin:0 0 12px; padding-left:12px; border-left:3px solid var(--sage);}
+  .legend{list-style:none; padding:0; margin:0 0 14px; font-size:14px;}
+  .legend li{padding:2px 0;}
+  .legend i{display:inline-block; width:1.4em; font-size:16px;}
+  .words{font-size:14px; color:var(--ink); margin:6px 0 0;}
+
+  .slot{display:inline-flex; align-items:center; justify-content:center; min-width:1.9em; height:1.7em; margin:0 .18em; padding:0 .3em; vertical-align:-.22em; border:1.5px dashed rgba(90,27,166,.55); border-radius:7px; background:rgba(90,27,166,.05); color:var(--violet); cursor:pointer; user-select:none; transition:background .12s,border-color .12s;}
+  .slot.filled{border-style:solid; background:rgba(90,27,166,.10); font-weight:500;}
+  .slot.target{background:rgba(90,27,166,.2);}
+  .slot.wrong{border-color:var(--terra); background:rgba(160,58,44,.12); color:var(--terra);}
+  .slot.right{border-color:#6f8560; background:rgba(156,175,136,.28); color:#2f3f24;}
+  .slot:focus-visible{outline:2px solid var(--violet); outline-offset:2px;}
+  body.has-sel .slot:hover{background:rgba(90,27,166,.18);}
+
+  .work{min-height:60px; border:1.5px dashed rgba(90,27,166,.45); border-radius:10px; padding:10px 14px; background:rgba(90,27,166,.04);}
+  .work.empty{color:var(--soft); font-style:italic; font-size:13.5px; display:flex; align-items:center;}
+  .work .cur{display:inline-block; width:2px; height:1.1em; background:var(--violet); vertical-align:-.15em; margin-left:2px; animation:blink 1s steps(2) infinite;}
+  @keyframes blink{50%{opacity:0;}}
+  @media(prefers-reduced-motion:reduce){.work .cur{animation:none;}}
+
+  .palette{display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 4px;}
+  .tok{font-family:var(--serif); font-size:19px; line-height:1; min-width:44px; height:42px; padding:0 12px; background:#fff; border:1px solid var(--rule); border-radius:8px; color:#221d16; cursor:pointer; user-select:none; touch-action:none; display:inline-flex; align-items:center; justify-content:center; transition:border-color .12s,background .12s;}
+  .tok i{font-style:italic;}
+  .tok:hover{border-color:var(--violet);}
+  .tok.sel{background:var(--violet); border-color:var(--violet); color:#fff;}
+  .tok.util{font-family:var(--mono); font-size:13px; color:var(--muted);}
+  .tok:focus-visible{outline:2px solid var(--violet); outline-offset:2px;}
+  .ghost{position:fixed; pointer-events:none; z-index:50; opacity:.92; transform:translate(-50%,-50%); box-shadow:0 4px 12px rgba(0,0,0,.18);}
+
+  .actions{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; align-items:center;}
+  .btn{background:none; border:1px solid var(--rule); color:var(--muted); padding:7px 14px; border-radius:8px; font-family:var(--mono); letter-spacing:.04em; font-size:11px; cursor:pointer;}
+  .btn:hover{border-color:var(--violet); color:var(--violet);}
+  .btn.primary{border-color:var(--violet); color:#fff; background:var(--violet); font-weight:500;}
+  .btn.primary:hover{background:#4a1690; color:#fff;}
+  .btn:disabled{opacity:.4; cursor:default;}
+  .nav{margin-left:auto; display:flex; gap:6px; align-items:center;}
+  .counter{font-family:var(--mono); font-size:11px; color:var(--soft); letter-spacing:.04em; padding:0 6px;}
+
+  /* graph mode */
+  .graph-wrap{display:flex; flex-direction:column; align-items:center;}
+  .graph-wrap svg{width:100%; max-width:300px; height:auto; display:block;}
+  .gcap{font-size:13.5px; color:var(--muted); text-align:center; margin:2px 0 0;}
+  .gcap .set{font-family:var(--serif); color:var(--ink); font-size:14.5px;}
+  .stmts{list-style:none; padding:0; margin:16px 0 0;}
+  .stmt{display:flex; align-items:center; gap:10px; padding:8px 6px; border-top:1px solid var(--rule); border-radius:4px;}
+  .stmt .let{font-family:var(--mono); font-size:11px; color:var(--soft); width:22px; flex:none;}
+  .stmt .fm{flex:1; font-size:17px; line-height:1.5; min-width:0;}
+  .stmt .fm i{font-style:italic;}
+  .stmt.right{background:rgba(156,175,136,.18);}
+  .stmt.wrong{background:rgba(160,58,44,.10);}
+  .tf{display:inline-flex; border:1px solid var(--rule); border-radius:8px; overflow:hidden; flex:none;}
+  .tf button{font-family:var(--mono); font-size:11px; letter-spacing:.04em; padding:6px 11px; background:#fff; border:none; color:var(--muted); cursor:pointer;}
+  .tf button + button{border-left:1px solid var(--rule);}
+  .tf button.on{background:var(--violet); color:#fff;}
+  .tf button:focus-visible{outline:2px solid var(--violet); outline-offset:-2px;}
+
+  /* feedback */
+  .verdict{font-size:15px; margin:0 0 10px;}
+  .verdict.ok{color:#2f3f24;}
+  .verdict.bad{color:var(--terra);}
+  .verdict.warn{color:var(--muted); font-style:italic;}
+  .hint{font-size:13.5px; color:var(--muted); font-style:italic; margin:0;}
+  .note{font-size:14px; margin:0 0 10px; padding:8px 12px; background:rgba(160,58,44,.07); border-left:3px solid var(--terra); border-radius:0 6px 6px 0;}
+  .moral{font-size:14px; margin:12px 0 0; padding:8px 12px; background:rgba(156,175,136,.18); border-left:3px solid var(--sage); border-radius:0 6px 6px 0;}
+  .tt-wrap{overflow-x:auto;}
+  table.tt{border-collapse:collapse; font-family:var(--mono); font-size:12px; margin-top:6px; width:100%;}
+  table.tt th{font-weight:500; color:var(--soft); text-align:center; padding:4px 6px; border-bottom:1px solid var(--rule); font-family:var(--serif); font-size:13.5px;}
+  table.tt th.v{font-style:italic;}
+  table.tt td{text-align:center; padding:3px 6px; color:var(--ink);}
+  table.tt th.sep, table.tt td.sep{border-left:1px solid var(--rule);}
+  table.tt tr.diff td{background:rgba(160,58,44,.13); color:var(--terra); font-weight:500;}
+  .notes{list-style:none; padding:0; margin:8px 0 0; font-size:14px;}
+  .notes li{padding:7px 0; border-top:1px solid var(--rule);}
+  .notes li b{font-weight:500; color:var(--terra); margin-right:4px;}
+  .notes li.ok b{color:#4a5a39;}
+  .notes i{font-style:italic;}
+  .score{font-family:var(--mono); font-size:11px; letter-spacing:.06em; color:var(--soft);}
+  .score b{color:var(--violet); font-weight:500;}
+
+  .backlink-block{margin-top:44px; padding-top:16px; border-top:1px solid #e5e0d8;}
+  .backlink-block a{font-family:var(--mono); font-size:12px; letter-spacing:.06em; color:#5A1BA6; text-decoration:none;}
+  .backlink-block a:hover{text-decoration:underline;}
+  .footer{margin-top:32px; padding-top:18px; border-top:2px solid #221d16; display:flex; justify-content:space-between; align-items:baseline; gap:16px; flex-wrap:wrap; font-family:var(--mono); font-size:11px; letter-spacing:.06em; color:#6b6358;}
+  .footer a{color:#5A1BA6; text-decoration:none;}
+  .footer a:hover{text-decoration:underline;}
+  .footer-axiom{font-family:var(--serif); font-style:italic; font-size:13px; color:#8a8276; letter-spacing:0;}
+  .venn-row{display:flex; justify-content:center; gap:14px; margin:6px 0 4px;}
+  .venn-row.two .venn-wrap{flex:1 1 0; min-width:0;}
+  .venn-wrap{max-width:340px; width:100%;}
+  .venn-wrap svg{width:100%; height:auto; display:block; cursor:pointer; touch-action:manipulation;}
+  .vcap{font-size:13.5px; color:var(--muted); text-align:center; margin:0 0 4px;}
+  .vcap i{font-style:italic;}
+  @media(max-width:560px){ .venn-row.two{flex-direction:column; align-items:center;} }
+  .verdict-row{display:flex; align-items:center; gap:12px; margin-top:12px;}
+  .diagram{display:flex; justify-content:center;}
+  .diagram svg{width:100%; max-width:300px; height:auto; display:block;}
+  .diagram.small svg{max-width:250px;}
+  .pname{display:block; font-weight:500;}
+  .pdef{display:block; font-size:14px; color:var(--muted);}
+  .pdef i{font-style:italic;}
+  .constraint b{font-weight:500;}
+  .build-row{display:flex; flex-wrap:wrap; gap:18px; align-items:center; justify-content:center; margin-top:4px;}
+  table.grid{border-collapse:separate; border-spacing:5px; margin:0;}
+  table.grid th{font-family:var(--mono); font-size:11px; font-weight:500; color:var(--soft); padding:0 4px;}
+  .cell{font-family:var(--serif); font-size:15px; min-width:62px; height:40px; background:#fff; border:1px solid var(--rule); border-radius:8px; color:var(--soft); cursor:pointer;}
+  .cell:hover{border-color:var(--violet);}
+  .cell.on{background:var(--violet); border-color:var(--violet); color:#fff;}
+  .cell:focus-visible{outline:2px solid var(--violet); outline-offset:2px;}
+  .fchoose{display:flex; flex-direction:column; gap:8px;}
+  .frow{display:flex; align-items:center; gap:10px;}
+  .fname{font-size:17px; min-width:58px;}
+  .fname i{font-style:italic;}
+  .tok.elt{font-size:17px;}
+  .stmts .stmt .fm{font-size:16px;}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="tool-head">
+    <div class="eyebrow">Mathematics · Tool 02</div>
+    <h1>Sets, relations, and functions</h1>
+    <p class="sub">Five kinds of exercise, from Venn regions to building relations and functions with prescribed properties. Answers are checked by evaluation — region by region, element by element, or over every pair — and some profiles are impossible.</p>
+  </header>
+
+  <div class="seg" id="seg" role="tablist">
+    <button data-mode="V" class="active" role="tab">Venn regions</button>
+    <button data-mode="S" role="tab">Compute a set</button>
+    <button data-mode="P" role="tab">Properties of a relation</button>
+    <button data-mode="R" role="tab">Build a relation</button>
+    <button data-mode="F" role="tab">Build a function</button>
+  </div>
+
+  <div class="layout">
+    <div class="panel">
+      <p class="instr" id="instr"></p>
+      <div id="ex"></div>
+      <div class="actions">
+        <button class="btn primary" id="check">Check</button>
+        <button class="btn" id="impossible">Impossible</button>
+        <button class="btn" id="reveal">Show answer</button>
+        <button class="btn" id="clear">Clear</button>
+        <div class="nav">
+          <button class="btn" id="prev" aria-label="Previous exercise">&larr;</button>
+          <span class="counter" id="counter"></span>
+          <button class="btn" id="next" aria-label="Next exercise">&rarr;</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="lbl">Feedback</div>
+      <div id="fb"></div>
+      <div class="divider"></div>
+      <div class="score" id="score"></div>
+    </div>
+  </div>
+
+  <div class="backlink-block">
+    <a href="./">&larr; Back to Mathematics</a>
+  </div>
+  <div class="footer">
+    <div>Built with Claude &middot; Amit Goyal and Herv&eacute; Cr&egrave;s &middot; <a href="mailto:amit.goyal@nyu.edu">amit.goyal@nyu.edu</a></div>
+    <div class="footer-axiom">More is preferred to less.</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* =====================================================================
+     EXERCISE BANK
+     ===================================================================== */
+
+  // V: Venn regions. Set expressions use A B C, ∪ ∩ ∖ △, postfix ᶜ, brackets.
+  //    kind "shade": one expression. kind "identity": lhs, rhs, plus a verdict.
+  const BANK_V = [
+    { kind:"shade", expr:"Aᶜ ∩ (B ∪ C)",
+      moral:"Aᶜ ∩ (B ∪ C) is (B ∪ C) ∖ A: take everything in B or C, then remove what lies in A." },
+    { kind:"shade", expr:"(A △ B) △ C",
+      moral:"(A △ B) △ C contains exactly the elements that lie in an odd number of the three sets. Bracketing the other way, A △ (B △ C), gives the same description, which is why △ is associative." },
+    { kind:"identity", lhs:"A ∖ (B ∩ C)", rhs:"(A ∖ B) ∪ (A ∖ C)",
+      moral:"This is De Morgan's law relative to A: removing B ∩ C from A is the same as keeping what escapes B or what escapes C." },
+    { kind:"identity", lhs:"A ∖ (B ∖ C)", rhs:"(A ∖ B) ∪ C",
+      moral:"The correct identity is A ∖ (B ∖ C) = (A ∖ B) ∪ (A ∩ C). The right side here also contains the elements of C that lie outside A." },
+    { kind:"identity", lhs:"A ∪ (B ∩ C)", rhs:"(A ∪ B) ∩ C",
+      moral:"Union distributes over intersection as A ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C). Moving the brackets without distributing loses the part of A outside C." }
+  ];
+
+  // S: compute a set by choosing elements from a palette.
+  //    whyIn: note for an element that belongs but was left out;
+  //    whyOut: note for an element that was chosen but does not belong.
+  const F_EX = {X:["1","2","3","4"], Y:["a","b","c","d"], f:{"1":"a","2":"b","3":"a","4":"c"}, names:["X","Y"]};
+  const BANK_S = [
+    { prompt:"Let <i>A</i> = {1, 2} and <i>B</i> = {<i>x</i>, <i>y</i>}. Find <i>A</i> × <i>B</i>.",
+      palette:["(1, x)","(1, y)","(2, x)","(2, y)","(x, 1)","(y, 2)","(1, 2)","(x, y)"],
+      answer:["(1, x)","(1, y)","(2, x)","(2, y)"],
+      whyIn:{ "(1, x)":"1 ∈ A and x ∈ B, so (1, x) ∈ A × B.", "(1, y)":"1 ∈ A and y ∈ B, so (1, y) ∈ A × B.",
+              "(2, x)":"2 ∈ A and x ∈ B, so (2, x) ∈ A × B.", "(2, y)":"2 ∈ A and y ∈ B, so (2, y) ∈ A × B." },
+      whyOut:{ "(x, 1)":"The first coordinate must come from A. (x, 1) belongs to B × A, not A × B.",
+               "(y, 2)":"The first coordinate must come from A. (y, 2) belongs to B × A, not A × B.",
+               "(1, 2)":"The second coordinate must come from B, and 2 ∉ B.",
+               "(x, y)":"The first coordinate must come from A, and x ∉ A." },
+      moral:"A × B is the set of ordered pairs (a, b) with a ∈ A and b ∈ B, so |A × B| = |A| · |B| = 4. Order matters: A × B ≠ B × A here." },
+    { prompt:"Let <i>A</i> = {1, 2}. Find the power set P(<i>A</i>).",
+      palette:["∅","1","2","{1}","{2}","{1, 2}","{∅}"],
+      answer:["∅","{1}","{2}","{1, 2}"],
+      whyIn:{ "∅":"∅ ⊆ A for every set A, so ∅ ∈ P(A).", "{1}":"{1} ⊆ A because 1 ∈ A.",
+              "{2}":"{2} ⊆ A because 2 ∈ A.", "{1, 2}":"A ⊆ A, so A itself belongs to P(A)." },
+      whyOut:{ "1":"1 is an element of A, not a subset of A. The corresponding subset is {1}.",
+               "2":"2 is an element of A, not a subset of A. The corresponding subset is {2}.",
+               "{∅}":"{∅} is the set whose only element is ∅. It is not a subset of A, because ∅ ∉ A." },
+      moral:"P(A) has 2<sup>|A|</sup> = 4 elements, and each of them is a subset of A. Note the difference between ∅ ⊆ A, which always holds, and ∅ ∈ A, which does not hold here." },
+    { fn:F_EX, prompt:"For <i>f</i> : <i>X</i> → <i>Y</i> as drawn, find the preimage <i>f</i><sup>−1</sup>({a, d}).",
+      palette:["1","2","3","4","a","d"],
+      answer:["1","3"],
+      whyIn:{ "1":"f(1) = a ∈ {a, d}.", "3":"f(3) = a ∈ {a, d}." },
+      whyOut:{ "2":"f(2) = b ∉ {a, d}.", "4":"f(4) = c ∉ {a, d}.",
+               "a":"The preimage is a subset of the domain X; a is in the codomain.",
+               "d":"The preimage is a subset of the domain X; d is in the codomain." },
+      moral:"f<sup>−1</sup>(B) = {x ∈ X : f(x) ∈ B} is defined for every function, even one with no inverse, as here. Nothing maps to d, so d contributes nothing to the preimage." },
+    { fn:F_EX, prompt:"For <i>f</i> : <i>X</i> → <i>Y</i> as drawn, find <i>f</i>(<i>f</i><sup>−1</sup>({a, d})).",
+      palette:["a","b","c","d"],
+      answer:["a"],
+      whyIn:{ "a":"f<sup>−1</sup>({a, d}) = {1, 3}, and f(1) = f(3) = a." },
+      whyOut:{ "d":"No element of X maps to d, so d cannot be in the image of any set.",
+               "b":"f<sup>−1</sup>({a, d}) = {1, 3}, and f(1) = f(3) = a; b is not reached.",
+               "c":"f<sup>−1</sup>({a, d}) = {1, 3}, and f(1) = f(3) = a; c is not reached." },
+      moral:"f(f<sup>−1</sup>(B)) = {a} is strictly smaller than B = {a, d}. In general f(f<sup>−1</sup>(B)) = B ∩ f(X) ⊆ B, with equality exactly when B lies inside the range." },
+    { fn:F_EX, prompt:"For <i>f</i> : <i>X</i> → <i>Y</i> as drawn, find <i>f</i><sup>−1</sup>(<i>f</i>({1})).",
+      palette:["1","2","3","4"],
+      answer:["1","3"],
+      whyIn:{ "1":"f({1}) = {a}, and f(1) = a.", "3":"f({1}) = {a}, and f(3) = a as well." },
+      whyOut:{ "2":"f({1}) = {a}, but f(2) = b ≠ a.", "4":"f({1}) = {a}, but f(4) = c ≠ a." },
+      moral:"f<sup>−1</sup>(f({1})) = {1, 3} is strictly larger than {1}. In general A ⊆ f<sup>−1</sup>(f(A)), with equality for every A exactly when f is injective." }
+  ];
+
+  // Relation statements, shared by modes P and R.
+  const Rel=(a,b)=>({t:"R",a,b}), EQ=(a,b)=>({t:"EQ",a,b}),
+        AND=(l,r)=>({t:"AND",l,r}), OR=(l,r)=>({t:"OR",l,r}), IMP=(l,r)=>({t:"IMP",l,r});
+  const PROPS = [
+    { key:"refl",  name:"Reflexive",     yes:"reflexive",     no:"not reflexive",     st:{q:[["A","x"]], b:Rel("x","x")} },
+    { key:"sym",   name:"Symmetric",     yes:"symmetric",     no:"not symmetric",     st:{q:[["A","x"],["A","y"]], b:IMP(Rel("x","y"),Rel("y","x"))} },
+    { key:"anti",  name:"Antisymmetric", yes:"antisymmetric", no:"not antisymmetric", st:{q:[["A","x"],["A","y"]], b:IMP(AND(Rel("x","y"),Rel("y","x")),EQ("x","y"))} },
+    { key:"trans", name:"Transitive",    yes:"transitive",    no:"not transitive",    st:{q:[["A","x"],["A","y"],["A","z"]], b:IMP(AND(Rel("x","y"),Rel("y","z")),Rel("x","z"))} },
+    { key:"comp",  name:"Complete",      yes:"complete",      no:"not complete",      st:{q:[["A","x"],["A","y"]], b:OR(Rel("x","y"),Rel("y","x"))} }
+  ];
+  const PROP = Object.fromEntries(PROPS.map(p=>[p.key,p]));
+
+  // P: decide every property of a drawn relation.
+  const diag = S=>S.map(s=>[s,s]);
+  const BANK_P = [
+    { S:[1,2,3,4], R:diag([1,2,3,4]).concat([[1,2],[2,1],[3,4],[4,3]]),
+      moral:"Reflexive, symmetric and transitive: an equivalence relation. Its equivalence classes, {1, 2} and {3, 4}, partition <i>S</i>." },
+    { S:[1,2,6,3], R:diag([1,2,6,3]).concat([[1,2],[1,3],[1,6],[2,6],[3,6]]),
+      caption:"An arrow from <i>x</i> to <i>y</i> means that <i>x</i> divides <i>y</i>.",
+      moral:"Divisibility is reflexive, antisymmetric and transitive: a partial order. It is not complete, since neither 2 divides 3 nor 3 divides 2." },
+    { S:["a","b","c"], R:diag(["a","b","c"]).concat([["a","b"],["b","c"],["c","a"]]),
+      caption:"Bundles <i>a</i>, <i>b</i>, <i>c</i>. An arrow from <i>x</i> to <i>y</i> means <i>x</i> ≿ <i>y</i>: <i>x</i> is at least as good as <i>y</i>.",
+      moral:"Complete but not transitive: the preferences cycle, a ≻ b ≻ c ≻ a. No bundle is at least as good as both others, so there is no best choice from {a, b, c}. This is why rational preferences are required to be transitive." },
+    { S:[1,2,3], R:[],
+      moral:"Symmetry, antisymmetry and transitivity all hold vacuously, because their hypotheses never hold. So a relation can be both symmetric and antisymmetric: the two are not opposites." },
+    { S:[1,2,3,4], R:[[1,1],[1,2],[2,1],[2,2],[3,3]],
+      moral:"Symmetric and transitive, but not reflexive, because 4 is related to nothing. The tempting argument “from (x, y) and (y, x), transitivity gives (x, x)” needs some y with (x, y) ∈ R, and for x = 4 there is none." }
+  ];
+
+  // R: build a relation on {1, 2, 3} with a property profile, or declare it impossible.
+  //    want: property key → required truth value. example: one solution (possible items).
+  const BANK_R = [
+    { want:{sym:true, trans:true, refl:false}, example:[[1,1],[1,2],[2,1],[2,2]],
+      moral:"Symmetry and transitivity give (x, x) ∈ R only for elements x that are related to something. An element related to nothing breaks reflexivity." },
+    { want:{refl:true, sym:true, anti:true, trans:false}, impossible:true,
+      proof:"If (x, y) ∈ R with x ≠ y, symmetry gives (y, x) ∈ R, and antisymmetry then forces x = y, a contradiction. So R contains no pairs off the diagonal, and reflexivity makes R exactly {(1, 1), (2, 2), (3, 3)}. That relation is transitive." },
+    { want:{refl:true, trans:true, sym:false, anti:false}, example:[[1,1],[2,2],[3,3],[1,2],[2,1],[1,3],[2,3]],
+      moral:"A reflexive, transitive relation is a preorder. This one is neither symmetric nor antisymmetric, so it is neither an equivalence relation nor a partial order." },
+    { want:{comp:true, refl:false}, impossible:true,
+      proof:"Completeness says (x, y) ∈ R or (y, x) ∈ R for all x and y. Taking y = x gives (x, x) ∈ R. So every complete relation is reflexive." },
+    { want:{comp:true, anti:true, trans:false}, example:[[1,1],[2,2],[3,3],[1,2],[2,3],[3,1]],
+      moral:"Completeness forces every loop and at least one arrow between each pair; antisymmetry allows at most one. On three elements such a relation fails transitivity exactly when its arrows form a cycle, 1 → 2 → 3 → 1 or the reverse." }
+  ];
+
+  // F: build a function A → B with a property profile, or declare it impossible.
+  const FPROPS = {
+    inj:  {yes:"injective",          no:"not injective"},
+    surj: {yes:"surjective",         no:"not surjective"},
+    idem: {yes:"f ∘ f = f",          no:"f ∘ f ≠ f"},
+    id:   {yes:"f is the identity",  no:"f is not the identity"},
+    cnst: {yes:"f is constant",      no:"f is not constant"}
+  };
+  const BANK_F = [
+    { A:["1","2","3"], B:["a","b","c","d"], want:{inj:true, surj:false}, example:{"1":"a","2":"b","3":"c"},
+      moral:"When |A| &lt; |B|, some element of B is always missed, so no function here is surjective. Every injection from A is automatically not surjective." },
+    { A:["1","2","3","4"], B:["a","b","c"], want:{surj:true, inj:false}, example:{"1":"a","2":"b","3":"c","4":"a"},
+      moral:"When |A| &gt; |B|, two elements of A must share an image, so no function here is injective. Every surjection from A is automatically not injective." },
+    { A:["1","2","3","4"], B:["a","b","c"], want:{inj:true}, impossible:true,
+      proof:"An injective function sends the 4 elements of A to 4 different elements of B, but B has only 3. This is the pigeonhole principle." },
+    { A:["1","2","3"], B:["a","b","c"], want:{inj:true, surj:false}, impossible:true,
+      proof:"An injective function takes 3 different values, and B has exactly 3 elements, so every element of B is hit. Between finite sets of the same size, injective and surjective are equivalent." },
+    { A:["1","2","3"], B:["1","2","3"], same:true, want:{idem:true, id:false, cnst:false}, example:{"1":"1","2":"1","3":"3"},
+      moral:"f ∘ f = f says that f(y) = y for every y in the range f(A): f fixes each point it reaches. Such functions are called idempotent. The identity and the constant functions are the extreme cases." }
+  ];
+
+  const BANK = {V:BANK_V, S:BANK_S, P:BANK_P, R:BANK_R, F:BANK_F};
+
+  const INSTR = {
+    V:"Tap regions of the diagram to shade the set; tap again to unshade. For an identity, shade both sides and then decide whether they are equal.",
+    S:"Choose the elements of the set; tap a chosen element again to remove it.",
+    P:"Decide whether the relation drawn has each property. An arrow from x to y means (x, y) ∈ R, and a loop at x means (x, x) ∈ R.",
+    R:"Tap cells of the grid to add or remove pairs until R has every property listed, or press Impossible if no relation on {1, 2, 3} can have them all.",
+    F:"Choose f(x) for each x until f has every property listed, or press Impossible if no function can have them all."
+  };
+  const FBHINT = {
+    V:"Shade and press Check. Wrong regions are named, so you can see which elements you included or left out.",
+    S:"Press Check when your set is complete. Each element you added wrongly, or missed, is explained.",
+    P:"Answer every property and press Check. Each answer then gets a witness or a counterexample from the graph.",
+    R:"Press Check to test your relation against each required property; failures come with a counterexample.",
+    F:"Press Check to test your function against each required property; failures name the elements involved."
+  };
+
+  /* =====================================================================
+     SET EXPRESSIONS ON 8 VENN REGIONS
+     Region r (0–7): bit 0 = in A, bit 1 = in B, bit 2 = in C.
+     A set is an 8-bit mask of regions.
+     ===================================================================== */
+  const BASE = { A:0, B:0, C:0 };
+  for(let r=0;r<8;r++){ if(r&1) BASE.A|=1<<r; if(r&2) BASE.B|=1<<r; if(r&4) BASE.C|=1<<r; }
+  function setEval(s){
+    const toks=[...s.replace(/\s+/g,"")]; let k=0;
+    const peek=()=>toks[k];
+    function expr(){ let v=term(); while("∪∖△".includes(peek()||"#")){ const op=toks[k++], w=term(); v = op==="∪" ? (v|w) : op==="∖" ? (v&~w&255) : (v^w); } return v; }
+    function term(){ let v=post(); while(peek()==="∩"){ k++; v&=post(); } return v; }
+    function post(){ let v=atom(); while(peek()==="ᶜ"){ k++; v=(~v)&255; } return v; }
+    function atom(){
+      const t=toks[k++];
+      if(t==="("){ const v=expr(); if(toks[k++]!==")") throw new Error("bracket"); return v; }
+      if(BASE[t]!==undefined) return BASE[t];
+      throw new Error("bad set expression at "+t);
+    }
+    const v=expr(); if(k!==toks.length) throw new Error("trailing input"); return v;
+  }
+  const regionsOf=m=>[0,1,2,3,4,5,6,7].filter(r=>m&(1<<r));
+  function regionWords(r){
+    const names=["A","B","C"], ins=names.filter((_,i)=>r&(1<<i)), outs=names.filter((_,i)=>!(r&(1<<i)));
+    const it=x=>"<i>"+x+"</i>";
+    if(ins.length===0) return "outside "+it("A")+", "+it("B")+" and "+it("C");
+    if(outs.length===0) return "in all three sets";
+    if(ins.length===1) return "in "+it(ins[0])+" only";
+    return "in "+ins.map(it).join(" and ")+" but not "+it(outs[0]);
+  }
+  function setHTML(s){
+    return s.replace(/([ABC])/g,"<i>$1</i>").replace(/ᶜ/g,"<sup>c</sup>");
+  }
+
+  /* =====================================================================
+     RELATIONS: evaluation and certificates (as in Tool 01, with ∨)
+     ===================================================================== */
+  const iv=x=>'<i>'+x+'</i>';
+  const VARS=new Set(["x","y","z"]);
+  function term(x,env){ return (env&&env[x]!==undefined) ? String(env[x]) : iv(x); }
+  function renderB(n,env,top){
+    switch(n.t){
+      case "R":   return "("+term(n.a,env)+", "+term(n.b,env)+") ∈ "+iv("R");
+      case "EQ":  return term(n.a,env)+" = "+term(n.b,env);
+      case "AND": return renderB(n.l,env,false)+" ∧ "+renderB(n.r,env,false);
+      case "OR":  { const s=renderB(n.l,env,false)+" ∨ "+renderB(n.r,env,false); return top?s:"("+s+")"; }
+      case "IMP": { const s=renderB(n.l,env,false)+" → "+renderB(n.r,env,false); return top?s:"("+s+")"; }
+    }
+  }
+  function renderStmt(st){ return st.q.map(q=>(q[0]==="A"?"∀":"∃")+iv(q[1])).join(" ")+" : "+renderB(st.b,null,true); }
+  function evB(n,env,has){
+    switch(n.t){
+      case "R":   return has(env[n.a],env[n.b]);
+      case "EQ":  return env[n.a]===env[n.b];
+      case "AND": return evB(n.l,env,has)&&evB(n.r,env,has);
+      case "OR":  return evB(n.l,env,has)||evB(n.r,env,has);
+      case "IMP": return !evB(n.l,env,has)||evB(n.r,env,has);
+    }
+  }
+  function why(n,env,has){
+    switch(n.t){
+      case "R": return ["("+env[n.a]+", "+env[n.b]+") "+(has(env[n.a],env[n.b])?"∈":"∉")+" "+iv("R")];
+      case "EQ": return [env[n.a]+" "+(env[n.a]===env[n.b]?"=":"≠")+" "+env[n.b]];
+      case "AND": { const l=evB(n.l,env,has), r=evB(n.r,env,has);
+        if(l&&r) return why(n.l,env,has).concat(why(n.r,env,has)); return !l?why(n.l,env,has):why(n.r,env,has); }
+      case "OR": { const l=evB(n.l,env,has), r=evB(n.r,env,has);
+        if(!l&&!r) return why(n.l,env,has).concat(why(n.r,env,has)); return l?why(n.l,env,has):why(n.r,env,has); }
+      case "IMP": { const l=evB(n.l,env,has), r=evB(n.r,env,has);
+        if(l&&!r) return why(n.l,env,has).concat(why(n.r,env,has)); return !l?why(n.l,env,has):why(n.r,env,has); }
+    }
+  }
+  const uniq=a=>[...new Set(a)];
+  function* assignments(vs,S,env){
+    if(vs.length===0){ yield env; return; }
+    for(const s of S) yield* assignments(vs.slice(1),S,Object.assign({},env,{[vs[0]]:s}));
+  }
+  const fmtAssign=as=>as.map(([v,s])=>iv(v)+" = "+s).join(", ");
+  const everyWord=vs=>vs.length===1 ? iv(vs[0]) : "choice of "+vs.map(iv).join(", ");
+  function cert(st,i,env,S,has){
+    if(i===st.q.length) return {val:evB(st.b,env,has), text:uniq(why(st.b,env,has)).join(" and ")};
+    const [Q,v]=st.q[i], restQ=st.q.slice(i), restVars=restQ.map(q=>q[1]), allSame=restQ.every(q=>q[0]===Q);
+    const kids=S.map(s=>({s, c:cert(st,i+1,Object.assign({},env,{[v]:s}),S,has)}));
+    if(Q==="A"){
+      if(!kids.every(k=>k.c.val)){
+        const k=kids.find(k=>!k.c.val);
+        const assign = k.c.kind==="cx" ? [[v,k.s]].concat(k.c.assign) : [[v,k.s]];
+        const tail   = k.c.kind==="cx" ? k.c.tail : k.c.text;
+        return {val:false, kind:"cx", assign, tail, text:"counterexample "+fmtAssign(assign)+": "+tail};
+      }
+      if(allSame){
+        if(st.b.t==="IMP"){
+          const inst=[]; for(const e of assignments(restVars,S,env)) if(evB(st.b.l,e,has)) inst.push(e);
+          if(inst.length===0) return {val:true, text:"vacuously true: no "+everyWord(restVars)+" satisfies "+renderB(st.b.l,env,true)+", so there is nothing to check"};
+          if(inst.length<=6){
+            const tup = restVars.length===1
+              ? iv(restVars[0])+" = "+inst.map(e=>e[restVars[0]]).join(", ")
+              : "("+restVars.map(iv).join(", ")+") = "+inst.map(e=>"("+restVars.map(x=>e[x]).join(", ")+")").join(", ");
+            return {val:true, text:"the hypothesis "+renderB(st.b.l,env,true)+" holds only for "+tup+", and in each case "+renderB(st.b.r,env,true)};
+          }
+        }
+        return {val:true, text:renderB(st.b,env,true)+" for every "+everyWord(restVars)};
+      }
+      return {val:true, text:"for each "+iv(v)+": "+kids.map(k=>iv(v)+" = "+k.s+" — "+k.c.text).join("; ")};
+    }
+    if(kids.some(k=>k.c.val)){
+      const k=kids.find(k=>k.c.val);
+      const assign = k.c.kind==="wit" ? [[v,k.s]].concat(k.c.assign) : [[v,k.s]];
+      const tail   = k.c.kind==="wit" ? k.c.tail : k.c.text;
+      return {val:true, kind:"wit", assign, tail, text:"witness "+fmtAssign(assign)+": "+tail};
+    }
+    if(allSame) return {val:false, text:"no "+everyWord(restVars)+" satisfies "+renderB(st.b,env,true)};
+    return {val:false, text:"every "+iv(v)+" fails: "+kids.map(k=>iv(v)+" = "+k.s+" — "+k.c.text).join("; ")};
+  }
+  function relCert(S,R,propKey){
+    const set=new Set(R.map(e=>e[0]+","+e[1]));
+    return cert(PROP[propKey].st,0,{},S,(a,b)=>set.has(a+","+b));
+  }
+
+  /* ---------- function properties ---------- */
+  function fnProps(item,f){
+    const A=item.A, B=item.B, out={};
+    // injective
+    let clash=null;
+    for(let i=0;i<A.length&&!clash;i++) for(let j=i+1;j<A.length;j++) if(f[A[i]]===f[A[j]]){ clash=[A[i],A[j]]; break; }
+    out.inj = clash ? {val:false, text:"f("+clash[0]+") = f("+clash[1]+") = "+f[clash[0]]}
+                    : {val:true,  text:"no two elements of A have the same image"};
+    const hit=new Set(A.map(x=>f[x])), miss=B.filter(y=>!hit.has(y));
+    out.surj = miss.length ? {val:false, text:"nothing maps to "+miss[0]}
+                           : {val:true,  text:"every element of B is the image of some element of A"};
+    if(item.same){
+      const bad=A.find(x=>f[f[x]]!==f[x]);
+      out.idem = bad!==undefined ? {val:false, text:"f(f("+bad+")) = f("+f[bad]+") = "+f[f[bad]]+", but f("+bad+") = "+f[bad]}
+                                 : {val:true,  text:"f(f(x)) = f(x) for every x"};
+      const moved=A.find(x=>f[x]!==x);
+      out.id = moved!==undefined ? {val:false, text:"f("+moved+") = "+f[moved]+" ≠ "+moved}
+                                 : {val:true,  text:"f(x) = x for every x"};
+      const other=A.find(x=>f[x]!==f[A[0]]);
+      out.cnst = other!==undefined ? {val:false, text:"f("+A[0]+") = "+f[A[0]]+" but f("+other+") = "+f[other]}
+                                   : {val:true,  text:"every element maps to "+f[A[0]]};
+    }
+    return out;
+  }
+
+  /* ---------- exhaustive possibility checks ---------- */
+  const S3=[1,2,3];
+  const ALLPAIRS=[]; S3.forEach(a=>S3.forEach(b=>ALLPAIRS.push([a,b])));
+  function relMeets(R,want){ return Object.keys(want).every(k=>relCert(S3,R,k).val===want[k]); }
+  function relPossible(want){
+    for(let m=0;m<512;m++){ const R=ALLPAIRS.filter((_,i)=>m&(1<<i)); if(relMeets(R,want)) return true; }
+    return false;
+  }
+  function fnMeets(item,f){ const p=fnProps(item,f); return Object.keys(item.want).every(k=>p[k].val===item.want[k]); }
+  function fnPossible(item){
+    const n=item.A.length, m=item.B.length;
+    for(let c=0;c<Math.pow(m,n);c++){
+      const f={}; let x=c; item.A.forEach(a=>{ f[a]=item.B[x%m]; x=Math.floor(x/m); });
+      if(fnMeets(item,f)) return true;
+    }
+    return false;
+  }
+
+  /* =====================================================================
+     DRAWING
+     ===================================================================== */
+  const fx=x=>x.toFixed(1);
+  const CIRC={A:{x:115,y:95}, B:{x:185,y:95}, C:{x:150,y:153}}, CR=64;
+  const U={x:8,y:8,w:284,h:212};
+  function vennSVG(id,mask){
+    let defs="";
+    ["A","B","C"].forEach(s=>{
+      defs+='<clipPath id="'+id+'c'+s+'"><circle cx="'+CIRC[s].x+'" cy="'+CIRC[s].y+'" r="'+CR+'"/></clipPath>';
+      defs+='<mask id="'+id+'n'+s+'" maskUnits="userSpaceOnUse" x="0" y="0" width="300" height="228"><rect x="0" y="0" width="300" height="228" fill="#fff"/><circle cx="'+CIRC[s].x+'" cy="'+CIRC[s].y+'" r="'+CR+'" fill="#000"/></mask>';
+    });
+    defs+='<clipPath id="'+id+'u"><rect x="'+U.x+'" y="'+U.y+'" width="'+U.w+'" height="'+U.h+'" rx="6"/></clipPath>';
+    let fills="";
+    regionsOf(mask).forEach(r=>{
+      let g='<rect x="0" y="0" width="300" height="228" fill="rgba(90,27,166,0.30)"/>';
+      ["A","B","C"].forEach((s,i)=>{ g = (r&(1<<i)) ? '<g clip-path="url(#'+id+'c'+s+')">'+g+'</g>' : '<g mask="url(#'+id+'n'+s+')">'+g+'</g>'; });
+      fills+='<g clip-path="url(#'+id+'u)">'+g+'</g>';
+    });
+    const lab=(x,y,t)=>'<text x="'+x+'" y="'+y+'" text-anchor="middle" font-family="STIX Two Text,Georgia,serif" font-style="italic" font-size="17" fill="#221d16">'+t+'</text>';
+    return '<svg xmlns="http://www.w3.org/2000/svg" class="venn" data-venn="'+id+'" viewBox="0 0 300 228" role="img" aria-label="Venn diagram of A, B and C">'+
+      '<defs>'+defs+'</defs>'+
+      '<rect x="'+U.x+'" y="'+U.y+'" width="'+U.w+'" height="'+U.h+'" rx="6" fill="#fffdf9"/>'+fills+
+      '<rect x="'+U.x+'" y="'+U.y+'" width="'+U.w+'" height="'+U.h+'" rx="6" fill="none" stroke="#221d16" stroke-width="1.4"/>'+
+      '<g fill="none" stroke="#221d16" stroke-width="1.5">'+["A","B","C"].map(s=>'<circle cx="'+CIRC[s].x+'" cy="'+CIRC[s].y+'" r="'+CR+'"/>').join("")+'</g>'+
+      lab(62,40,"A")+lab(238,40,"B")+lab(222,208,"C")+
+      '<text x="20" y="27" font-family="STIX Two Text,Georgia,serif" font-style="italic" font-size="14" fill="#8a8276">U</text>'+
+      '</svg>';
+  }
+  function regionAt(x,y){
+    if(x<U.x||x>U.x+U.w||y<U.y||y>U.y+U.h) return -1;
+    let r=0; ["A","B","C"].forEach((s,i)=>{ if(Math.hypot(x-CIRC[s].x,y-CIRC[s].y)<=CR) r|=1<<i; });
+    return r;
+  }
+
+  function graphSVG(S,R,uid){
+    const W=320, cx=160, cy=160, RR=100, r=17, n=S.length, pos={};
+    S.forEach((s,i)=>{ const ang=-Math.PI/2-Math.PI/n+i*2*Math.PI/n; pos[s]={x:cx+RR*Math.cos(ang), y:cy+RR*Math.sin(ang)}; });
+    const set=new Set(R.map(e=>e[0]+","+e[1]));
+    const unit=(dx,dy)=>{ const L=Math.hypot(dx,dy); return {x:dx/L,y:dy/L}; };
+    const mk='url(#'+uid+')';
+    let paths="";
+    R.forEach(([u,v])=>{
+      const P=pos[u], Q=pos[v];
+      if(u===v){
+        const th=Math.atan2(P.y-cy,P.x-cx), pt=(rad,a)=>({x:P.x+rad*Math.cos(th+a), y:P.y+rad*Math.sin(th+a)});
+        const s=pt(r,-0.45), e=pt(r+1,0.45), c1=pt(r*2.9,-0.6), c2=pt(r*2.9,0.6);
+        paths+='<path d="M'+fx(s.x)+' '+fx(s.y)+' C '+fx(c1.x)+' '+fx(c1.y)+', '+fx(c2.x)+' '+fx(c2.y)+', '+fx(e.x)+' '+fx(e.y)+'" marker-end="'+mk+'"/>';
+      } else if(set.has(v+","+u)){
+        const d=unit(Q.x-P.x,Q.y-P.y), c={x:(P.x+Q.x)/2-d.y*24, y:(P.y+Q.y)/2+d.x*24};
+        const a=unit(c.x-P.x,c.y-P.y), b=unit(c.x-Q.x,c.y-Q.y);
+        paths+='<path d="M'+fx(P.x+a.x*r)+' '+fx(P.y+a.y*r)+' Q '+fx(c.x)+' '+fx(c.y)+', '+fx(Q.x+b.x*(r+1))+' '+fx(Q.y+b.y*(r+1))+'" marker-end="'+mk+'"/>';
+      } else {
+        const d=unit(Q.x-P.x,Q.y-P.y);
+        paths+='<path d="M'+fx(P.x+d.x*r)+' '+fx(P.y+d.y*r)+' L '+fx(Q.x-d.x*(r+1))+' '+fx(Q.y-d.y*(r+1))+'" marker-end="'+mk+'"/>';
+      }
+    });
+    let nodes="";
+    S.forEach(s=>{
+      nodes+='<circle cx="'+fx(pos[s].x)+'" cy="'+fx(pos[s].y)+'" r="'+r+'" fill="#fffdf9" stroke="#221d16" stroke-width="1.5"/>';
+      nodes+='<text x="'+fx(pos[s].x)+'" y="'+fx(pos[s].y+5.5)+'" text-anchor="middle" font-family="STIX Two Text,Georgia,serif" font-size="16"'+(typeof s==="string"?' font-style="italic"':'')+' fill="#221d16">'+s+'</text>';
+    });
+    return '<svg xmlns="http://www.w3.org/2000/svg" class="graph" viewBox="0 0 '+W+' '+W+'" role="img" aria-label="Directed graph of the relation">'+
+      '<defs><marker id="'+uid+'" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#5A1BA6"/></marker></defs>'+
+      '<g fill="none" stroke="#5A1BA6" stroke-width="1.6">'+paths+'</g>'+nodes+'</svg>';
+  }
+
+  function bipSVG(A,B,f,names,uid){
+    const gap=46, rows=Math.max(A.length,B.length), H=rows*gap+62, lx=80, rx=236, r=14;
+    const y0=H/2-(rows-1)*gap/2+10;
+    const col=(arr)=>{ const top=H/2-(arr.length-1)*gap/2+10; return arr.map((_,i)=>top+i*gap); };
+    const ya=col(A), yb=col(B), pa={}, pb={};
+    A.forEach((a,i)=>pa[a]={x:lx,y:ya[i]}); B.forEach((b,i)=>pb[b]={x:rx,y:yb[i]});
+    const ell=(x,arr)=>'<ellipse cx="'+x+'" cy="'+fx(H/2+10)+'" rx="36" ry="'+fx((arr.length-1)*gap/2+30)+'" fill="rgba(156,175,136,0.14)" stroke="#9CAF88" stroke-width="1.2"/>';
+    let arrows="";
+    A.forEach(a=>{
+      const b=f[a]; if(b===undefined) return;
+      const P=pa[a], Q=pb[b], L=Math.hypot(Q.x-P.x,Q.y-P.y), dx=(Q.x-P.x)/L, dy=(Q.y-P.y)/L;
+      arrows+='<path d="M'+fx(P.x+dx*r)+' '+fx(P.y+dy*r)+' L '+fx(Q.x-dx*(r+1))+' '+fx(Q.y-dy*(r+1))+'" marker-end="url(#'+uid+')"/>';
+    });
+    const node=(p,t)=>'<circle cx="'+p.x+'" cy="'+fx(p.y)+'" r="'+r+'" fill="#fffdf9" stroke="#221d16" stroke-width="1.5"/>'+
+      '<text x="'+p.x+'" y="'+fx(p.y+5)+'" text-anchor="middle" font-family="STIX Two Text,Georgia,serif" font-size="15" fill="#221d16">'+t+'</text>';
+    const title=(x,t)=>'<text x="'+x+'" y="20" text-anchor="middle" font-family="STIX Two Text,Georgia,serif" font-style="italic" font-size="17" fill="#221d16">'+t+'</text>';
+    return '<svg xmlns="http://www.w3.org/2000/svg" class="bip" viewBox="0 0 316 '+fx(H+14)+'" role="img" aria-label="Arrow diagram of a function">'+
+      '<defs><marker id="'+uid+'" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#5A1BA6"/></marker></defs>'+
+      ell(lx,A)+ell(rx,B)+title(lx,names[0])+title(rx,names[1])+
+      '<text x="158" y="20" text-anchor="middle" font-family="STIX Two Text,Georgia,serif" font-style="italic" font-size="15" fill="#5A1BA6">f</text>'+
+      '<g fill="none" stroke="#5A1BA6" stroke-width="1.6">'+arrows+'</g>'+
+      A.map(a=>node(pa[a],a)).join("")+B.map(b=>node(pb[b],b)).join("")+'</svg>';
+  }
+
+  /* =====================================================================
+     UI
+     ===================================================================== */
+  const $=id=>document.getElementById(id);
+  const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+  const elHTML=e=>esc(e).replace(/\b([xy])\b/g,"<i>$1</i>");
+  const setList=arr=>arr.length? "{"+arr.map(elHTML).join(", ")+"}" : "∅";
+
+  let mode="V";
+  const idx={V:0,S:0,P:0,R:0,F:0};
+  let st={};
+  const stats={attempted:new Set(), solved:new Set(), revealed:new Set()};
+  const key=()=>mode+idx[mode];
+  const item=()=>BANK[mode][idx[mode]];
+  const markSolved=k=>{ if(!stats.revealed.has(k)) stats.solved.add(k); };
+
+  function fresh(){
+    const it=item();
+    if(mode==="V") st={L:0, Rr:0, verdict:null};
+    else if(mode==="S") st={chosen:new Set()};
+    else if(mode==="P") st={ans:{}};
+    else if(mode==="R") st={pairs:new Set()};
+    else st={f:{}};
+  }
+  const pairsArr=()=>ALLPAIRS.filter(p=>st.pairs.has(p[0]+","+p[1]));
+
+  function profileHTML(want,labels){
+    return '<div class="constraint"><p>Required: '+Object.keys(want).map(k=>'<b>'+labels(k,want[k])+'</b>').join(", ")+'.</p></div>';
+  }
+  const relLabel=(k,v)=>v?PROP[k].yes:PROP[k].no;
+  const fnLabel=(k,v)=>v?FPROPS[k].yes:FPROPS[k].no;
+
+  function render(){
+    $("instr").textContent=INSTR[mode];
+    const it=item(); let h="";
+    if(mode==="V"){
+      if(it.kind==="shade"){
+        h+='<div class="lbl">Shade</div><div class="f">'+setHTML(it.expr)+'</div>';
+        h+='<div class="venn-row"><div class="venn-wrap">'+vennSVG("vL",st.L)+'</div></div>';
+      } else {
+        h+='<div class="lbl">Is this identity true?</div><div class="f">'+setHTML(it.lhs)+' <span class="equiv">=</span> '+setHTML(it.rhs)+'</div>';
+        h+='<div class="venn-row two"><div class="venn-wrap"><div class="vcap">Left side: '+setHTML(it.lhs)+'</div>'+vennSVG("vL",st.L)+'</div>'+
+           '<div class="venn-wrap"><div class="vcap">Right side: '+setHTML(it.rhs)+'</div>'+vennSVG("vR",st.Rr)+'</div></div>';
+        h+='<div class="verdict-row"><span class="lbl" style="margin:0">Verdict</span><span class="tf"><button data-verdict="1" class="'+(st.verdict===true?'on':'')+'">Equal</button><button data-verdict="0" class="'+(st.verdict===false?'on':'')+'">Not equal</button></span></div>';
+      }
+    } else if(mode==="S"){
+      h+='<p class="words" style="font-size:16px;margin:0 0 10px;">'+it.prompt+'</p>';
+      if(it.fn) h+='<div class="diagram">'+bipSVG(it.fn.X,it.fn.Y,it.fn.f,it.fn.names,"mS")+'</div>';
+      h+='<div class="lbl" style="margin-top:10px;">Your set</div><div class="work f">'+setList(it.palette.filter(e=>st.chosen.has(e)))+'</div>';
+      h+='<div class="lbl" style="margin-top:14px;">Elements</div><div class="palette">'+it.palette.map(e=>'<button class="tok elt'+(st.chosen.has(e)?' sel':'')+'" data-el="'+esc(e)+'">'+elHTML(e)+'</button>').join("")+'</div>';
+    } else if(mode==="P"){
+      h+='<div class="diagram">'+graphSVG(it.S,it.R,"mP")+'</div>';
+      h+='<p class="gcap"><i>S</i> = {'+it.S.map(elHTML).join(", ")+'}. '+(it.caption||"An arrow from <i>x</i> to <i>y</i> means (<i>x</i>, <i>y</i>) ∈ <i>R</i>.")+'</p>';
+      h+='<ul class="stmts">';
+      PROPS.forEach(p=>{
+        h+='<li class="stmt" data-row="'+p.key+'"><span class="fm"><span class="pname">'+p.name+'</span><span class="pdef">'+renderStmt(p.st)+'</span></span>'+
+           '<span class="tf"><button data-prop="'+p.key+'" data-val="1" class="'+(st.ans[p.key]===true?'on':'')+'">True</button><button data-prop="'+p.key+'" data-val="0" class="'+(st.ans[p.key]===false?'on':'')+'">False</button></span></li>';
+      });
+      h+='</ul>';
+    } else if(mode==="R"){
+      h+=profileHTML(it.want,relLabel);
+      h+='<div class="build-row"><div><div class="lbl">Pairs in <i>R</i> ⊆ <i>S</i> × <i>S</i>, <i>S</i> = {1, 2, 3}</div><table class="grid"><tr><th></th>'+S3.map(y=>'<th>'+y+'</th>').join("")+'</tr>';
+      S3.forEach(x=>{ h+='<tr><th>'+x+'</th>'+S3.map(y=>{ const on=st.pairs.has(x+","+y); return '<td><button class="cell'+(on?' on':'')+'" data-pair="'+x+','+y+'" aria-pressed="'+on+'">('+x+', '+y+')</button></td>'; }).join("")+'</tr>'; });
+      h+='</table><p class="gcap" style="text-align:left">Row <i>x</i>, column <i>y</i>: the pair (<i>x</i>, <i>y</i>).</p></div><div class="diagram small">'+graphSVG(S3,pairsArr(),"mR")+'</div></div>';
+    } else {
+      h+=profileHTML(it.want,fnLabel);
+      h+='<div class="build-row"><div class="diagram small">'+bipSVG(it.A,it.B,st.f,it.same?["A","A"]:["A","B"],"mF")+'</div><div class="fchoose">';
+      it.A.forEach(a=>{ h+='<div class="frow"><span class="fname"><i>f</i>('+a+') =</span><span class="tf">'+it.B.map(b=>'<button data-fx="'+a+'" data-fy="'+b+'" class="'+(st.f[a]===b?'on':'')+'">'+b+'</button>').join("")+'</span></div>'; });
+      h+='<p class="gcap" style="text-align:left">'+(it.same?'<i>f</i> : <i>A</i> → <i>A</i>, with <i>A</i> = {'+it.A.join(", ")+'}':'<i>f</i> : <i>A</i> → <i>B</i>, with <i>A</i> = {'+it.A.join(", ")+'} and <i>B</i> = {'+it.B.join(", ")+'}')+'</p></div></div>';
+    }
+    $("ex").innerHTML=h;
+    $("impossible").style.display = (mode==="R"||mode==="F") ? "" : "none";
+    $("counter").textContent=(idx[mode]+1)+" / "+BANK[mode].length;
+    $("prev").disabled=idx[mode]===0;
+    $("next").disabled=idx[mode]===BANK[mode].length-1;
+    renderScore();
+  }
+  function renderScore(){
+    const a=stats.attempted.size, s=stats.solved.size;
+    $("score").innerHTML = a===0 ? "No exercises attempted yet." : "Solved <b>"+s+"</b> of "+a+" attempted this session.";
+  }
+  const setFB=h=>{ $("fb").innerHTML=h; };
+  const resetFB=()=>setFB('<p class="hint">'+FBHINT[mode]+'</p>');
+
+  /* ---------- interaction ---------- */
+  function toggleRegion(which,r){
+    if(r<0) return;
+    if(which==="vL") st.L^=1<<r; else st.Rr^=1<<r;
+    render();
+  }
+  $("ex").addEventListener("click",e=>{
+    const venn=e.target.closest("svg.venn");
+    if(venn && venn.getScreenCTM){
+      const pt=venn.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY;
+      const p=pt.matrixTransform(venn.getScreenCTM().inverse());
+      toggleRegion(venn.dataset.venn, regionAt(p.x,p.y)); return;
+    }
+    const b=e.target.closest("button"); if(!b) return;
+    if(b.dataset.verdict!==undefined){ st.verdict=b.dataset.verdict==="1"; render(); }
+    else if(b.dataset.el!==undefined){ const x=b.dataset.el; st.chosen.has(x)?st.chosen.delete(x):st.chosen.add(x); render(); }
+    else if(b.dataset.prop){ st.ans[b.dataset.prop]=b.dataset.val==="1"; render(); }
+    else if(b.dataset.pair){ const k=b.dataset.pair; st.pairs.has(k)?st.pairs.delete(k):st.pairs.add(k); render(); }
+    else if(b.dataset.fx){ st.f[b.dataset.fx]=b.dataset.fy; render(); }
+  });
+  $("seg").addEventListener("click",e=>{
+    const b=e.target.closest("button[data-mode]"); if(!b) return;
+    mode=b.dataset.mode;
+    $("seg").querySelectorAll("button").forEach(x=>x.classList.toggle("active",x===b));
+    load();
+  });
+  $("prev").addEventListener("click",()=>{ if(idx[mode]>0){ idx[mode]--; load(); } });
+  $("next").addEventListener("click",()=>{ if(idx[mode]<BANK[mode].length-1){ idx[mode]++; load(); } });
+  $("clear").addEventListener("click",()=>{ fresh(); resetFB(); render(); });
+  $("check").addEventListener("click",()=>check(false));
+  $("impossible").addEventListener("click",()=>check(true));
+  $("reveal").addEventListener("click",reveal);
+  function load(){ fresh(); resetFB(); render(); }
+
+  /* ---------- checking ---------- */
+  function check(saysImpossible){
+    const it=item(), k=key();
+    if(!saysImpossible){
+      if(mode==="V" && it.kind==="identity" && st.verdict===null){ setFB('<p class="verdict warn">Shade both sides and choose a verdict first.</p>'); return; }
+      if(mode==="P" && PROPS.some(p=>st.ans[p.key]===undefined)){ setFB('<p class="verdict warn">Answer every property first.</p>'); return; }
+      if(mode==="F" && it.A.some(a=>st.f[a]===undefined)){ setFB('<p class="verdict warn">Choose f(x) for every x first.</p>'); return; }
+    }
+    stats.attempted.add(k);
+    ({V:checkV,S:checkS,P:checkP,R:checkR,F:checkF})[mode](it,k,saysImpossible);
+    renderScore();
+  }
+
+  function shadeReport(label,mine,target){
+    const miss=regionsOf(target&~mine), extra=regionsOf(mine&~target);
+    if(!miss.length && !extra.length) return {ok:true, html:""};
+    let h='<li><b>'+label+'</b> ';
+    const parts=[];
+    if(miss.length) parts.push("missing the region"+(miss.length>1?"s":"")+" "+miss.map(regionWords).join("; "));
+    if(extra.length) parts.push("wrongly includes the region"+(extra.length>1?"s":"")+" "+extra.map(regionWords).join("; "));
+    return {ok:false, html:h+cap(parts.join(", and "))+'.</li>'};
+  }
+  function checkV(it,k){
+    if(it.kind==="shade"){
+      const t=setEval(it.expr), rep=shadeReport("Your shading:",st.L,t);
+      if(rep.ok){ markSolved(k); setFB('<p class="verdict ok">Correct.</p><p class="moral">'+it.moral+'</p>'); }
+      else setFB('<p class="verdict bad">Not quite.</p><ul class="notes">'+rep.html+'</ul>');
+      return;
+    }
+    const tl=setEval(it.lhs), tr=setEval(it.rhs), eq=(tl===tr);
+    const rl=shadeReport("Left side:",st.L,tl), rr=shadeReport("Right side:",st.Rr,tr);
+    const vOK = st.verdict===eq;
+    const diff=regionsOf(tl^tr);
+    const truth = eq ? "The two sides shade the same regions, so the identity holds."
+      : "The identity fails. "+diff.map(r=>"An element "+regionWords(r)+" lies in the "+((tl>>r)&1?"left side but not the right":"right side but not the left")+".").join(" ");
+    if(rl.ok && rr.ok && vOK){ markSolved(k); setFB('<p class="verdict ok">Correct.</p><p class="words">'+truth+'</p><p class="moral">'+it.moral+'</p>'); return; }
+    let h='<p class="verdict bad">Not quite.</p><ul class="notes">'+rl.html+rr.html;
+    if(!vOK){
+      if(rl.ok && rr.ok) h+='<li><b>Verdict:</b> '+truth+'</li>';
+      else h+='<li><b>Verdict:</b> not right either. Correct the shadings first, then compare the two diagrams region by region.</li>';
+    }
+    setFB(h+'</ul>');
+  }
+
+  function checkS(it,k){
+    const ans=new Set(it.answer);
+    const miss=it.answer.filter(e=>!st.chosen.has(e)), extra=it.palette.filter(e=>st.chosen.has(e)&&!ans.has(e));
+    if(!miss.length && !extra.length){ markSolved(k); setFB('<p class="verdict ok">Correct: '+setList(it.answer)+'.</p><p class="moral">'+it.moral+'</p>'); return; }
+    let h='<p class="verdict bad">Not quite.</p><ul class="notes">';
+    extra.forEach(e=>{ h+='<li><b>'+elHTML(e)+' does not belong.</b> '+it.whyOut[e]+'</li>'; });
+    miss.forEach(e=>{ h+='<li><b>'+elHTML(e)+' is missing.</b> '+it.whyIn[e]+'</li>'; });
+    setFB(h+'</ul>');
+  }
+
+  function propList(S,R,judged){
+    let h='<ul class="notes">'; let right=0;
+    PROPS.forEach(p=>{
+      const c=relCert(S,R,p.key);
+      const ok = judged ? judged[p.key]===c.val : true; if(ok) right++;
+      h+='<li class="'+(ok?'ok':'')+'"><b>'+p.name+': '+(c.val?'true':'false')+(ok?'':' (you said '+(judged[p.key]?'true':'false')+')')+'.</b> '+cap(c.text)+'.</li>';
+    });
+    return {html:h+'</ul>', right};
+  }
+  function checkP(it,k){
+    const {html,right}=propList(it.S,it.R,st.ans);
+    document.querySelectorAll("#ex .stmt").forEach(row=>{ const p=row.dataset.row; row.classList.add(st.ans[p]===relCert(it.S,it.R,p).val?"right":"wrong"); });
+    const all=right===PROPS.length; if(all) markSolved(k);
+    setFB('<p class="verdict '+(all?'ok':'bad')+'">'+right+' of '+PROPS.length+' correct.</p>'+html+(all?'<p class="moral">'+it.moral+'</p>':''));
+  }
+
+  function checkR(it,k,saysImpossible){
+    const possible=relPossible(it.want);
+    if(saysImpossible){
+      if(!possible){ markSolved(k); setFB('<p class="verdict ok">Correct: no relation on {1, 2, 3} has this profile.</p><p class="moral">'+it.proof+'</p>'); }
+      else setFB('<p class="verdict bad">Not so: a relation on {1, 2, 3} with this profile exists. Keep looking.</p>');
+      return;
+    }
+    const R=pairsArr();
+    const fails=Object.keys(it.want).filter(p=>relCert(S3,R,p).val!==it.want[p]);
+    if(!fails.length){ markSolved(k); setFB('<p class="verdict ok">Correct: your relation has every required property.</p><p class="moral">'+it.moral+'</p>'); return; }
+    let h='<p class="verdict bad">'+fails.length+' of '+Object.keys(it.want).length+' requirements '+(fails.length>1?'are':'is')+' not met.</p><ul class="notes">';
+    fails.forEach(p=>{ const c=relCert(S3,R,p); h+='<li><b>Required: '+relLabel(p,it.want[p])+'.</b> Your relation is '+(c.val?PROP[p].yes:PROP[p].no)+': '+c.text+'.</li>'; });
+    h+='</ul>';
+    h+='<p class="hint" style="margin-top:8px">If you think no relation on {1, 2, 3} can meet all of these at once, press Impossible.</p>';
+    setFB(h);
+  }
+
+  function checkF(it,k,saysImpossible){
+    const possible=fnPossible(it);
+    if(saysImpossible){
+      if(!possible){ markSolved(k); setFB('<p class="verdict ok">Correct: no function has this profile.</p><p class="moral">'+it.proof+'</p>'); }
+      else setFB('<p class="verdict bad">Not so: a function with this profile exists. Keep looking.</p>');
+      return;
+    }
+    const p=fnProps(it,st.f);
+    const fails=Object.keys(it.want).filter(q=>p[q].val!==it.want[q]);
+    if(!fails.length){ markSolved(k); setFB('<p class="verdict ok">Correct: your function has every required property.</p><p class="moral">'+it.moral+'</p>'); return; }
+    let h='<p class="verdict bad">'+fails.length+' of '+Object.keys(it.want).length+' requirements '+(fails.length>1?'are':'is')+' not met.</p><ul class="notes">';
+    fails.forEach(q=>{ h+='<li><b>Required: '+fnLabel(q,it.want[q])+'.</b> Your function fails this: '+p[q].text+'.</li>'; });
+    h+='</ul>';
+    h+='<p class="hint" style="margin-top:8px">If you think no function can meet all of these at once, press Impossible.</p>';
+    setFB(h);
+  }
+
+  function reveal(){
+    const it=item(), k=key();
+    stats.attempted.add(k); stats.revealed.add(k); stats.solved.delete(k);
+    const note='<p class="verdict warn">The answer is shown. It counts as revealed, not solved.</p>';
+    if(mode==="V"){
+      if(it.kind==="shade"){ st.L=setEval(it.expr); render(); setFB(note+'<p class="moral">'+it.moral+'</p>'); }
+      else {
+        st.L=setEval(it.lhs); st.Rr=setEval(it.rhs); st.verdict=(st.L===st.Rr); render();
+        const diff=regionsOf(st.L^st.Rr);
+        setFB(note+'<p class="words">'+(diff.length? "Not equal. "+diff.map(r=>"An element "+regionWords(r)+" lies in the "+((st.L>>r)&1?"left side but not the right":"right side but not the left")+".").join(" ") : "Equal: the two sides shade the same regions.")+'</p><p class="moral">'+it.moral+'</p>');
+      }
+    } else if(mode==="S"){ st.chosen=new Set(it.answer); render(); setFB(note+'<p class="moral">'+it.moral+'</p>'); }
+    else if(mode==="P"){ PROPS.forEach(p=>{ st.ans[p.key]=relCert(it.S,it.R,p.key).val; }); render(); setFB(note+propList(it.S,it.R,null).html+'<p class="moral">'+it.moral+'</p>'); }
+    else if(mode==="R"){
+      if(it.impossible){ st.pairs=new Set(); render(); setFB(note+'<p class="words"><b>Impossible.</b> '+it.proof+'</p>'); }
+      else { st.pairs=new Set(it.example.map(p=>p[0]+","+p[1])); render(); setFB(note+'<p class="words">One example is shown; others exist.</p><p class="moral">'+it.moral+'</p>'); }
+    } else {
+      if(it.impossible){ st.f={}; render(); setFB(note+'<p class="words"><b>Impossible.</b> '+it.proof+'</p>'); }
+      else { st.f=Object.assign({},it.example); render(); setFB(note+'<p class="words">One example is shown; others exist.</p><p class="moral">'+it.moral+'</p>'); }
+    }
+    renderScore();
+  }
+
+  window.__t2={BANK,setEval,regionsOf,regionWords,relCert,relPossible,fnPossible,fnMeets,relMeets,fnProps,PROPS,vennSVG,graphSVG,bipSVG,regionAt,toggleRegion,state:()=>st,ALLPAIRS,S3};
+  load();
+})();
+</script>
+</body>
+</html>
