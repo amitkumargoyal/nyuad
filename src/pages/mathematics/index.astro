@@ -1,0 +1,111 @@
+---
+import Course from '../../layouts/Course.astro';
+import HeroMathematics from '../../components/HeroMathematics.astro';
+import { getCollection } from 'astro:content';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// ----- Interactive tools (standalone HTML files in public/mathematics/) -----
+// Entries: { file, title, desc, glyph } — glyph is an 80×80 inline SVG miniature.
+const tools = [
+  {
+    file: 'logic.html',
+    title: 'Logic: propositions and quantifiers',
+    desc: 'Complete equivalences, build formulas under constraints, translate English into symbols, negate ε–δ statements, and test quantified claims on a directed graph. Every answer is checked by truth table or by evaluation.',
+    glyph: `<g transform="translate(0,-4)"><path d="M27.5 22.0 L45.0 22.0" stroke="#5A1BA6" stroke-width="2" stroke-linecap="round"/><path d="M51.0 22.0 L45.0 25.4 L45.0 18.6 Z" fill="#5A1BA6"/><path d="M56.4 28.6 L47.3 44.9" stroke="#5A1BA6" stroke-width="2" stroke-linecap="round"/><path d="M44.4 50.1 L44.3 43.2 L50.3 46.5 Z" fill="#5A1BA6"/><path d="M36.4 51.4 L27.3 35.1" stroke="#5A1BA6" stroke-width="2" stroke-linecap="round"/><path d="M24.4 29.9 L30.3 33.5 L24.3 36.8 Z" fill="#5A1BA6"/><path d="M35.7 64.1 C 28.7 79.2, 51.3 79.2, 47.4 70.6" stroke="#5A1BA6" stroke-width="2" stroke-linecap="round"/><path d="M45.0 65.1 L50.5 69.2 L44.3 72.0 Z" fill="#5A1BA6"/><circle cx="20" cy="22" r="7.5" fill="#fffdf9" stroke="#221d16" stroke-width="1.6"/><circle cx="60" cy="22" r="7.5" fill="#fffdf9" stroke="#221d16" stroke-width="1.6"/><circle cx="40" cy="58" r="7.5" fill="#fffdf9" stroke="#221d16" stroke-width="1.6"/></g>`,
+  },
+];
+
+// ----- Notes & exercises from the content collections -----
+const byOrderThenDate = (a, b) =>
+  (a.data.order ?? Infinity) - (b.data.order ?? Infinity) ||
+  a.data.date.valueOf() - b.data.date.valueOf();
+
+const notes = (await getCollection('math_notes', ({ data }) => !data.draft)).sort(byOrderThenDate);
+const exercises = (await getCollection('math_exercises', ({ data }) => !data.draft)).sort(byOrderThenDate);
+
+const fmtDate = (d: Date) =>
+  d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+<Course
+  title="Mathematics — NYUAD"
+  eyebrow="NYU Abu Dhabi · Course site"
+  heading="Mathematics"
+  lede="Interactive exercises, notes, and problem sets on the language of proof: logic, sets, functions, limits, and continuity."
+  byline="Developed by Amit Goyal and Hervé Crès"
+>
+  <HeroMathematics slot="figure" />
+
+  <section class="section">
+    <div class="section-head">
+      <h2 class="section-title">Interactive tools</h2>
+      <div class="section-rule"></div>
+      <div class="section-note">{tools.length > 0 ? `${tools.length} tool${tools.length === 1 ? "" : "s"}` : 'Coming soon'}</div>
+    </div>
+    {tools.length === 0 ? (
+      <p class="empty-note">Interactive tools will appear here as the course progresses.</p>
+    ) : (
+      <div class="tools-grid">
+        {tools.map((t, i) => (
+          <a class="tool" href={`${base}/mathematics/${t.file}`}>
+            <svg class="glyph" viewBox="0 0 80 80" fill="none" aria-hidden="true" set:html={t.glyph} />
+            <div>
+              <div class="tool-tag">Tool {pad(i + 1)}</div>
+              <div class="tool-title">{t.title}</div>
+              <div class="tool-desc">{t.desc}</div>
+            </div>
+          </a>
+        ))}
+      </div>
+    )}
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2 class="section-title">Notes</h2>
+      <div class="section-rule"></div>
+      <div class="section-note">Lecture write-ups</div>
+    </div>
+    {notes.length === 0 ? (
+      <p class="empty-note">Notes will appear here as the course progresses.</p>
+    ) : (
+      <div class="toc">
+        {notes.map((n, i) => (
+          <a class="toc-row" href={`${base}/mathematics/notes/${n.id}/`}>
+            <div class="toc-num">{pad(i + 1)}</div>
+            <div>
+              <div class="toc-title">{n.data.title}</div>
+              <div class="toc-desc">{n.data.description}</div>
+            </div>
+            <div class="toc-date">{fmtDate(n.data.date)}</div>
+          </a>
+        ))}
+      </div>
+    )}
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2 class="section-title">Exercises</h2>
+      <div class="section-rule"></div>
+      <div class="section-note">Problem sets</div>
+    </div>
+    {exercises.length === 0 ? (
+      <p class="empty-note">Problem sets will appear here as the course progresses.</p>
+    ) : (
+      <div class="toc">
+        {exercises.map((e, i) => (
+          <a class="toc-row" href={`${base}/mathematics/exercises/${e.id}/`}>
+            <div class="toc-num">PS {i + 1}</div>
+            <div>
+              <div class="toc-title">{e.data.title}</div>
+              <div class="toc-desc">{e.data.description}</div>
+            </div>
+            <div class="toc-date">{fmtDate(e.data.date)}</div>
+          </a>
+        ))}
+      </div>
+    )}
+  </section>
+</Course>

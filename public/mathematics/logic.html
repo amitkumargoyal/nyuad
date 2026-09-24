@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Logic: propositions and quantifiers</title>
+<style>
+@font-face{font-family:'STIX Two Text';src:url('fonts/stix-two-text-latin-400-normal.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:'STIX Two Text';src:url('fonts/stix-two-text-latin-400-italic.woff2') format('woff2');font-weight:400;font-style:italic;font-display:swap;}
+@font-face{font-family:'STIX Two Text';src:url('fonts/stix-two-text-latin-500-normal.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap;}
+@font-face{font-family:'STIX Two Text';src:url('fonts/stix-two-text-latin-600-normal.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap;}
+@font-face{font-family:'IBM Plex Mono';src:url('fonts/ibm-plex-mono-latin-400-normal.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:'IBM Plex Mono';src:url('fonts/ibm-plex-mono-latin-500-normal.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap;}
+
+  :root{
+    --violet:#5A1BA6; --terra:#A03A2C; --sage:#9CAF88; --cream:#FAF7F2;
+    --muted:#6b6358; --charcoal:#3a3a3a; --ink:#2a2a2a; --rule:#e5e0d8; --soft:#8a8276;
+    --serif:'STIX Two Text',Georgia,serif; --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--cream); color:#221d16; font-family:var(--serif); line-height:1.5;}
+  .tool-head{border-bottom:2px solid #221d16; padding-bottom:14px; margin-bottom:18px;}
+  .eyebrow{font-family:var(--mono); font-size:10px; font-weight:500; letter-spacing:0.16em; text-transform:uppercase; color:#6b6358; margin-bottom:6px;}
+  .wrap{max-width:1080px; margin:0 auto; padding:28px 22px 40px;}
+  h1{color:var(--violet); font-size:26px; font-weight:600; margin:0 0 6px; letter-spacing:-0.01em;}
+  .sub{color:var(--muted); font-style:italic; font-size:14px; margin:0 0 8px; max-width:72ch;}
+
+  .seg{display:inline-flex; flex-wrap:wrap; border:1px solid var(--rule); border-radius:10px; overflow:hidden; margin:0 0 14px; background:#fff;}
+  .seg button{background:#fff; border:none; border-right:1px solid var(--rule); padding:9px 15px; font-family:var(--serif); font-size:14px; color:var(--muted); cursor:pointer; transition:background .12s,color .12s;}
+  .seg button:last-child{border-right:none;}
+  .seg button.active{background:var(--violet); color:#fff;}
+  .seg button:focus-visible{outline:2px solid var(--violet); outline-offset:-2px;}
+
+  .layout{display:grid; grid-template-columns:1.3fr 1fr; gap:26px; align-items:start;}
+  @media(max-width:860px){.layout{grid-template-columns:1fr;}}
+  .panel{background:#fff; border:1px solid var(--rule); border-radius:12px; padding:18px 18px 20px; min-width:0;}
+  .lbl{font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--soft); margin:0 0 8px;}
+  .instr{font-style:italic; color:var(--muted); font-size:13.5px; margin:0 0 14px;}
+  .divider{height:1px; background:var(--sage); opacity:.6; margin:14px 0;}
+  .prec{font-size:12.5px; color:var(--soft); font-style:italic; margin:6px 0 0;}
+  .prec i{font-style:normal;}
+
+  .f{font-family:var(--serif); font-size:20px; line-height:1.9; overflow-wrap:anywhere;}
+  .f i{font-style:italic;}
+  .f .op{padding:0 .12em;}
+  .fq{font-size:18px;}
+  .constraint{font-size:14px; color:#3f4d33; background:rgba(156,175,136,.22); border-radius:8px; padding:7px 12px; margin:6px 0 12px;}
+  .constraint p{margin:0;}
+  .constraint p + p{margin-top:3px;}
+  .constraint i{font-style:italic;}
+  .constraint .f{font-size:15px; line-height:1;}
+  .equiv{color:var(--muted); padding:0 .5em;}
+  .sentence{font-size:18px; margin:0 0 12px; padding-left:12px; border-left:3px solid var(--sage);}
+  .legend{list-style:none; padding:0; margin:0 0 14px; font-size:14px;}
+  .legend li{padding:2px 0;}
+  .legend i{display:inline-block; width:1.4em; font-size:16px;}
+  .words{font-size:14px; color:var(--ink); margin:6px 0 0;}
+
+  .slot{display:inline-flex; align-items:center; justify-content:center; min-width:1.9em; height:1.7em; margin:0 .18em; padding:0 .3em; vertical-align:-.22em; border:1.5px dashed rgba(90,27,166,.55); border-radius:7px; background:rgba(90,27,166,.05); color:var(--violet); cursor:pointer; user-select:none; transition:background .12s,border-color .12s;}
+  .slot.filled{border-style:solid; background:rgba(90,27,166,.10); font-weight:500;}
+  .slot.target{background:rgba(90,27,166,.2);}
+  .slot.wrong{border-color:var(--terra); background:rgba(160,58,44,.12); color:var(--terra);}
+  .slot.right{border-color:#6f8560; background:rgba(156,175,136,.28); color:#2f3f24;}
+  .slot:focus-visible{outline:2px solid var(--violet); outline-offset:2px;}
+  body.has-sel .slot:hover{background:rgba(90,27,166,.18);}
+
+  .work{min-height:60px; border:1.5px dashed rgba(90,27,166,.45); border-radius:10px; padding:10px 14px; background:rgba(90,27,166,.04);}
+  .work.empty{color:var(--soft); font-style:italic; font-size:13.5px; display:flex; align-items:center;}
+  .work .cur{display:inline-block; width:2px; height:1.1em; background:var(--violet); vertical-align:-.15em; margin-left:2px; animation:blink 1s steps(2) infinite;}
+  @keyframes blink{50%{opacity:0;}}
+  @media(prefers-reduced-motion:reduce){.work .cur{animation:none;}}
+
+  .palette{display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 4px;}
+  .tok{font-family:var(--serif); font-size:19px; line-height:1; min-width:44px; height:42px; padding:0 12px; background:#fff; border:1px solid var(--rule); border-radius:8px; color:#221d16; cursor:pointer; user-select:none; touch-action:none; display:inline-flex; align-items:center; justify-content:center; transition:border-color .12s,background .12s;}
+  .tok i{font-style:italic;}
+  .tok:hover{border-color:var(--violet);}
+  .tok.sel{background:var(--violet); border-color:var(--violet); color:#fff;}
+  .tok.util{font-family:var(--mono); font-size:13px; color:var(--muted);}
+  .tok:focus-visible{outline:2px solid var(--violet); outline-offset:2px;}
+  .ghost{position:fixed; pointer-events:none; z-index:50; opacity:.92; transform:translate(-50%,-50%); box-shadow:0 4px 12px rgba(0,0,0,.18);}
+
+  .actions{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; align-items:center;}
+  .btn{background:none; border:1px solid var(--rule); color:var(--muted); padding:7px 14px; border-radius:8px; font-family:var(--mono); letter-spacing:.04em; font-size:11px; cursor:pointer;}
+  .btn:hover{border-color:var(--violet); color:var(--violet);}
+  .btn.primary{border-color:var(--violet); color:#fff; background:var(--violet); font-weight:500;}
+  .btn.primary:hover{background:#4a1690; color:#fff;}
+  .btn:disabled{opacity:.4; cursor:default;}
+  .nav{margin-left:auto; display:flex; gap:6px; align-items:center;}
+  .counter{font-family:var(--mono); font-size:11px; color:var(--soft); letter-spacing:.04em; padding:0 6px;}
+
+  /* graph mode */
+  .graph-wrap{display:flex; flex-direction:column; align-items:center;}
+  .graph-wrap svg{width:100%; max-width:300px; height:auto; display:block;}
+  .gcap{font-size:13.5px; color:var(--muted); text-align:center; margin:2px 0 0;}
+  .gcap .set{font-family:var(--serif); color:var(--ink); font-size:14.5px;}
+  .stmts{list-style:none; padding:0; margin:16px 0 0;}
+  .stmt{display:flex; align-items:center; gap:10px; padding:8px 6px; border-top:1px solid var(--rule); border-radius:4px;}
+  .stmt .let{font-family:var(--mono); font-size:11px; color:var(--soft); width:22px; flex:none;}
+  .stmt .fm{flex:1; font-size:17px; line-height:1.5; min-width:0;}
+  .stmt .fm i{font-style:italic;}
+  .stmt.right{background:rgba(156,175,136,.18);}
+  .stmt.wrong{background:rgba(160,58,44,.10);}
+  .tf{display:inline-flex; border:1px solid var(--rule); border-radius:8px; overflow:hidden; flex:none;}
+  .tf button{font-family:var(--mono); font-size:11px; letter-spacing:.04em; padding:6px 11px; background:#fff; border:none; color:var(--muted); cursor:pointer;}
+  .tf button + button{border-left:1px solid var(--rule);}
+  .tf button.on{background:var(--violet); color:#fff;}
+  .tf button:focus-visible{outline:2px solid var(--violet); outline-offset:-2px;}
+
+  /* feedback */
+  .verdict{font-size:15px; margin:0 0 10px;}
+  .verdict.ok{color:#2f3f24;}
+  .verdict.bad{color:var(--terra);}
+  .verdict.warn{color:var(--muted); font-style:italic;}
+  .hint{font-size:13.5px; color:var(--muted); font-style:italic; margin:0;}
+  .note{font-size:14px; margin:0 0 10px; padding:8px 12px; background:rgba(160,58,44,.07); border-left:3px solid var(--terra); border-radius:0 6px 6px 0;}
+  .moral{font-size:14px; margin:12px 0 0; padding:8px 12px; background:rgba(156,175,136,.18); border-left:3px solid var(--sage); border-radius:0 6px 6px 0;}
+  .tt-wrap{overflow-x:auto;}
+  table.tt{border-collapse:collapse; font-family:var(--mono); font-size:12px; margin-top:6px; width:100%;}
+  table.tt th{font-weight:500; color:var(--soft); text-align:center; padding:4px 6px; border-bottom:1px solid var(--rule); font-family:var(--serif); font-size:13.5px;}
+  table.tt th.v{font-style:italic;}
+  table.tt td{text-align:center; padding:3px 6px; color:var(--ink);}
+  table.tt th.sep, table.tt td.sep{border-left:1px solid var(--rule);}
+  table.tt tr.diff td{background:rgba(160,58,44,.13); color:var(--terra); font-weight:500;}
+  .notes{list-style:none; padding:0; margin:8px 0 0; font-size:14px;}
+  .notes li{padding:7px 0; border-top:1px solid var(--rule);}
+  .notes li b{font-weight:500; color:var(--terra); margin-right:4px;}
+  .notes li.ok b{color:#4a5a39;}
+  .notes i{font-style:italic;}
+  .score{font-family:var(--mono); font-size:11px; letter-spacing:.06em; color:var(--soft);}
+  .score b{color:var(--violet); font-weight:500;}
+
+  .backlink-block{margin-top:44px; padding-top:16px; border-top:1px solid #e5e0d8;}
+  .backlink-block a{font-family:var(--mono); font-size:12px; letter-spacing:.06em; color:#5A1BA6; text-decoration:none;}
+  .backlink-block a:hover{text-decoration:underline;}
+  .footer{margin-top:32px; padding-top:18px; border-top:2px solid #221d16; display:flex; justify-content:space-between; align-items:baseline; gap:16px; flex-wrap:wrap; font-family:var(--mono); font-size:11px; letter-spacing:.06em; color:#6b6358;}
+  .footer a{color:#5A1BA6; text-decoration:none;}
+  .footer a:hover{text-decoration:underline;}
+  .footer-axiom{font-family:var(--serif); font-style:italic; font-size:13px; color:#8a8276; letter-spacing:0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="tool-head">
+    <div class="eyebrow">Mathematics · Tool 01</div>
+    <h1>Logic: propositions and quantifiers</h1>
+    <p class="sub">Five kinds of exercise. Answers are checked by meaning — a truth table, the negation rules, or evaluation on a graph — not by matching a stored string, so any correct answer is accepted.</p>
+  </header>
+
+  <div class="seg" id="seg" role="tablist">
+    <button data-mode="A" class="active" role="tab">Complete an equivalence</button>
+    <button data-mode="B" role="tab">Build under a constraint</button>
+    <button data-mode="T" role="tab">Translate from English</button>
+    <button data-mode="C" role="tab">Negate a quantified statement</button>
+    <button data-mode="G" role="tab">Quantifiers on a graph</button>
+  </div>
+
+  <div class="layout">
+    <div class="panel">
+      <p class="instr" id="instr"></p>
+      <div id="ex"></div>
+      <div id="palwrap">
+        <div class="lbl" style="margin-top:16px;">Symbols</div>
+        <div class="palette" id="palette"></div>
+        <p class="prec" id="prec"></p>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="check">Check</button>
+        <button class="btn" id="reveal">Show answer</button>
+        <button class="btn" id="clear">Clear</button>
+        <div class="nav">
+          <button class="btn" id="prev" aria-label="Previous exercise">&larr;</button>
+          <span class="counter" id="counter"></span>
+          <button class="btn" id="next" aria-label="Next exercise">&rarr;</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="lbl">Feedback</div>
+      <div id="fb"></div>
+      <div class="divider"></div>
+      <div class="score" id="score"></div>
+    </div>
+  </div>
+
+  <div class="backlink-block">
+    <a href="./">&larr; Back to Mathematics</a>
+  </div>
+  <div class="footer">
+    <div>Built with Claude &middot; Amit Goyal and Herv&eacute; Cr&egrave;s &middot; <a href="mailto:amit.goyal@nyu.edu">amit.goyal@nyu.edu</a></div>
+    <div class="footer-axiom">More is preferred to less.</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* =====================================================================
+     EXERCISE BANK
+     Formula syntax: variables p q r s; connectives ¬ ∧ ∨ → ↔; brackets.
+     Binding: ¬ tightest, then ∧, ∨, →, ↔. → groups to the right.
+     ===================================================================== */
+
+  // A: "_" marks a slot. Any filling that is truth-table equivalent to lhs
+  //    is accepted; ans is the intended filling (used for Show answer).
+  const BANK_A = [
+    { lhs:"¬(p → q)",     rhs:"p _ ¬q",             ans:["∧"],
+      law:"an implication fails exactly when its hypothesis holds and its conclusion fails." },
+    { lhs:"(p ∨ q) → r",  rhs:"(p → r) _ (q → r)",  ans:["∧"],
+      law:"a disjunctive hypothesis splits into two implications, and both are needed. This is proof by cases." },
+    { lhs:"(p ∧ q) → r",  rhs:"p _ (q _ r)",        ans:["→","→"],
+      law:"exportation. A conjunctive hypothesis can be assumed one conjunct at a time." },
+    { lhs:"p → (q ∨ r)",  rhs:"(p ∧ ¬q) _ r",       ans:["→"],
+      law:"to prove that p implies q or r, assume p and not q, and derive r." },
+    { lhs:"¬(p ↔ q)",     rhs:"p _ ¬q",             ans:["↔"],
+      law:"negating one side of a biconditional negates the whole biconditional." }
+  ];
+
+  // B: build a formula equivalent to target using only `allowed`;
+  //    nnf: every ¬ must sit directly on a variable. ref: one correct answer.
+  const BANK_B = [
+    { target:"p → q",           allowed:["¬","∧"],          ref:"¬(p ∧ ¬q)" },
+    { target:"p ∨ q",           allowed:["¬","→"],          ref:"¬p → q" },
+    { target:"p ↔ q",           allowed:["¬","∧","∨"],      ref:"(p ∧ q) ∨ (¬p ∧ ¬q)" },
+    { target:"¬(p → (q ∨ r))",  allowed:["¬","∧","∨"], nnf:true, ref:"p ∧ ¬q ∧ ¬r" },
+    { target:"¬(p ↔ q)",        allowed:["¬","∧","∨"], nnf:true, ref:"(p ∧ ¬q) ∨ (¬p ∧ q)" }
+  ];
+
+  // T: translate English into symbols. ref: one correct answer.
+  //    traps: common wrong translations with a targeted explanation
+  //    (matched by equivalence, so any formula equivalent to a trap gets its note).
+  const BANK_T = [
+    { text:"A bundle is chosen only if it is affordable.",
+      vars:{p:"the bundle is chosen", q:"the bundle is affordable"},
+      ref:"p → q",
+      traps:[
+        {f:"q → p", note:"This is the converse: it says every affordable bundle is chosen. “<i>p</i> only if <i>q</i>” means that <i>p</i> cannot hold without <i>q</i>, so <i>p</i> → <i>q</i>."},
+        {f:"p ↔ q", note:"“Only if” gives one direction, not two. The sentence does not claim that affordable bundles are chosen."}
+      ]},
+    { text:"Continuity of f at a is necessary for differentiability of f at a.",
+      vars:{p:"f is continuous at a", q:"f is differentiable at a"},
+      ref:"q → p",
+      traps:[
+        {f:"p → q", note:"This says continuity is <i>sufficient</i> for differentiability (false for |<i>x</i>| at 0, but that is beside the point). “<i>A</i> is necessary for <i>B</i>” means <i>B</i> cannot hold without <i>A</i>: <i>B</i> → <i>A</i>, here <i>q</i> → <i>p</i>."},
+        {f:"p ↔ q", note:"“Necessary” gives one direction only. Necessary <i>and sufficient</i> would give ↔."}
+      ]},
+    { text:"Neither does the market clear nor do prices adjust.",
+      vars:{p:"the market clears", q:"prices adjust"},
+      ref:"¬p ∧ ¬q",
+      traps:[
+        {f:"¬(p ∧ q)", note:"This says “not both”, equivalently ¬<i>p</i> ∨ ¬<i>q</i>, which still allows one of them to happen. “Neither … nor” denies each one: ¬<i>p</i> ∧ ¬<i>q</i>, equivalently ¬(<i>p</i> ∨ <i>q</i>)."},
+        {f:"p ∧ q", note:"This asserts both. “Neither … nor” denies both: ¬<i>p</i> ∧ ¬<i>q</i>."}
+      ]},
+    { text:"Whenever demand rises, the price rises, unless supply is perfectly elastic.",
+      vars:{p:"demand rises", q:"the price rises", r:"supply is perfectly elastic"},
+      ref:"(p ∧ ¬r) → q",
+      traps:[
+        {f:"p → q", note:"This drops the exception. “Unless <i>r</i>” means the claim is guaranteed only when <i>r</i> fails: ¬<i>r</i> → (<i>p</i> → <i>q</i>), equivalently (<i>p</i> ∧ ¬<i>r</i>) → <i>q</i> or <i>p</i> → (<i>q</i> ∨ <i>r</i>)."},
+        {f:"¬r ∧ (p → q)", note:"This asserts that supply is not perfectly elastic. “Unless” introduces an exception; it does not claim that the exception is absent."},
+        {f:"(p ∧ ¬r → q) ∧ (p ∧ r → ¬q)", note:"This adds that the price does not rise when supply is perfectly elastic. The sentence is silent on that case; in logic “unless” is read inclusively, so it asserts only (<i>p</i> ∧ ¬<i>r</i>) → <i>q</i>."}
+      ]},
+    { text:"A student passes if and only if they score at least 40 in the final exam and either submit the project or attend every tutorial.",
+      vars:{p:"the student passes", q:"the student scores at least 40 in the final", r:"the student submits the project", s:"the student attends every tutorial"},
+      ref:"p ↔ (q ∧ (r ∨ s))",
+      traps:[
+        {f:"p ↔ ((q ∧ r) ∨ s)", note:"The grouping is off: this lets a student pass by attending every tutorial alone, without 40 in the final. The score is required in every case, so it sits outside the “either … or”: <i>q</i> ∧ (<i>r</i> ∨ <i>s</i>)."},
+        {f:"p → (q ∧ (r ∨ s))", note:"This is one direction only. “If and only if” also says that meeting the conditions guarantees a pass."},
+        {f:"(q ∧ (r ∨ s)) → p", note:"This is one direction only. “If and only if” also says that a student who passes has met the conditions."}
+      ]}
+  ];
+
+  // C: [X] marks a slot; the accepted token is X. Text is HTML.
+  const BANK_C = [
+    { words:"(<i>a<sub>n</sub></i>) converges to <i>L</i>.",
+      stmt:"∀ε &gt; 0 ∃<i>N</i> ∈ ℕ ∀<i>n</i> ≥ <i>N</i> : |<i>a<sub>n</sub></i> − <i>L</i>| &lt; ε",
+      neg: "[∃]ε &gt; 0 [∀]<i>N</i> ∈ ℕ [∃]<i>n</i> ≥ <i>N</i> : |<i>a<sub>n</sub></i> − <i>L</i>| [≥] ε",
+      negWords:"(<i>a<sub>n</sub></i>) does not converge to <i>L</i>: for some ε &gt; 0, however large <i>N</i> is chosen, some later term lies at distance at least ε from <i>L</i>." },
+    { words:"<i>f</i> is continuous at <i>a</i>.",
+      stmt:"∀ε &gt; 0 ∃δ &gt; 0 ∀<i>x</i> : (|<i>x</i> − <i>a</i>| &lt; δ → |<i>f</i>(<i>x</i>) − <i>f</i>(<i>a</i>)| &lt; ε)",
+      neg: "[∃]ε &gt; 0 [∀]δ &gt; 0 [∃]<i>x</i> : (|<i>x</i> − <i>a</i>| &lt; δ [∧] |<i>f</i>(<i>x</i>) − <i>f</i>(<i>a</i>)| [≥] ε)",
+      negWords:"<i>f</i> is discontinuous at <i>a</i>: for some ε &gt; 0, every δ &gt; 0 admits a point <i>x</i> within δ of <i>a</i> with |<i>f</i>(<i>x</i>) − <i>f</i>(<i>a</i>)| ≥ ε. The hypothesis |<i>x</i> − <i>a</i>| &lt; δ is kept, not negated." },
+    { words:"<i>f</i> is uniformly continuous on <i>A</i>.",
+      stmt:"∀ε &gt; 0 ∃δ &gt; 0 ∀<i>x</i> ∈ <i>A</i> ∀<i>y</i> ∈ <i>A</i> : (|<i>x</i> − <i>y</i>| &lt; δ → |<i>f</i>(<i>x</i>) − <i>f</i>(<i>y</i>)| &lt; ε)",
+      neg: "[∃]ε &gt; 0 [∀]δ &gt; 0 [∃]<i>x</i> ∈ <i>A</i> [∃]<i>y</i> ∈ <i>A</i> : (|<i>x</i> − <i>y</i>| &lt; δ [∧] |<i>f</i>(<i>x</i>) − <i>f</i>(<i>y</i>)| [≥] ε)",
+      negWords:"<i>f</i> is not uniformly continuous on <i>A</i>: for some ε &gt; 0, every δ &gt; 0 is defeated by some pair of points less than δ apart whose images are at least ε apart. Compare continuity at a point, where δ may depend on the point." },
+    { words:"<i>f</i> : <i>A</i> → <i>B</i> is injective.",
+      stmt:"∀<i>x</i> ∈ <i>A</i> ∀<i>y</i> ∈ <i>A</i> : (<i>f</i>(<i>x</i>) = <i>f</i>(<i>y</i>) → <i>x</i> = <i>y</i>)",
+      neg: "[∃]<i>x</i> ∈ <i>A</i> [∃]<i>y</i> ∈ <i>A</i> : (<i>f</i>(<i>x</i>) = <i>f</i>(<i>y</i>) [∧] <i>x</i> [≠] <i>y</i>)",
+      negWords:"<i>f</i> is not injective: two distinct points of <i>A</i> have the same image." },
+    { words:"<i>S</i> has no largest element.",
+      stmt:"∀<i>x</i> ∈ <i>S</i> ∃<i>y</i> ∈ <i>S</i> : <i>y</i> &gt; <i>x</i>",
+      neg: "[∃]<i>x</i> ∈ <i>S</i> [∀]<i>y</i> ∈ <i>S</i> : <i>y</i> [≤] <i>x</i>",
+      negWords:"<i>S</i> has a largest element: some <i>x</i> in <i>S</i> is at least as large as every element of <i>S</i>." }
+  ];
+
+  // G: relation R on S = {1,…,n}, drawn as a directed graph.
+  //    Statement: q = quantifier prefix [["A"|"E", var]], b = body.
+  const Rel = (a,b)=>({t:"R",a,b}), NRel=(a,b)=>({t:"NR",a,b}),
+        EQ=(a,b)=>({t:"EQ",a,b}), NEQ=(a,b)=>({t:"NEQ",a,b}),
+        AND=(l,r)=>({t:"AND",l,r}), IMP=(l,r)=>({t:"IMP",l,r});
+  const A=v=>["A",v], E=v=>["E",v];
+  const TRANS = IMP(AND(Rel("x","y"),Rel("y","z")), Rel("x","z"));
+  const BANK_G = [
+    { n:4, R:[[1,2],[2,3],[3,4],[4,1]],
+      stmts:[
+        {q:[A("x"),E("y")], b:Rel("x","y")},
+        {q:[E("y"),A("x")], b:Rel("x","y")},
+        {q:[A("y"),E("x")], b:Rel("x","y")},
+        {q:[A("x"),A("y")], b:IMP(Rel("x","y"),Rel("y","x"))}
+      ],
+      moral:"(a) and (b) differ only in the order of the quantifiers. In (a) the <i>y</i> may depend on <i>x</i>; in (b) a single <i>y</i> must serve every <i>x</i>, which is a stronger claim." },
+    { n:4, R:[[1,2],[1,4],[2,4],[3,4],[4,4]],
+      stmts:[
+        {q:[E("y"),A("x")], b:Rel("x","y")},
+        {q:[A("x"),E("y")], b:Rel("x","y")},
+        {q:[E("x"),A("y")], b:Rel("x","y")},
+        {q:[A("y"),E("x")], b:Rel("x","y")}
+      ],
+      moral:"Here ∃<i>y</i> ∀<i>x</i> holds, because every node has an arrow into 4, and it implies ∀<i>x</i> ∃<i>y</i>. The previous graph shows that the converse fails." },
+    { n:3, R:[[1,1],[2,2],[3,3],[1,2],[2,3]],
+      stmts:[
+        {q:[A("x")], b:Rel("x","x")},
+        {q:[A("x"),A("y"),A("z")], b:TRANS},
+        {q:[A("x"),A("y")], b:IMP(AND(Rel("x","y"),Rel("y","x")),EQ("x","y"))},
+        {q:[A("x"),E("y")], b:AND(NEQ("x","y"),Rel("x","y"))}
+      ],
+      moral:"<i>R</i> is reflexive (a) and antisymmetric (c) but not transitive (b), so it is not a partial order. Adding the pair (1, 3) would make it one." },
+    { n:4, R:[[1,2],[3,4]],
+      stmts:[
+        {q:[A("x"),A("y"),A("z")], b:TRANS},
+        {q:[A("x"),A("y")], b:IMP(Rel("x","y"),Rel("y","x"))},
+        {q:[A("x"),A("y")], b:IMP(Rel("x","y"),NRel("y","x"))},
+        {q:[E("x"),A("y")], b:NRel("y","x")}
+      ],
+      moral:"A universal implication whose hypothesis never holds is true: <i>R</i> is transitive vacuously, because no two arrows join head to tail." },
+    { n:4, R:[[1,2],[2,3],[3,3],[4,3]],
+      stmts:[
+        {q:[A("x"),E("y")], b:Rel("x","y")},
+        {q:[A("x"),A("y"),A("z")], b:IMP(AND(Rel("x","y"),Rel("x","z")),EQ("y","z"))},
+        {q:[A("x"),A("y"),A("z")], b:IMP(AND(Rel("x","y"),Rel("z","y")),EQ("x","z"))},
+        {q:[A("y"),E("x")], b:Rel("x","y")}
+      ],
+      moral:"(a) and (b) together say that every node has exactly one arrow out, so <i>R</i> is the graph of a function <i>f</i> : <i>S</i> → <i>S</i>. Then (c) says <i>f</i> is injective and (d) says <i>f</i> is surjective; both fail here." }
+  ];
+
+  const BANK = {A:BANK_A, B:BANK_B, T:BANK_T, C:BANK_C, G:BANK_G};
+
+  const INSTR = {
+    A:"Fill each slot with a connective so that the two sides are logically equivalent. Tap a symbol, then a slot, or drag the symbol onto the slot. Tap a filled slot to empty it.",
+    B:"Build a formula equivalent to the target, using only the connectives allowed. Tap symbols to append them; ⌫ deletes the last one.",
+    T:"Write the sentence in symbols, using the propositions given. Tap symbols to append them; ⌫ deletes the last one.",
+    C:"Complete the negation, with every ¬ pushed all the way inside so that none remains. Tap a symbol, then a slot, or drag it there.",
+    G:"The graph shows a relation R on a finite set S: an arrow from x to y means (x, y) ∈ R. Decide whether each statement is true or false."
+  };
+  const FBHINT = {
+    A:"Fill the slots and press Check. If the sides are not equivalent, the rows where they differ are highlighted.",
+    B:"Build a formula and press Check. Your formula is compared with the target on every row of the truth table.",
+    T:"Build a formula and press Check. It is compared with the intended meaning on every row of the truth table.",
+    C:"Fill the slots and press Check. Each wrong slot is explained by the rule that governs it.",
+    G:"Answer every statement and press Check. Each statement then gets a witness or a counterexample from the graph."
+  };
+  const PREC = "Without brackets, formulas are read in this order: ¬ first, then ∧, ∨, →, ↔. For example, ¬<i>p</i> ∧ <i>q</i> means (¬<i>p</i>) ∧ <i>q</i>, and <i>p</i> ∧ <i>q</i> → <i>r</i> means (<i>p</i> ∧ <i>q</i>) → <i>r</i>. Use brackets when in doubt.";
+
+  /* =====================================================================
+     PROPOSITIONAL ENGINE
+     ===================================================================== */
+  const OPS = { "¬":"not", "∧":"and", "∨":"or", "→":"imp", "↔":"iff" };
+  const SYM = { not:"¬", and:"∧", or:"∨", imp:"→", iff:"↔" };
+
+  function tokenize(s){
+    const out=[]; let i=0;
+    while(i<s.length){
+      const ch=s[i];
+      if(/\s/.test(ch)){ i++; continue; }
+      if(/[pqrs]/.test(ch)){ out.push({t:"var",v:ch}); i++; continue; }
+      if(ch==="("||ch===")"){ out.push({t:ch}); i++; continue; }
+      if(OPS[ch]){ out.push({t:OPS[ch]}); i++; continue; }
+      throw new Error("unexpected symbol "+ch);
+    }
+    return out;
+  }
+  function parse(s){
+    const toks=tokenize(s); let k=0;
+    const peek=()=>toks[k]&&toks[k].t, take=()=>toks[k++];
+    const name=t=>t.t==="var"?t.v:(SYM[t.t]||t.t);
+    function iff(){ let l=imp(); while(peek()==="iff"){ take(); l={op:"iff",l,r:imp()}; } return l; }
+    function imp(){ const l=or(); if(peek()==="imp"){ take(); return {op:"imp",l,r:imp()}; } return l; }
+    function or(){ let l=and(); while(peek()==="or"){ take(); l={op:"or",l,r:and()}; } return l; }
+    function and(){ let l=not(); while(peek()==="and"){ take(); l={op:"and",l,r:not()}; } return l; }
+    function not(){ if(peek()==="not"){ take(); return {op:"not",a:not()}; } return atom(); }
+    function atom(){
+      const t=take();
+      if(!t) throw new Error("the formula ends where a variable or ( is needed");
+      if(t.t==="var") return {op:"var",v:t.v};
+      if(t.t==="("){ const e=iff(); if(peek()!==")") throw new Error("a bracket is not closed"); take(); return e; }
+      if(t.t===")") throw new Error("a ) appears where a variable or ( is needed");
+      throw new Error(name(t)+" appears where a variable or ( is needed");
+    }
+    if(toks.length===0) throw new Error("the formula is empty");
+    const tree=iff();
+    if(k<toks.length){
+      const t=toks[k];
+      if(t.t===")") throw new Error("there is an unmatched )");
+      throw new Error(name(t)+" cannot follow a complete formula here");
+    }
+    return tree;
+  }
+  function ev(n,env){
+    switch(n.op){
+      case "var": return env[n.v];
+      case "not": return !ev(n.a,env);
+      case "and": return ev(n.l,env)&&ev(n.r,env);
+      case "or":  return ev(n.l,env)||ev(n.r,env);
+      case "imp": return !ev(n.l,env)||ev(n.r,env);
+      case "iff": return ev(n.l,env)===ev(n.r,env);
+    }
+  }
+  function vars(n,acc){ acc=acc||new Set(); if(n.op==="var") acc.add(n.v); else if(n.op==="not") vars(n.a,acc); else { vars(n.l,acc); vars(n.r,acc); } return acc; }
+  function conns(n,acc){ acc=acc||new Set(); if(n.op==="var") return acc; acc.add(SYM[n.op]); if(n.op==="not") conns(n.a,acc); else { conns(n.l,acc); conns(n.r,acc); } return acc; }
+  function isNNF(n){ if(n.op==="var") return true; if(n.op==="not") return n.a.op==="var"; return isNNF(n.l)&&isNNF(n.r); }
+  function table(f,g,extra){
+    const vs=[...new Set([...vars(f),...vars(g),...(extra||[])])].sort();
+    const rows=[];
+    for(let m=0;m<(1<<vs.length);m++){
+      const env={};
+      vs.forEach((v,i)=>{ env[v]=!((m>>(vs.length-1-i))&1); });
+      const a=ev(f,env), b=ev(g,env);
+      rows.push({env,a,b,diff:a!==b});
+    }
+    return {vs,rows,equal:rows.every(r=>!r.diff)};
+  }
+  const equivalent=(f,g)=>table(f,g).equal;
+
+  /* =====================================================================
+     QUANTIFIERS ON A GRAPH: evaluation and certificates
+     ===================================================================== */
+  const iv=x=>'<i>'+x+'</i>';
+  function term(x,env){ return (env&&env[x]!==undefined) ? String(env[x]) : iv(x); }
+  function renderB(n,env,top){
+    switch(n.t){
+      case "R":   return "("+term(n.a,env)+", "+term(n.b,env)+") ∈ "+iv("R");
+      case "NR":  return "("+term(n.a,env)+", "+term(n.b,env)+") ∉ "+iv("R");
+      case "EQ":  return term(n.a,env)+" = "+term(n.b,env);
+      case "NEQ": return term(n.a,env)+" ≠ "+term(n.b,env);
+      case "AND": return renderB(n.l,env,false)+" ∧ "+renderB(n.r,env,false);
+      case "IMP": { const s=renderB(n.l,env,false)+" → "+renderB(n.r,env,false); return top?s:"("+s+")"; }
+    }
+  }
+  function renderStmt(st){
+    return st.q.map(q=>(q[0]==="A"?"∀":"∃")+iv(q[1])).join(" ")+" : "+renderB(st.b,null,true);
+  }
+  function evB(n,env,has){
+    switch(n.t){
+      case "R":   return has(env[n.a],env[n.b]);
+      case "NR":  return !has(env[n.a],env[n.b]);
+      case "EQ":  return env[n.a]===env[n.b];
+      case "NEQ": return env[n.a]!==env[n.b];
+      case "AND": return evB(n.l,env,has)&&evB(n.r,env,has);
+      case "IMP": return !evB(n.l,env,has)||evB(n.r,env,has);
+    }
+  }
+  // Minimal list of atomic facts explaining why body n has its value at env.
+  function why(n,env,has){
+    switch(n.t){
+      case "R": case "NR": {
+        const m=has(env[n.a],env[n.b]);
+        return ["("+env[n.a]+", "+env[n.b]+") "+(m?"∈":"∉")+" "+iv("R")];
+      }
+      case "EQ": case "NEQ":
+        return [env[n.a]+" "+(env[n.a]===env[n.b]?"=":"≠")+" "+env[n.b]];
+      case "AND": {
+        const l=evB(n.l,env,has), r=evB(n.r,env,has);
+        if(l&&r) return why(n.l,env,has).concat(why(n.r,env,has));
+        return !l ? why(n.l,env,has) : why(n.r,env,has);
+      }
+      case "IMP": {
+        const l=evB(n.l,env,has), r=evB(n.r,env,has);
+        if(l&&!r) return why(n.l,env,has).concat(why(n.r,env,has));
+        return !l ? why(n.l,env,has) : why(n.r,env,has);
+      }
+    }
+  }
+  const uniq=a=>[...new Set(a)];
+  function* assignments(vs,S,env){
+    if(vs.length===0){ yield env; return; }
+    for(const s of S) yield* assignments(vs.slice(1),S,Object.assign({},env,{[vs[0]]:s}));
+  }
+  const fmtAssign=as=>as.map(([v,s])=>iv(v)+" = "+s).join(", ");
+  const everyWord=vs=>vs.length===1 ? iv(vs[0]) : "choice of "+vs.map(iv).join(", ");
+
+  // Returns {val, text, kind?, assign?, tail?} for the statement from quantifier i on.
+  function cert(st,i,env,S,has){
+    if(i===st.q.length){
+      return {val:evB(st.b,env,has), text:uniq(why(st.b,env,has)).join(" and ")};
+    }
+    const [Q,v]=st.q[i];
+    const restQ=st.q.slice(i);
+    const restVars=restQ.map(q=>q[1]);
+    const allSame=restQ.every(q=>q[0]===Q);
+    const kids=S.map(s=>({s, c:cert(st,i+1,Object.assign({},env,{[v]:s}),S,has)}));
+
+    if(Q==="A"){
+      const val=kids.every(k=>k.c.val);
+      if(!val){
+        const k=kids.find(k=>!k.c.val);
+        const assign = k.c.kind==="cx" ? [[v,k.s]].concat(k.c.assign) : [[v,k.s]];
+        const tail   = k.c.kind==="cx" ? k.c.tail : k.c.text;
+        return {val:false, kind:"cx", assign, tail, text:"counterexample "+fmtAssign(assign)+": "+tail};
+      }
+      if(allSame){
+        if(st.b.t==="IMP"){
+          const inst=[];
+          for(const e of assignments(restVars,S,env)) if(evB(st.b.l,e,has)) inst.push(e);
+          if(inst.length===0)
+            return {val:true, text:"vacuously true: no "+everyWord(restVars)+" satisfies "+renderB(st.b.l,env,true)+", so there is nothing to check"};
+          if(inst.length<=6){
+            const tup = restVars.length===1
+              ? iv(restVars[0])+" = "+inst.map(e=>e[restVars[0]]).join(", ")
+              : "("+restVars.map(iv).join(", ")+") = "+inst.map(e=>"("+restVars.map(x=>e[x]).join(", ")+")").join(", ");
+            return {val:true, text:"the hypothesis "+renderB(st.b.l,env,true)+" holds only for "+tup+", and in each case "+renderB(st.b.r,env,true)};
+          }
+        }
+        return {val:true, text:renderB(st.b,env,true)+" for every "+everyWord(restVars)};
+      }
+      return {val:true, text:"for each "+iv(v)+": "+kids.map(k=>iv(v)+" = "+k.s+" — "+k.c.text).join("; ")};
+    }
+
+    // Q === "E"
+    const val=kids.some(k=>k.c.val);
+    if(val){
+      const k=kids.find(k=>k.c.val);
+      const assign = k.c.kind==="wit" ? [[v,k.s]].concat(k.c.assign) : [[v,k.s]];
+      const tail   = k.c.kind==="wit" ? k.c.tail : k.c.text;
+      return {val:true, kind:"wit", assign, tail, text:"witness "+fmtAssign(assign)+": "+tail};
+    }
+    if(allSame) return {val:false, text:"no "+everyWord(restVars)+" satisfies "+renderB(st.b,env,true)};
+    return {val:false, text:"every "+iv(v)+" fails: "+kids.map(k=>iv(v)+" = "+k.s+" — "+k.c.text).join("; ")};
+  }
+  function evalStmt(g,st){
+    const S=[]; for(let i=1;i<=g.n;i++) S.push(i);
+    const set=new Set(g.R.map(e=>e[0]+","+e[1]));
+    const has=(a,b)=>set.has(a+","+b);
+    return cert(st,0,{},S,has);
+  }
+
+  function graphSVG(g){
+    const W=320, cx=160, cy=160, RR=100, r=17, n=g.n;
+    const pos={};
+    for(let i=1;i<=n;i++){
+      const ang=-Math.PI/2-Math.PI/n+(i-1)*2*Math.PI/n;
+      pos[i]={x:cx+RR*Math.cos(ang), y:cy+RR*Math.sin(ang)};
+    }
+    const set=new Set(g.R.map(e=>e[0]+","+e[1]));
+    const f=x=>x.toFixed(1);
+    const unit=(dx,dy)=>{ const L=Math.hypot(dx,dy); return {x:dx/L,y:dy/L}; };
+    let paths="";
+    g.R.forEach(([u,v])=>{
+      const P=pos[u], Q=pos[v];
+      if(u===v){
+        const th=Math.atan2(P.y-cy,P.x-cx);
+        const pt=(rad,a)=>({x:P.x+rad*Math.cos(th+a), y:P.y+rad*Math.sin(th+a)});
+        const s=pt(r,-0.45), e=pt(r+1,0.45), c1=pt(r*2.9,-0.6), c2=pt(r*2.9,0.6);
+        paths+='<path d="M'+f(s.x)+' '+f(s.y)+' C '+f(c1.x)+' '+f(c1.y)+', '+f(c2.x)+' '+f(c2.y)+', '+f(e.x)+' '+f(e.y)+'" class="edge" marker-end="url(#arr)"/>';
+      } else if(set.has(v+","+u)){
+        const d=unit(Q.x-P.x,Q.y-P.y), nx=-d.y, ny=d.x;
+        const c={x:(P.x+Q.x)/2+nx*24, y:(P.y+Q.y)/2+ny*24};
+        const a=unit(c.x-P.x,c.y-P.y), b=unit(c.x-Q.x,c.y-Q.y);
+        const s={x:P.x+a.x*r, y:P.y+a.y*r}, e={x:Q.x+b.x*(r+1), y:Q.y+b.y*(r+1)};
+        paths+='<path d="M'+f(s.x)+' '+f(s.y)+' Q '+f(c.x)+' '+f(c.y)+', '+f(e.x)+' '+f(e.y)+'" class="edge" marker-end="url(#arr)"/>';
+      } else {
+        const d=unit(Q.x-P.x,Q.y-P.y);
+        const s={x:P.x+d.x*r, y:P.y+d.y*r}, e={x:Q.x-d.x*(r+1), y:Q.y-d.y*(r+1)};
+        paths+='<path d="M'+f(s.x)+' '+f(s.y)+' L '+f(e.x)+' '+f(e.y)+'" class="edge" marker-end="url(#arr)"/>';
+      }
+    });
+    let nodes="";
+    for(let i=1;i<=n;i++){
+      nodes+='<circle cx="'+f(pos[i].x)+'" cy="'+f(pos[i].y)+'" r="'+r+'" fill="#fffdf9" stroke="#221d16" stroke-width="1.5"/>';
+      nodes+='<text x="'+f(pos[i].x)+'" y="'+f(pos[i].y+5.5)+'" text-anchor="middle" font-family="STIX Two Text,Georgia,serif" font-size="16" fill="#221d16">'+i+'</text>';
+    }
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+W+'" role="img" aria-label="Directed graph of the relation R">'+
+      '<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#5A1BA6"/></marker></defs>'+
+      '<g fill="none" stroke="#5A1BA6" stroke-width="1.6">'+paths.replace(/ class="edge"/g,"")+'</g>'+nodes+'</svg>';
+  }
+
+  /* =====================================================================
+     UI
+     ===================================================================== */
+  const $=id=>document.getElementById(id);
+  const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  function fmlHTML(s){ return esc(s).replace(/\b([pqrs])\b/g,"<i>$1</i>").replace(/([¬∧∨→↔])/g,'<span class="op">$1</span>'); }
+  const TF=b=>b?"T":"F";
+  const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+  const LETTERS="abcdefgh";
+
+  let mode="A";
+  const idx={A:0,B:0,T:0,C:0,G:0};
+  let slots=[], built=[], gAns=[], selected=null;
+  const stats={attempted:new Set(), solved:new Set(), revealed:new Set()};
+  const key=()=>mode+idx[mode];
+  const item=()=>BANK[mode][idx[mode]];
+  const SLOTMODE=m=>m==="A"||m==="C";
+  const BUILDMODE=m=>m==="B"||m==="T";
+
+  function partsA(rhs){
+    const parts=[]; const bits=rhs.split("_");
+    bits.forEach((b,i)=>{ if(b) parts.push({text:b}); if(i<bits.length-1) parts.push({slot:true}); });
+    return parts;
+  }
+  function partsC(neg){
+    const parts=[]; const re=/\[([^\]]+)\]/g; let last=0, m;
+    while((m=re.exec(neg))){
+      if(m.index>last) parts.push({text:neg.slice(last,m.index)});
+      parts.push({slot:true, accept:m[1]});
+      last=re.lastIndex;
+    }
+    if(last<neg.length) parts.push({text:neg.slice(last)});
+    return parts;
+  }
+  const slotsOf=parts=>parts.filter(p=>p.slot);
+
+  const PAL_A=["¬","∧","∨","→","↔"];
+  const PAL_C=["∀","∃","∧","∨","→","=","≠","<","≤",">","≥"];
+
+  function render(){
+    document.body.classList.toggle("has-sel",!!selected);
+    $("instr").textContent=INSTR[mode];
+    const it=item(); let h="";
+
+    if(mode==="A"){
+      let s=0;
+      h+='<div class="f">'+fmlHTML(it.lhs)+'<span class="equiv">≡</span>';
+      partsA(it.rhs).forEach(p=>{ h+= p.slot ? slotHTML(s++) : fmlHTML(p.text); });
+      h+='</div>';
+    } else if(mode==="B"){
+      h+='<div class="lbl">Target</div><div class="f">'+fmlHTML(it.target)+'</div>';
+      h+='<div class="constraint"><p>Allowed connectives: <span class="f">'+it.allowed.map(fmlHTML).join("&ensp;")+'</span></p>'+(it.nnf?'<p>Every ¬ must apply directly to a variable, as in ¬<i>p</i>, not ¬(<i>p</i> ∧ <i>q</i>).</p>':'')+'</div>';
+      h+=workHTML();
+    } else if(mode==="T"){
+      h+='<p class="sentence">'+esc(it.text).replace(/\bf\b/g,"<i>f</i>").replace(/\ba\.$/,"<i>a</i>.").replace(/ at a /g," at <i>a</i> ")+'</p>';
+      h+='<ul class="legend">'+Object.keys(it.vars).map(v=>'<li><i>'+v+'</i>'+esc(it.vars[v]).replace(/\bf\b/g,"<i>f</i>").replace(/ a$/," <i>a</i>")+'</li>').join("")+'</ul>';
+      h+=workHTML();
+    } else if(mode==="C"){
+      let s=0;
+      h+='<div class="lbl">Statement</div><div class="words">'+it.words+'</div><div class="f fq">'+it.stmt+'</div>';
+      h+='<div class="lbl" style="margin-top:12px;">Its negation</div><div class="f fq">';
+      partsC(it.neg).forEach(p=>{ h+= p.slot ? slotHTML(s++) : p.text; });
+      h+='</div>';
+    } else {
+      h+='<div class="graph-wrap">'+graphSVG(it)+'<p class="gcap"><span class="set"><i>S</i> = {'+Array.from({length:it.n},(_,i)=>i+1).join(", ")+'}</span>&ensp;·&ensp;<span class="set"><i>R</i> = {'+it.R.map(e=>"("+e[0]+", "+e[1]+")").join(", ")+'}</span></p></div>';
+      h+='<ul class="stmts">';
+      it.stmts.forEach((st,i)=>{
+        h+='<li class="stmt" data-row="'+i+'"><span class="let">('+LETTERS[i]+')</span><span class="fm">'+renderStmt(st)+'</span>'+
+           '<span class="tf"><button data-st="'+i+'" data-val="1" class="'+(gAns[i]===true?'on':'')+'">True</button><button data-st="'+i+'" data-val="0" class="'+(gAns[i]===false?'on':'')+'">False</button></span></li>';
+      });
+      h+='</ul>';
+    }
+    $("ex").innerHTML=h;
+
+    // palette
+    $("palwrap").style.display = mode==="G" ? "none" : "";
+    let ph="";
+    if(BUILDMODE(mode)){
+      const vs = mode==="B" ? [...vars(parse(it.target))].sort() : Object.keys(it.vars);
+      vs.forEach(v=>{ ph+=tokHTML(v,"<i>"+v+"</i>"); });
+      ["¬","∧","∨","→","↔","(",")"].forEach(t=>{ ph+=tokHTML(t,esc(t)); });
+      ph+='<button class="tok util" data-util="bs" aria-label="Delete last symbol">⌫</button>';
+    } else if(mode==="A"){ PAL_A.forEach(t=>{ ph+=tokHTML(t,esc(t)); }); }
+    else if(mode==="C"){ PAL_C.forEach(t=>{ ph+=tokHTML(t,esc(t)); }); }
+    $("palette").innerHTML=ph;
+    $("palette").querySelectorAll(".tok[data-tok]").forEach(b=>{ if(b.dataset.tok===selected) b.classList.add("sel"); });
+    $("prec").innerHTML = BUILDMODE(mode) ? PREC : "";
+
+    $("counter").textContent=(idx[mode]+1)+" / "+BANK[mode].length;
+    $("prev").disabled=idx[mode]===0;
+    $("next").disabled=idx[mode]===BANK[mode].length-1;
+    renderScore();
+  }
+  function workHTML(){
+    let h='<div class="lbl" style="margin-top:4px;">Your formula</div>';
+    if(built.length===0) return h+'<div class="work empty">Tap symbols below to build your formula.</div>';
+    return h+'<div class="work f">'+built.map(fmlHTML).join(" ").replace(/\( /g,"(").replace(/ \)/g,")").replace(/¬<\/span> /g,"¬</span>")+'<span class="cur"></span></div>';
+  }
+  function slotHTML(i){
+    const v=slots[i];
+    return '<span class="slot'+(v?' filled':'')+'" data-slot="'+i+'" role="button" tabindex="0" aria-label="slot '+(i+1)+(v?', contains '+esc(v):', empty')+'">'+(v?esc(v):'&nbsp;')+'</span>';
+  }
+  function tokHTML(t,label){ return '<button class="tok" data-tok="'+esc(t)+'" aria-label="'+esc(t)+'">'+label+'</button>'; }
+  function renderScore(){
+    const a=stats.attempted.size, s=stats.solved.size;
+    $("score").innerHTML = a===0 ? "No exercises attempted yet." : "Solved <b>"+s+"</b> of "+a+" attempted this session.";
+  }
+  const setFB=h=>{ $("fb").innerHTML=h; };
+  const resetFB=()=>setFB('<p class="hint">'+FBHINT[mode]+'</p>');
+
+  /* ---------- interaction ---------- */
+  let drag=null, dragMoved=false, ghost=null;
+
+  $("palette").addEventListener("click",e=>{
+    const b=e.target.closest(".tok"); if(!b) return;
+    if(b.dataset.util==="bs"){ built.pop(); render(); return; }
+    const t=b.dataset.tok;
+    if(BUILDMODE(mode)){ built.push(t); render(); }
+    else if(!dragMoved){ selected=(selected===t)?null:t; render(); }
+  });
+  $("ex").addEventListener("click",e=>{
+    const tf=e.target.closest(".tf button");
+    if(tf){ gAns[+tf.dataset.st]= tf.dataset.val==="1"; render(); return; }
+    const s=e.target.closest(".slot"); if(!s) return;
+    const i=+s.dataset.slot;
+    if(selected){ slots[i]=selected; render(); }
+    else if(slots[i]){ slots[i]=null; render(); }
+  });
+  $("ex").addEventListener("keydown",e=>{
+    const s=e.target.closest(".slot"); if(!s) return;
+    if(e.key==="Enter"||e.key===" "){ e.preventDefault(); s.click(); }
+    else if(e.key==="Backspace"||e.key==="Delete"){ slots[+s.dataset.slot]=null; render(); }
+  });
+  $("palette").addEventListener("pointerdown",e=>{
+    const b=e.target.closest(".tok[data-tok]"); if(!b||!SLOTMODE(mode)) return;
+    drag={tok:b.dataset.tok, x:e.clientX, y:e.clientY, el:b}; dragMoved=false;
+  });
+  document.addEventListener("pointermove",e=>{
+    if(!drag) return;
+    if(!dragMoved && Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>6){
+      dragMoved=true;
+      ghost=drag.el.cloneNode(true); ghost.classList.add("ghost","sel"); document.body.appendChild(ghost);
+    }
+    if(ghost){
+      ghost.style.left=e.clientX+"px"; ghost.style.top=e.clientY+"px";
+      document.querySelectorAll(".slot.target").forEach(s=>s.classList.remove("target"));
+      const s=slotUnder(e.clientX,e.clientY); if(s) s.classList.add("target");
+    }
+  });
+  document.addEventListener("pointerup",e=>{
+    if(!drag) return;
+    if(dragMoved){
+      const s=slotUnder(e.clientX,e.clientY);
+      if(ghost){ ghost.remove(); ghost=null; }
+      if(s){ slots[+s.dataset.slot]=drag.tok; selected=null; }
+      render();
+      setTimeout(()=>{ dragMoved=false; },0);
+    }
+    drag=null;
+  });
+  document.addEventListener("pointercancel",()=>{ if(ghost){ ghost.remove(); ghost=null; } drag=null; dragMoved=false; render(); });
+  function slotUnder(x,y){
+    if(ghost) ghost.style.display="none";
+    const el=document.elementFromPoint(x,y);
+    if(ghost) ghost.style.display="";
+    return el && el.closest ? el.closest(".slot") : null;
+  }
+
+  $("seg").addEventListener("click",e=>{
+    const b=e.target.closest("button[data-mode]"); if(!b) return;
+    mode=b.dataset.mode;
+    $("seg").querySelectorAll("button").forEach(x=>x.classList.toggle("active",x===b));
+    loadItem();
+  });
+  $("prev").addEventListener("click",()=>{ if(idx[mode]>0){ idx[mode]--; loadItem(); } });
+  $("next").addEventListener("click",()=>{ if(idx[mode]<BANK[mode].length-1){ idx[mode]++; loadItem(); } });
+  $("clear").addEventListener("click",()=>{ clearWork(); resetFB(); render(); });
+  $("reveal").addEventListener("click",reveal);
+  $("check").addEventListener("click",check);
+
+  function clearWork(){
+    const it=item();
+    selected=null; built=[];
+    const n = mode==="A" ? slotsOf(partsA(it.rhs)).length : mode==="C" ? slotsOf(partsC(it.neg)).length : 0;
+    slots=Array(n).fill(null);
+    gAns = mode==="G" ? Array(it.stmts.length).fill(null) : [];
+  }
+  function loadItem(){ clearWork(); resetFB(); render(); }
+
+  /* ---------- checking ---------- */
+  const filledRHS=(it,fill)=>{ let s=0; return partsA(it.rhs).map(p=>p.slot?(fill[s++]||"?"):p.text).join(""); };
+  const markSolved=k=>{ if(!stats.revealed.has(k)) stats.solved.add(k); };
+
+  function ttHTML(t,la,lb){
+    let h='<div class="tt-wrap"><table class="tt"><tr>'+t.vs.map(v=>'<th class="v">'+v+'</th>').join("")+'<th class="sep">'+la+'</th><th>'+lb+'</th></tr>';
+    t.rows.forEach(r=>{ h+='<tr'+(r.diff?' class="diff"':'')+'>'+t.vs.map(v=>'<td>'+TF(r.env[v])+'</td>').join("")+'<td class="sep">'+TF(r.a)+'</td><td>'+TF(r.b)+'</td></tr>'; });
+    return h+'</table></div>';
+  }
+  function diffWords(t){
+    const d=t.rows.filter(r=>r.diff);
+    const one=r=>t.vs.map(v=>'<i>'+v+'</i> = '+TF(r.env[v])).join(", ");
+    return d.length===1 ? "in one row, when "+one(d[0]) : "in "+d.length+" rows, for example when "+one(d[0]);
+  }
+
+  function check(){
+    const it=item(), k=key();
+    if(SLOTMODE(mode) && slots.some(v=>!v)){ setFB('<p class="verdict warn">Fill every slot first.</p>'); return; }
+    if(BUILDMODE(mode) && built.length===0){ setFB('<p class="verdict warn">Build a formula first.</p>'); return; }
+    if(mode==="G" && gAns.some(v=>v===null)){ setFB('<p class="verdict warn">Answer every statement first.</p>'); return; }
+    stats.attempted.add(k);
+    ({A:checkA,B:checkB,T:checkT,C:checkC,G:checkG})[mode](it,k);
+    renderScore();
+  }
+
+  function checkA(it,k){
+    if(slots.includes("¬")){
+      setFB('<p class="verdict bad">¬ applies to a single formula, so it cannot join two. Each slot here needs a connective that takes two formulas.</p>');
+      return;
+    }
+    const f=parse(it.lhs), g=parse(filledRHS(it,slots));
+    const t=table(f,g);
+    if(t.equal){
+      markSolved(k);
+      const intended=it.ans.every((a,i)=>a===slots[i]);
+      if(intended) setFB('<p class="verdict ok">Equivalent. The two sides agree on every row.</p><p class="words">The identity: '+esc(it.law)+'</p>'+ttHTML(t,"left","right"));
+      else setFB('<p class="verdict ok">Equivalent. The two sides agree on every row.</p><p class="words">This filling is correct, though not the one intended. The intended identity is '+fmlHTML(it.lhs)+' ≡ '+fmlHTML(filledRHS(it,it.ans))+': '+esc(it.law)+'</p>'+ttHTML(t,"left","right"));
+    } else {
+      setFB('<p class="verdict bad">Not equivalent. The two sides differ '+diffWords(t)+'.</p>'+ttHTML(t,"left","right"));
+    }
+  }
+
+  function parseBuilt(){
+    try{ return {g:parse(built.join(" "))}; }
+    catch(err){ return {err:'<p class="verdict bad">This is not a well-formed formula: '+esc(err.message)+'.</p>'}; }
+  }
+  function checkB(it,k){
+    const P=parseBuilt(); if(P.err){ setFB(P.err); return; }
+    const f=parse(it.target), g=P.g;
+    const bad=[...conns(g)].filter(c=>!it.allowed.includes(c));
+    if(bad.length){ setFB('<p class="verdict bad">The constraint is broken: '+bad.map(fmlHTML).join(" and ")+' '+(bad.length>1?'are':'is')+' not allowed here.</p>'); return; }
+    if(it.nnf && !isNNF(g)){ setFB('<p class="verdict bad">The constraint is broken: some ¬ applies to a compound formula. Push every ¬ inside until it sits directly on a variable.</p>'); return; }
+    const t=table(f,g);
+    if(t.equal){ markSolved(k); setFB('<p class="verdict ok">Equivalent to the target, and within the constraint.</p>'+ttHTML(t,"target","yours")); }
+    else setFB('<p class="verdict bad">Not equivalent to the target. They differ '+diffWords(t)+'.</p>'+ttHTML(t,"target","yours"));
+  }
+
+  function checkT(it,k){
+    const P=parseBuilt(); if(P.err){ setFB(P.err); return; }
+    const f=parse(it.ref), g=P.g;
+    const t=table(f,g,Object.keys(it.vars));
+    const legend='<ul class="legend" style="font-size:13px; margin:10px 0 0;">'+Object.keys(it.vars).map(v=>'<li><i>'+v+'</i>'+esc(it.vars[v])+'</li>').join("")+'</ul>';
+    if(t.equal){ markSolved(k); setFB('<p class="verdict ok">Correct. Your formula agrees with the sentence on every row.</p>'+ttHTML(t,"sentence","yours")); return; }
+    const trap=it.traps.find(tr=>equivalent(parse(tr.f),g));
+    setFB('<p class="verdict bad">Not a faithful translation. It differs from the sentence '+diffWords(t)+'.</p>'+(trap?'<p class="note">'+trap.note+'</p>':'')+ttHTML(t,"sentence","yours")+legend);
+  }
+
+  const QUANT=["∀","∃"], CONN=["∧","∨","→"], REL=["=","≠","<","≤",">","≥"];
+  const COMP={"<":"≥","≤":">",">":"≤","≥":"<","=":"≠","≠":"="};
+  const CASES={"<":["lt"],"≤":["lt","eq"],"=":["eq"],"≠":["lt","gt"],"≥":["eq","gt"],">":["gt"]};
+  const CASEWORDS={lt:"the left side is smaller than the right", eq:"the two sides are equal", gt:"the left side is larger than the right"};
+  function ruleFor(exp,got){
+    if(QUANT.includes(exp)){
+      if(!QUANT.includes(got)) return "This slot needs a quantifier.";
+      const bound=" A bound such as ε &gt; 0 or <i>n</i> ≥ <i>N</i> only restricts the range of the variable, so it stays as it is.";
+      return exp==="∃"
+        ? "¬∀ becomes ∃¬: a universal claim fails as soon as it fails for one value."+bound
+        : "¬∃ becomes ∀¬: an existence claim fails only if every candidate fails."+bound;
+    }
+    if(exp==="∧"){
+      if(!CONN.includes(got)) return "This slot needs a connective.";
+      return "¬(<i>A</i> → <i>B</i>) is <i>A</i> ∧ ¬<i>B</i>: an implication fails exactly when its hypothesis holds and its conclusion fails. So → becomes ∧, the hypothesis is kept, and only the conclusion is negated.";
+    }
+    if(REL.includes(exp)){
+      if(!REL.includes(got)) return "This slot needs a relation.";
+      const orig=COMP[exp];
+      let s="The negation of <i>u</i> "+esc(orig)+" <i>v</i> is <i>u</i> "+esc(exp)+" <i>v</i>, its complement. ";
+      if(got===orig) return s+"You kept the original relation.";
+      const miss=CASES[exp].filter(c=>!CASES[got].includes(c));
+      const extra=CASES[got].filter(c=>!CASES[exp].includes(c));
+      const bits=[];
+      if(miss.length) bits.push("misses the case where "+miss.map(c=>CASEWORDS[c]).join(" or "));
+      if(extra.length) bits.push("includes the case where "+extra.map(c=>CASEWORDS[c]).join(" or ")+", in which the original statement holds");
+      return s+"Your "+esc(got)+" "+bits.join(", and ")+".";
+    }
+    return "Expected "+esc(exp)+".";
+  }
+  function checkC(it,k){
+    const sl=slotsOf(partsC(it.neg));
+    const wrong=[];
+    sl.forEach((p,i)=>{ if(slots[i]!==p.accept) wrong.push({i,exp:p.accept,got:slots[i]}); });
+    document.querySelectorAll("#ex .slot").forEach((el,i)=>el.classList.add(wrong.some(w=>w.i===i)?"wrong":"right"));
+    if(wrong.length===0){ markSolved(k); setFB('<p class="verdict ok">Correct.</p><p class="words">'+it.negWords+'</p>'); return; }
+    let h='<p class="verdict bad">'+wrong.length+' of '+sl.length+' slots '+(wrong.length>1?'are':'is')+' wrong; '+(wrong.length>1?'they are':'it is')+' marked in the formula.</p><ul class="notes">';
+    wrong.forEach(w=>{ h+='<li><b>Slot '+(w.i+1)+', your '+esc(w.got)+':</b> '+ruleFor(w.exp,w.got)+'</li>'; });
+    setFB(h+'</ul>');
+  }
+
+  function gExplain(it,showAll){
+    let h='<ul class="notes">'; let right=0;
+    it.stmts.forEach((st,i)=>{
+      const c=evalStmt(it,st);
+      const ok=gAns[i]===c.val; if(ok) right++;
+      h+='<li class="'+(ok||showAll?'ok':'')+'"><b>('+LETTERS[i]+') '+(c.val?'True':'False')+(showAll||ok?'':', not '+(gAns[i]?'true':'false'))+'.</b> '+cap(c.text)+'.</li>';
+    });
+    return {html:h+'</ul>', right};
+  }
+  function checkG(it,k){
+    const {html,right}=gExplain(it,false);
+    document.querySelectorAll("#ex .stmt").forEach((row,i)=>row.classList.add(gAns[i]===evalStmt(it,it.stmts[i]).val?"right":"wrong"));
+    const all=right===it.stmts.length;
+    if(all) markSolved(k);
+    setFB('<p class="verdict '+(all?'ok':'bad')+'">'+right+' of '+it.stmts.length+' correct.</p>'+html+(all?'<p class="moral">'+it.moral+'</p>':''));
+  }
+
+  function reveal(){
+    const it=item(), k=key();
+    stats.attempted.add(k); stats.revealed.add(k); stats.solved.delete(k);
+    selected=null;
+    const note='<p class="verdict warn">The answer is shown. It counts as revealed, not solved.</p>';
+    if(mode==="A"){ slots=it.ans.slice(); render(); setFB(note+'<p class="words">The identity: '+esc(it.law)+'</p>'); }
+    else if(mode==="B"||mode==="T"){ built=tokenize(it.ref).map(t=>t.t==="var"?t.v:(SYM[t.t]||t.t)); render(); setFB(note+(mode==="T"?'<p class="words">Any equivalent formula is also accepted.</p>':'')); }
+    else if(mode==="C"){ slots=slotsOf(partsC(it.neg)).map(p=>p.accept); render(); setFB(note+'<p class="words">'+it.negWords+'</p>'); }
+    else {
+      gAns=it.stmts.map(st=>evalStmt(it,st).val); render();
+      setFB(note+gExplain(it,true).html+'<p class="moral">'+it.moral+'</p>');
+    }
+    renderScore();
+  }
+
+  // Exposed for automated tests only.
+  window.__logic={parse,table,equivalent,conns,isNNF,tokenize,BANK,partsA,partsC,filledRHS,evalStmt,renderStmt,ruleFor,graphSVG,PAL_A,PAL_C};
+
+  loadItem();
+})();
+</script>
+</body>
+</html>

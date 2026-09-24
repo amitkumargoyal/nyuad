@@ -21,4 +21,6 @@ export const collections = {
   agt_exercises: col('./src/content/game-theory/exercises'),
   micro_notes: col('./src/content/microeconomics/notes'),
   micro_exercises: col('./src/content/microeconomics/exercises'),
+  math_notes: col('./src/content/mathematics/notes'),
+  math_exercises: col('./src/content/mathematics/exercises'),
 };

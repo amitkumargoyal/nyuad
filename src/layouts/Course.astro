@@ -13,12 +13,13 @@ interface Props {
   eyebrow: string;        // mono label above the heading
   heading: string;        // violet h1
   lede?: string;          // italic line under the heading
+  byline?: string;        // optional credit line under the lede
   article?: boolean;      // narrower container, quieter header
   backlinkHref?: string;  // if set, show a back-link above the footer
   backlinkLabel?: string;
 }
 
-const { title, eyebrow, heading, lede, article = false, backlinkHref, backlinkLabel = '← Back' } = Astro.props;
+const { title, eyebrow, heading, lede, byline, article = false, backlinkHref, backlinkLabel = '← Back' } = Astro.props;
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -34,6 +35,7 @@ const { title, eyebrow, heading, lede, article = false, backlinkHref, backlinkLa
         <div class="eyebrow">{eyebrow}</div>
         <h1>{heading}</h1>
         {lede && <p class="lede">{lede}</p>}
+        {byline && <p class="byline">{byline}</p>}
       </div>
       <slot name="figure" />
     </header>

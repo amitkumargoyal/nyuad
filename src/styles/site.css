@@ -68,6 +68,13 @@ h1 {
   color: var(--muted);
   max-width: 46ch;
 }
+.byline {
+  margin-top: 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .04em;
+  color: var(--muted);
+}
 
 /* Article pages: quieter header */
 .hero--article { margin-bottom: 30px; padding-bottom: 22px; }

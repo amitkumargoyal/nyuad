@@ -1,0 +1,35 @@
+---
+// Decorative ε–δ picture of continuity at a point for the course hero.
+// Constructed numerically: on the δ-band (a ± δ) the curve stays strictly
+// inside the ε-band (f(a) ± ε); max |f(x) − f(a)| there is 0.60 < ε = 0.75,
+// with δ at 80% of its largest admissible value.
+---
+<svg class="hero-diagram" viewBox="0 0 230 178" fill="none" aria-hidden="true">
+  <g stroke="#ece6db" stroke-width="1">
+    <path d="M58 18 V146 M88 18 V146 M118 18 V146 M148 18 V146 M178 18 V146 M208 18 V146"/>
+    <path d="M28 44 H214 M28 70 H214 M28 96 H214 M28 122 H214"/>
+  </g>
+  <!-- ε-band around f(a) and δ-band around a -->
+  <rect x="28" y="79.0" width="186" height="27.0" fill="rgba(90,27,166,0.11)"/>
+  <rect x="103.1" y="18" width="20.9" height="128" fill="rgba(160,58,44,0.11)"/>
+  <!-- axes -->
+  <path d="M28 12 V146 H214" stroke="#221d16" stroke-width="1.8" stroke-linecap="round"/>
+  <!-- guide lines to the point -->
+  <path d="M113.6 92.5 V146 M28 92.5 H113.6" stroke="#9CAF88" stroke-width="1.4" stroke-dasharray="3 4"/>
+  <!-- centre lines through each band, showing where the radius markers start -->
+  <path d="M113.6 92.5 H214" stroke="#5A1BA6" stroke-width="1" stroke-dasharray="2 3" opacity="0.55"/>
+  <path d="M113.6 92.5 V18" stroke="#A03A2C" stroke-width="1" stroke-dasharray="2 3" opacity="0.55"/>
+  <!-- the function -->
+  <path class="draw" d="M39.2 132.2 L42.9 131.5 L46.6 130.7 L50.3 129.8 L54.0 128.9 L57.8 127.8 L61.5 126.7 L65.2 125.4 L68.9 124.1 L72.6 122.5 L76.4 120.8 L80.1 119.0 L83.8 116.9 L87.5 114.6 L91.2 112.1 L95.0 109.3 L98.7 106.4 L102.4 103.2 L106.1 99.8 L109.8 96.2 L113.6 92.5 L117.3 88.7 L121.0 84.8 L124.7 80.9 L128.4 77.1 L132.2 73.4 L135.9 69.8 L139.6 66.4 L143.3 63.2 L147.0 60.3 L150.8 57.5 L154.5 55.0 L158.2 52.7 L161.9 50.6 L165.6 48.8 L169.4 47.1 L173.1 45.5 L176.8 44.2 L180.5 42.9 L184.2 41.8 L188.0 40.7 L191.7 39.8 L195.4 38.9 L199.1 38.1 L202.8 37.4 L206.6 36.7" stroke="#5A1BA6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="113.6" cy="92.5" r="4.5" fill="#A03A2C" stroke="#FAF7F2" stroke-width="2"/>
+  <!-- ε and δ markers -->
+  <path d="M206 92.5 V79.0 M202.5 92.5 H209.5 M202.5 79.0 H209.5" stroke="#5A1BA6" stroke-width="1.2"/>
+  <path d="M113.6 22 H124.0 M113.6 18.5 V25.5 M124.0 18.5 V25.5" stroke="#A03A2C" stroke-width="1.2"/>
+  <text x="197.0" y="89.0" text-anchor="start" font-family="'STIX Two Text',serif" font-style="italic" font-size="12" fill="#5A1BA6">ε</text>
+  <text x="118.8" y="14.0" text-anchor="middle" font-family="'STIX Two Text',serif" font-style="italic" font-size="12" fill="#A03A2C">δ</text>
+  <!-- labels -->
+  <text x="113.6" y="160.0" text-anchor="middle" font-family="'STIX Two Text',serif" font-style="italic" font-size="12" fill="#6b6358">a</text>
+  <text x="24.0" y="96.5" text-anchor="end" font-family="'STIX Two Text',serif" font-style="italic" font-size="11" fill="#6b6358">f(a)</text>
+  <text x="218.0" y="160.0" text-anchor="start" font-family="'STIX Two Text',serif" font-style="italic" font-size="12" fill="#6b6358">x</text>
+  <text x="212.0" y="32.0" text-anchor="start" font-family="'STIX Two Text',serif" font-style="italic" font-size="12" fill="#5A1BA6">f</text>
+</svg>
