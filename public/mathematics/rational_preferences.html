@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rational preferences</title>
+<style>
+@font-face{font-family:'STIX Two Text';src:url('fonts/stix-two-text-latin-400-normal.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:'STIX Two Text';src:url('fonts/stix-two-text-latin-400-italic.woff2') format('woff2');font-weight:400;font-style:italic;font-display:swap;}
+@font-face{font-family:'STIX Two Text';src:url('fonts/stix-two-text-latin-500-normal.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap;}
+@font-face{font-family:'STIX Two Text';src:url('fonts/stix-two-text-latin-600-normal.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap;}
+@font-face{font-family:'IBM Plex Mono';src:url('fonts/ibm-plex-mono-latin-400-normal.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:'IBM Plex Mono';src:url('fonts/ibm-plex-mono-latin-500-normal.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap;}
+
+  :root{
+    --violet:#5A1BA6; --terra:#A03A2C; --sage:#9CAF88; --cream:#FAF7F2;
+    --muted:#6b6358; --charcoal:#3a3a3a; --ink:#2a2a2a; --rule:#e5e0d8; --soft:#8a8276;
+    --serif:'STIX Two Text',Georgia,serif; --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--cream); color:#221d16; font-family:var(--serif); line-height:1.5;}
+  .tool-head{border-bottom:2px solid #221d16; padding-bottom:14px; margin-bottom:18px;}
+  .eyebrow{font-family:var(--mono); font-size:10px; font-weight:500; letter-spacing:0.16em; text-transform:uppercase; color:#6b6358; margin-bottom:6px;}
+  .wrap{max-width:1080px; margin:0 auto; padding:28px 22px 40px;}
+  h1{color:var(--violet); font-size:26px; font-weight:600; margin:0 0 6px; letter-spacing:-0.01em;}
+  .sub{color:var(--muted); font-style:italic; font-size:14px; margin:0 0 8px; max-width:72ch;}
+
+  .seg{display:inline-flex; flex-wrap:wrap; border:1px solid var(--rule); border-radius:10px; overflow:hidden; margin:0 0 14px; background:#fff;}
+  .seg button{background:#fff; border:none; border-right:1px solid var(--rule); padding:9px 15px; font-family:var(--serif); font-size:14px; color:var(--muted); cursor:pointer; transition:background .12s,color .12s;}
+  .seg button:last-child{border-right:none;}
+  .seg button.active{background:var(--violet); color:#fff;}
+  .seg button:focus-visible{outline:2px solid var(--violet); outline-offset:-2px;}
+
+  .layout{display:grid; grid-template-columns:1.35fr 1fr; gap:26px; align-items:start;}
+  @media(max-width:860px){.layout{grid-template-columns:1fr;}}
+  .panel{background:#fff; border:1px solid var(--rule); border-radius:12px; padding:18px 18px 20px; min-width:0;}
+  .lbl{font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--soft); margin:0 0 8px;}
+  .lbl i{text-transform:none;}
+  .instr{font-style:italic; color:var(--muted); font-size:13.5px; margin:0 0 14px;}
+  .divider{height:1px; background:var(--sage); opacity:.6; margin:14px 0;}
+
+  .constraint{font-size:14px; color:#3f4d33; background:rgba(156,175,136,.22); border-radius:8px; padding:7px 12px; margin:6px 0 12px;}
+  .constraint p{margin:0;}
+  .constraint b{font-weight:500;}
+
+  .actions{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; align-items:center;}
+  .btn{background:none; border:1px solid var(--rule); color:var(--muted); padding:7px 14px; border-radius:8px; font-family:var(--mono); letter-spacing:.04em; font-size:11px; cursor:pointer;}
+  .btn:hover{border-color:var(--violet); color:var(--violet);}
+  .btn.primary{border-color:var(--violet); color:#fff; background:var(--violet); font-weight:500;}
+  .btn.primary:hover{background:#4a1690; color:#fff;}
+  .btn:disabled{opacity:.4; cursor:default;}
+  .nav{margin-left:auto; display:flex; gap:6px; align-items:center;}
+  .counter{font-family:var(--mono); font-size:11px; color:var(--soft); letter-spacing:.04em; padding:0 6px;}
+
+  .diagram{display:flex; justify-content:center;}
+  .diagram svg{width:100%; max-width:300px; height:auto; display:block;}
+  .diagram.small svg{max-width:250px;}
+  .gcap{font-size:13.5px; color:var(--muted); text-align:center; margin:6px 0 0;}
+  .gcap i{font-style:italic;}
+  .stmts{list-style:none; padding:0; margin:16px 0 0;}
+  .stmt{display:flex; align-items:center; gap:10px; padding:8px 6px; border-top:1px solid var(--rule); border-radius:4px;}
+  .stmt .let{font-family:var(--mono); font-size:11px; color:var(--soft); width:22px; flex:none;}
+  .stmt .fm{flex:1; font-size:16px; line-height:1.5; min-width:0;}
+  .stmt .fm i{font-style:italic;}
+  .stmt.right{background:rgba(156,175,136,.18);}
+  .stmt.wrong{background:rgba(160,58,44,.10);}
+  .tf{display:inline-flex; border:1px solid var(--rule); border-radius:8px; overflow:hidden; flex:none;}
+  .tf button{font-family:var(--mono); font-size:11px; letter-spacing:.04em; padding:6px 11px; background:#fff; border:none; color:var(--muted); cursor:pointer;}
+  .tf button + button{border-left:1px solid var(--rule);}
+  .tf button.on{background:var(--violet); color:#fff;}
+  .tf button:focus-visible{outline:2px solid var(--violet); outline-offset:-2px;}
+
+  .build-row{display:flex; flex-wrap:wrap; gap:18px; align-items:center; justify-content:center; margin-top:4px;}
+  table.grid{border-collapse:separate; border-spacing:5px; margin:0;}
+  table.grid th{font-family:var(--mono); font-size:11px; font-weight:500; color:var(--soft); padding:0 4px;}
+  .cell{font-family:var(--serif); font-size:14px; min-width:58px; height:40px; background:#fff; border:1px solid var(--rule); border-radius:8px; color:var(--soft); cursor:pointer;}
+  .cell:hover{border-color:var(--violet);}
+  .cell.on{background:var(--violet); border-color:var(--violet); color:#fff;}
+  .cell.imp{border:1.5px dashed var(--violet); color:var(--violet); background:rgba(90,27,166,0.05);}
+  .cell.dis{display:inline-flex; align-items:center; justify-content:center; background:transparent; border-color:transparent; cursor:default; color:var(--rule);}
+  .cell:focus-visible{outline:2px solid var(--violet); outline-offset:2px;}
+  .cyc{max-width:250px; font-size:14px; color:var(--terra); padding:10px 12px; border-left:3px solid var(--terra); background:rgba(160,58,44,.07); border-radius:0 6px 6px 0;}
+
+  table.mat{border-collapse:separate; border-spacing:3px; margin:4px auto 0; font-family:var(--mono); font-size:14px;}
+  table.mat th{font-family:var(--serif); font-size:16px; font-weight:400; color:var(--ink); padding:2px 8px;}
+  table.mat th i{font-style:italic;}
+  table.mat td{width:38px; height:34px; text-align:center; border:1px solid var(--rule); border-radius:6px; color:var(--soft); background:#fff;}
+  table.mat td.one{color:var(--violet); background:rgba(90,27,166,0.10); border-color:rgba(90,27,166,0.35); font-weight:500;}
+  .rows{margin-top:14px; display:flex; flex-direction:column; gap:10px;}
+  .qrow{display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding-top:8px; border-top:1px solid var(--rule);}
+  .qname{font-size:15px; min-width:150px;}
+  .qname i{font-style:italic;}
+  .chips{display:inline-flex; flex-wrap:wrap; gap:6px;}
+  .chip{font-family:var(--serif); font-size:15px; min-width:38px; height:34px; padding:0 10px; background:#fff; border:1px solid var(--rule); border-radius:8px; color:#221d16; cursor:pointer;}
+  .chip i{font-style:italic;}
+  .chip:hover{border-color:var(--violet);}
+  .chip.on{background:var(--violet); border-color:var(--violet); color:#fff;}
+  .chip.none{font-family:var(--mono); font-size:11px; letter-spacing:.04em; color:var(--muted);}
+  .chip.none.on{color:#fff;}
+  .chip:focus-visible{outline:2px solid var(--violet); outline-offset:2px;}
+  .empty-note{font-size:12.5px; color:var(--soft); font-style:italic;}
+
+  .verdict{font-size:15px; margin:0 0 10px;}
+  .verdict.ok{color:#2f3f24;}
+  .verdict.bad{color:var(--terra);}
+  .verdict.warn{color:var(--muted); font-style:italic;}
+  .hint{font-size:13.5px; color:var(--muted); font-style:italic; margin:0;}
+  .moral{font-size:14px; margin:12px 0 0; padding:8px 12px; background:rgba(156,175,136,.18); border-left:3px solid var(--sage); border-radius:0 6px 6px 0;}
+  .moral i{font-style:italic;}
+  .words{font-size:14px; color:var(--ink); margin:6px 0 0;}
+  .words i{font-style:italic;}
+  .notes{list-style:none; padding:0; margin:8px 0 0; font-size:14px;}
+  .notes li{padding:7px 0; border-top:1px solid var(--rule);}
+  .notes li b{font-weight:500; color:var(--terra); margin-right:4px;}
+  .notes li.ok b{color:#4a5a39;}
+  .notes i{font-style:italic;}
+  .score{font-family:var(--mono); font-size:11px; letter-spacing:.06em; color:var(--soft);}
+  .score b{color:var(--violet); font-weight:500;}
+
+  .backlink-block{margin-top:44px; padding-top:16px; border-top:1px solid #e5e0d8;}
+  .backlink-block a{font-family:var(--mono); font-size:12px; letter-spacing:.06em; color:#5A1BA6; text-decoration:none;}
+  .backlink-block a:hover{text-decoration:underline;}
+  .footer{margin-top:32px; padding-top:18px; border-top:2px solid #221d16; display:flex; justify-content:space-between; align-items:baseline; gap:16px; flex-wrap:wrap; font-family:var(--mono); font-size:11px; letter-spacing:.06em; color:#6b6358;}
+  .footer a{color:#5A1BA6; text-decoration:none;}
+  .footer a:hover{text-decoration:underline;}
+  .footer-axiom{font-family:var(--serif); font-style:italic; font-size:13px; color:#8a8276; letter-spacing:0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="tool-head">
+    <div class="eyebrow">Mathematics · Tool 04</div>
+    <h1>Rational preferences</h1>
+    <p class="sub">Preference relations on finite sets of bundles: completeness, transitivity, indifference, choice sets, and utility representation. Some requested utility functions do not exist.</p>
+  </header>
+
+  <div class="seg" id="seg" role="tablist">
+    <button data-mode="P" class="active" role="tab">Rational preferences</button>
+    <button data-mode="U" role="tab">Utility representation</button>
+  </div>
+
+  <div class="layout">
+    <div class="panel">
+      <p class="instr" id="instr"></p>
+      <div id="ex"></div>
+      <div class="actions">
+        <button class="btn primary" id="check">Check</button>
+        <button class="btn" id="impossible">Impossible</button>
+        <button class="btn" id="reveal">Show answer</button>
+        <button class="btn" id="clear">Clear</button>
+        <div class="nav">
+          <button class="btn" id="prev" aria-label="Previous exercise">&larr;</button>
+          <span class="counter" id="counter"></span>
+          <button class="btn" id="next" aria-label="Next exercise">&rarr;</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="lbl">Feedback</div>
+      <div id="fb"></div>
+      <div class="divider"></div>
+      <div class="score" id="score"></div>
+    </div>
+  </div>
+
+  <div class="backlink-block">
+    <a href="./">&larr; Back to Mathematics</a>
+  </div>
+  <div class="footer">
+    <div>Built with Claude &middot; Amit Goyal and Herv&eacute; Cr&egrave;s &middot; <a href="mailto:amit.goyal@nyu.edu">amit.goyal@nyu.edu</a></div>
+    <div class="footer-axiom">More is preferred to less.</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* =====================================================================
+     EXERCISE BANK
+     Posets are given by their covering pairs [lower, upper]; the order ≤ is
+     the reflexive–transitive closure. pos gives Hasse coordinates (upward).
+     ===================================================================== */
+
+  // P: rational preferences. R lists every pair (x, y) with x ≿ y.
+  const fromU = (S,u)=>{ const R=[]; S.forEach(x=>S.forEach(y=>{ if(u[x]>=u[y]) R.push([x,y]); })); return R; };
+  const loops = S=>S.map(s=>[s,s]);
+  const BANK_P = [
+    { S:["a","b","c","d"], form:"matrix", R:fromU(["a","b","c","d"],{a:2,b:3,c:3,d:1}),
+      stmts:[{t:"ind",a:"b",b:"c"},{t:"sp",a:"a",b:"c"}], menus:[["a","b","c","d"],["a","d"]],
+      moral:"Complete and transitive, so rational. The indifference classes are {b, c}, {a} and {d}, ranked in that order. The choice set of a menu is its top indifference class." },
+    { S:["a","b","c"], R:loops(["a","b","c"]).concat([["a","b"],["b","c"],["c","a"]]),
+      stmts:[{t:"sp",a:"a",b:"b"},{t:"ind",a:"a",b:"c"}], menus:[["a","b","c"],["a","b"]],
+      moral:"A strict cycle a ≻ b ≻ c ≻ a. Every pair is ranked, but on the menu {a, b, c} each bundle is beaten by another, so nothing can be chosen." },
+    { S:["a","b","c"], R:loops(["a","b","c"]).concat([["a","c"],["b","c"]]),
+      stmts:[{t:"ind",a:"a",b:"b"},{t:"sp",a:"a",b:"c"}], menus:[["a","b","c"],["a","c"]],
+      moral:"Incomparable is not the same as indifferent: a ∼ b would need both a ≿ b and b ≿ a, and here neither holds. The choice set of {a, b, c} is empty although there is no cycle: a and b are never compared, so neither is at least as good as everything." },
+    { S:["a","b","c","d"], R:loops(["a","b","c","d"]).concat([["a","b"],["b","c"],["a","c"],["d","a"],["c","d"],["b","d"]]),
+      stmts:[{t:"sp",a:"d",b:"a"},{t:"sp",a:"b",b:"d"}], menus:[["a","b","c"],["a","b","c","d"]],
+      moral:"On the menu {a, b, c} these preferences behave rationally (a ≻ b ≻ c), and a is chosen. Adding d creates the cycle a ≻ c ≻ d ≻ a, and the larger menu has no best element." },
+    { S:["x","y","z"], R:loops(["x","y","z"]).concat([["x","y"],["y","x"],["y","z"],["z","y"],["z","x"]]),
+      caption:"Cups of tea with 10, 11 and 12 grams of sugar (<i>x</i>, <i>y</i>, <i>z</i>). The drinker cannot tell apart cups that differ by 1 gram, so <i>x</i> ∼ <i>y</i> and <i>y</i> ∼ <i>z</i>, but prefers the sweeter of two cups that differ by 2 grams.",
+      stmts:[{t:"ind",a:"x",b:"z"},{t:"sp",a:"z",b:"x"}], menus:[["x","y","z"]],
+      moral:"Indifference that is not transitive (Luce's example) breaks rationality. Yet the choice set is not empty. A nonempty choice set on one menu is no proof of rationality." }
+  ];
+
+  // U: utility representation. R as in P; rule: optional text description.
+  const lex = S=>{ const v=s=>s.slice(1,-1).split(",").map(Number); const R=[];
+    S.forEach(x=>S.forEach(y=>{ const a=v(x), b=v(y); if(a[0]>b[0] || (a[0]===b[0] && a[1]>=b[1])) R.push([x,y]); })); return R; };
+  const BANK_U = [
+    { S:["a","b","c","d"], R:fromU(["a","b","c","d"],{a:4,b:1,c:3,d:2}), example:{a:4,b:1,c:3,d:2},
+      moral:"Any strictly decreasing assignment along the ranking a ≻ c ≻ d ≻ b works. The numbers carry only the order; u = 4, 1, 3, 2 and u = 100, 0, 7, 5 represent the same preferences." },
+    { S:["a","b","c","d"], R:fromU(["a","b","c","d"],{a:2,b:1,c:1,d:2}), example:{a:2,b:1,c:1,d:2},
+      moral:"Indifferent bundles must receive equal utility, and strictly preferred ones a strictly larger utility." },
+    { S:["a","b","c"], R:loops(["a","b","c"]).concat([["a","b"],["b","c"],["c","a"]]), impossible:true,
+      proof:"a ≻ b requires u(a) &gt; u(b); likewise u(b) &gt; u(c) and u(c) &gt; u(a). Together these give u(a) &gt; u(a), which no number satisfies." },
+    { S:["x","y","z"], R:loops(["x","y","z"]).concat([["x","y"],["y","x"],["y","z"],["z","y"],["z","x"]]), impossible:true,
+      caption:"Luce's tea example: <i>x</i> ∼ <i>y</i> and <i>y</i> ∼ <i>z</i>, but <i>z</i> ≻ <i>x</i>.",
+      proof:"x ∼ y requires u(x) = u(y), and y ∼ z requires u(y) = u(z), so u(x) = u(z). But z ≻ x requires u(z) &gt; u(x). A utility function forces indifference to be transitive." },
+    { S:["(1, 2)","(2, 0)","(1, 3)","(2, 1)"], R:lex(["(1, 2)","(2, 0)","(1, 3)","(2, 1)"]), example:{"(1, 2)":1,"(2, 0)":3,"(1, 3)":2,"(2, 1)":4},
+      caption:"Lexicographic preferences on four bundles (<i>x</i><sub>1</sub>, <i>x</i><sub>2</sub>): compare the first coordinates, and use the second only to break a tie.",
+      moral:"Lexicographic preferences are complete and transitive, and every rational preference on a finite set (indeed on any countable set) has a utility representation. The famous failure concerns lexicographic preferences on all of ℝ²." }
+  ];
+
+  const BANK = {P:BANK_P, U:BANK_U};
+  const GKEY = "An arrow from <i>x</i> to <i>y</i> means <i>x</i> ≿ <i>y</i>; a loop at <i>x</i> means <i>x</i> ≿ <i>x</i>; arrows in both directions mean <i>x</i> ∼ <i>y</i>.";
+
+  const INSTR = {
+    P:"Answer each question about the preference relation ≿, and select the choice set of each menu B, that is, C(B) = {x ∈ B : x ≿ y for every y ∈ B}.",
+    U:"Choose a utility value for each bundle so that x ≿ y exactly when u(x) ≥ u(y), or press Impossible if no utility function represents these preferences."
+  };
+  const FBHINT = {
+    P:"Answer every question, select the choice sets, and press Check.",
+    U:"Press Check to compare your utility numbers with the preferences, pair by pair."
+  };
+
+  /* =====================================================================
+     DRAWING
+     ===================================================================== */
+  const fx=x=>x.toFixed(1);
+  function matrixHTML(S,leq,rowOrder){
+    const R=rowOrder||S;
+    let h='<table class="mat"><tr><th></th>'+S.map(y=>'<th>'+elH(y)+'</th>').join("")+'</tr>';
+    R.forEach(x=>{ h+='<tr><th>'+elH(x)+'</th>'+S.map(y=>'<td class="'+(leq(x,y)?'one':'')+'">'+(leq(x,y)?1:0)+'</td>').join("")+'</tr>'; });
+    return h+'</table>';
+  }
+  function graphSVG(S,R,uid){
+    const W=320, cx=160, cy=160, RR=100, r=17, n=S.length, pos={};
+    S.forEach((s,i)=>{ const ang=-Math.PI/2-Math.PI/n+i*2*Math.PI/n; pos[s]={x:cx+RR*Math.cos(ang), y:cy+RR*Math.sin(ang)}; });
+    const set=new Set(R.map(e=>e[0]+"|"+e[1]));
+    const unit=(dx,dy)=>{ const L=Math.hypot(dx,dy); return {x:dx/L,y:dy/L}; };
+    const mk='url(#'+uid+')'; let paths="";
+    R.forEach(([u,v])=>{
+      const P=pos[u], Q=pos[v];
+      if(u===v){
+        const th=Math.atan2(P.y-cy,P.x-cx), pt=(rad,a)=>({x:P.x+rad*Math.cos(th+a), y:P.y+rad*Math.sin(th+a)});
+        const s=pt(r,-0.45), e=pt(r+1,0.45), c1=pt(r*2.9,-0.6), c2=pt(r*2.9,0.6);
+        paths+='<path d="M'+fx(s.x)+' '+fx(s.y)+' C '+fx(c1.x)+' '+fx(c1.y)+', '+fx(c2.x)+' '+fx(c2.y)+', '+fx(e.x)+' '+fx(e.y)+'" marker-end="'+mk+'"/>';
+      } else if(set.has(v+"|"+u)){
+        const d=unit(Q.x-P.x,Q.y-P.y), c={x:(P.x+Q.x)/2-d.y*24, y:(P.y+Q.y)/2+d.x*24};
+        const a=unit(c.x-P.x,c.y-P.y), b=unit(c.x-Q.x,c.y-Q.y);
+        paths+='<path d="M'+fx(P.x+a.x*r)+' '+fx(P.y+a.y*r)+' Q '+fx(c.x)+' '+fx(c.y)+', '+fx(Q.x+b.x*(r+1))+' '+fx(Q.y+b.y*(r+1))+'" marker-end="'+mk+'"/>';
+      } else {
+        const d=unit(Q.x-P.x,Q.y-P.y);
+        paths+='<path d="M'+fx(P.x+d.x*r)+' '+fx(P.y+d.y*r)+' L '+fx(Q.x-d.x*(r+1))+' '+fx(Q.y-d.y*(r+1))+'" marker-end="'+mk+'"/>';
+      }
+    });
+    let nodes="";
+    S.forEach(s=>{ nodes+='<circle cx="'+fx(pos[s].x)+'" cy="'+fx(pos[s].y)+'" r="'+r+'" fill="#fffdf9" stroke="#221d16" stroke-width="1.5"/>'+
+      '<text x="'+fx(pos[s].x)+'" y="'+fx(pos[s].y+5.5)+'" text-anchor="middle" font-family="STIX Two Text,Georgia,serif" font-style="italic" font-size="16" fill="#221d16">'+s+'</text>'; });
+    return '<svg xmlns="http://www.w3.org/2000/svg" class="graph" viewBox="0 0 '+W+' '+W+'" role="img" aria-label="Directed graph of the preference relation">'+
+      '<defs><marker id="'+uid+'" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#5A1BA6"/></marker></defs>'+
+      '<g fill="none" stroke="#5A1BA6" stroke-width="1.6">'+paths+'</g>'+nodes+'</svg>';
+  }
+
+  /* =====================================================================
+     UI HELPERS
+     ===================================================================== */
+  const $=id=>document.getElementById(id);
+  const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+  function elH(s){ return /^[a-dpqrsxyz]$/.test(s) ? "<i>"+s+"</i>" : esc(s).replace(/\b([ab])\b/g,"<i>$1</i>"); }
+  const listH=a=>a.length ? a.map(elH).join(", ") : "none";
+  const setH=a=>a.length ? "{"+a.map(elH).join(", ")+"}" : "∅";
+  const LETTERS="abcdefgh";
+
+  let mode="P";
+  const idx={P:0,U:0};
+  let st={};
+  const stats={attempted:new Set(), solved:new Set(), revealed:new Set()};
+  const key=()=>mode+idx[mode];
+  const item=()=>BANK[mode][idx[mode]];
+  const markSolved=k=>{ if(!stats.revealed.has(k)) stats.solved.add(k); };
+
+  function fresh(){
+    if(mode==="P") st={ans:{}, menus:item().menus.map(()=>new Set())};
+    else st={u:{}};
+  }
+
+  /* ---------- preferences ---------- */
+  const prefOf=it=>{ const s=new Set(it.R.map(e=>e[0]+"|"+e[1])); return (a,b)=>s.has(a+"|"+b); };
+  const pw=(a,b)=>elH(a)+" ≿ "+elH(b), npw=(a,b)=>"¬("+elH(a)+" ≿ "+elH(b)+")";
+  const fact=(ge,a,b)=>ge(a,b)?pw(a,b):npw(a,b);
+  function completeInfo(S,ge){
+    for(const a of S) for(const b of S) if(!ge(a,b)&&!ge(b,a))
+      return {val:false, text: a===b ? npw(a,a)+"; completeness with both bundles equal to "+elH(a)+" requires "+pw(a,a) : "neither "+pw(a,b)+" nor "+pw(b,a)};
+    return {val:true, text:"every pair of bundles is ranked in at least one direction, including each bundle with itself"};
+  }
+  function transInfo(S,ge){
+    for(const a of S) for(const b of S) for(const c of S) if(ge(a,b)&&ge(b,c)&&!ge(a,c))
+      return {val:false, text:pw(a,b)+" and "+pw(b,c)+", but "+npw(a,c)};
+    return {val:true, text:"checking every triple: whenever x ≿ y and y ≿ z, also x ≿ z"};
+  }
+  function prefStmt(s){ return s.t==="ind" ? elH(s.a)+" ∼ "+elH(s.b) : elH(s.a)+" ≻ "+elH(s.b); }
+  function prefStmtEval(ge,s){
+    const ab=ge(s.a,s.b), ba=ge(s.b,s.a);
+    if(s.t==="ind") return {val:ab&&ba, text: ab&&ba ? pw(s.a,s.b)+" and "+pw(s.b,s.a) : "indifference needs both "+pw(s.a,s.b)+" and "+pw(s.b,s.a)+", but "+(ab?npw(s.b,s.a):npw(s.a,s.b))};
+    return {val:ab&&!ba, text: ab&&!ba ? pw(s.a,s.b)+" and "+npw(s.b,s.a) : (!ab ? npw(s.a,s.b) : pw(s.b,s.a)+", so at best "+elH(s.a)+" ∼ "+elH(s.b))};
+  }
+  const choice=(ge,B)=>B.filter(x=>B.every(y=>ge(x,y)));
+  function choiceWhy(ge,B,x,inC){
+    if(inC) return elH(x)+" ≿ every bundle in the menu: "+B.map(y=>pw(x,y)).join(", ");
+    const y=B.find(y=>!ge(x,y)); return npw(x,y)+", so "+elH(x)+" is not at least as good as every bundle in the menu";
+  }
+  const rational=it=>{ const ge=prefOf(it); return completeInfo(it.S,ge).val && transInfo(it.S,ge).val; };
+
+  /* =====================================================================
+     RENDER
+     ===================================================================== */
+  function tfButtons(id,cur){ return '<span class="tf"><button data-q="'+id+'" data-val="1" class="'+(cur===true?'on':'')+'">True</button><button data-q="'+id+'" data-val="0" class="'+(cur===false?'on':'')+'">False</button></span>'; }
+  function chips(group,els,sel){ return '<span class="chips">'+els.map(e=>'<button class="chip'+(sel.has(e)?' on':'')+'" data-group="'+group+'" data-el="'+esc(e)+'">'+elH(e)+'</button>').join("")+'</span>'; }
+  function single(group,els,cur){ return '<span class="chips">'+els.map(e=>'<button class="chip'+(cur===e?' on':'')+'" data-group="'+group+'" data-el="'+esc(e)+'">'+elH(e)+'</button>').join("")+'<button class="chip none'+(cur===null?' on':'')+'" data-group="'+group+'" data-none="1">None</button></span>'; }
+
+  function render(){
+    $("instr").textContent=INSTR[mode];
+    const it=item(); let h="";
+    if(mode==="P"){
+      const ge=prefOf(it);
+      h+= it.form==="matrix" ? '<div class="diagram">'+matrixHTML(it.S,ge)+'</div><p class="gcap">The entry in row <i>x</i>, column <i>y</i> is 1 when <i>x</i> ≿ <i>y</i>.</p>'
+                             : '<div class="diagram">'+graphSVG(it.S,it.R,"mP")+'</div><p class="gcap">'+GKEY+'</p>';
+      if(it.caption) h+='<p class="gcap">'+it.caption+'</p>';
+      h+='<ul class="stmts">';
+      h+='<li class="stmt" data-row="comp"><span class="fm">≿ is complete</span>'+tfButtons("comp",st.ans.comp)+'</li>';
+      h+='<li class="stmt" data-row="trans"><span class="fm">≿ is transitive</span>'+tfButtons("trans",st.ans.trans)+'</li>';
+      it.stmts.forEach((s,i)=>{ h+='<li class="stmt" data-row="s'+i+'"><span class="fm">'+prefStmt(s)+'</span>'+tfButtons("s"+i,st.ans["s"+i])+'</li>'; });
+      h+='</ul><div class="rows">';
+      it.menus.forEach((B,i)=>{ h+='<div class="qrow"><span class="qname"><i>C</i>('+setH(B)+') =</span>'+chips("menu"+i,B,st.menus[i])+'<span class="empty-note">'+(st.menus[i].size?'':'no bundle selected: ∅')+'</span></div>'; });
+      h+='</div>';
+    } else {
+      const ge=prefOf(it);
+      if(it.S[0].startsWith("(")) h+='<p class="gcap" style="text-align:left">'+it.caption+'</p>';
+      else { h+='<div class="diagram">'+graphSVG(it.S,it.R,"mU")+'</div><p class="gcap">'+GKEY+'</p>'; if(it.caption) h+='<p class="gcap">'+it.caption+'</p>'; }
+      h+='<div class="rows">';
+      it.S.forEach(x=>{ h+='<div class="qrow"><span class="qname"><i>u</i>('+elH(x)+') =</span><span class="chips">'+[1,2,3,4,5,6].map(v=>'<button class="chip'+(st.u[x]===v?' on':'')+'" data-u="'+esc(x)+'" data-v="'+v+'">'+v+'</button>').join("")+'</span></div>'; });
+      h+='</div>';
+    }
+    $("ex").innerHTML=h;
+    $("impossible").style.display=(mode==="U")?"":"none";
+    $("counter").textContent=(idx[mode]+1)+" / "+BANK[mode].length;
+    $("prev").disabled=idx[mode]===0;
+    $("next").disabled=idx[mode]===BANK[mode].length-1;
+    renderScore();
+  }
+  function renderScore(){
+    const a=stats.attempted.size, s=stats.solved.size;
+    $("score").innerHTML = a===0 ? "No exercises attempted yet." : "Solved <b>"+s+"</b> of "+a+" attempted this session.";
+  }
+  const setFB=h=>{ $("fb").innerHTML=h; };
+  const resetFB=()=>setFB('<p class="hint">'+FBHINT[mode]+'</p>');
+
+  /* ---------- interaction ---------- */
+  $("ex").addEventListener("click",e=>{
+    const b=e.target.closest("button"); if(!b) return;
+    if(b.dataset.q!==undefined){ st.ans[b.dataset.q]=b.dataset.val==="1"; render(); return; }
+    if(b.dataset.pair){ const k=b.dataset.pair; st.pairs.has(k)?st.pairs.delete(k):st.pairs.add(k); render(); return; }
+    if(b.dataset.u){ st.u[b.dataset.u]=+b.dataset.v; render(); return; }
+    const g=b.dataset.group; if(!g) return;
+    if(g==="max"||g==="min"){ st[g]= b.dataset.none ? null : b.dataset.el; }
+    else if(g==="maximal"||g==="minimal"){ const s=st[g], x=b.dataset.el; s.has(x)?s.delete(x):s.add(x); }
+    else if(g.startsWith("menu")){ const s=st.menus[+g.slice(4)], x=b.dataset.el; s.has(x)?s.delete(x):s.add(x); }
+    render();
+  });
+  $("seg").addEventListener("click",e=>{
+    const b=e.target.closest("button[data-mode]"); if(!b) return;
+    mode=b.dataset.mode;
+    $("seg").querySelectorAll("button").forEach(x=>x.classList.toggle("active",x===b));
+    load();
+  });
+  $("prev").addEventListener("click",()=>{ if(idx[mode]>0){ idx[mode]--; load(); } });
+  $("next").addEventListener("click",()=>{ if(idx[mode]<BANK[mode].length-1){ idx[mode]++; load(); } });
+  $("clear").addEventListener("click",()=>{ fresh(); resetFB(); render(); });
+  $("check").addEventListener("click",()=>check(false));
+  $("impossible").addEventListener("click",()=>check(true));
+  $("reveal").addEventListener("click",reveal);
+  function load(){ fresh(); resetFB(); render(); }
+
+  /* =====================================================================
+     CHECKING
+     ===================================================================== */
+  function check(saysImpossible){
+    const it=item(), k=key();
+    if(!saysImpossible){
+      if(mode==="P" && (st.ans.comp===undefined||st.ans.trans===undefined||it.stmts.some((_,i)=>st.ans["s"+i]===undefined))){ setFB('<p class="verdict warn">Answer every question first.</p>'); return; }
+      if(mode==="U" && it.S.some(x=>st.u[x]===undefined)){ setFB('<p class="verdict warn">Choose a utility value for every bundle first.</p>'); return; }
+    }
+    stats.attempted.add(k);
+    ({P:checkP,U:checkU})[mode](it,k,saysImpossible);
+    renderScore();
+  }
+
+  function listFeedback(rows){
+    let h='<ul class="notes">', right=0;
+    rows.forEach(r=>{ if(r.ok) right++; h+='<li class="'+(r.ok?'ok':'')+'"><b>'+r.head+'</b> '+cap(r.text)+'.</li>'; });
+    return {html:h+'</ul>', right};
+  }
+
+  function pRows(it,judged){
+    const ge=prefOf(it), rows=[];
+    const add=(name,info,key)=>{ const ok=judged?judged[key]===info.val:true;
+      rows.push({ok, head:name+': '+(info.val?'true':'false')+(ok?'':' (you said '+(judged[key]?'true':'false')+')')+'.', text:info.text}); };
+    add("Complete",completeInfo(it.S,ge),"comp");
+    add("Transitive",transInfo(it.S,ge),"trans");
+    it.stmts.forEach((s,i)=>add(prefStmt(s),prefStmtEval(ge,s),"s"+i));
+    it.menus.forEach((B,i)=>{
+      const C=choice(ge,B), mine=judged?[...judged.menus[i]]:C;
+      const ok=!judged || (C.length===mine.length && C.every(x=>mine.includes(x)));
+      let text;
+      if(ok) text = C.length ? C.map(x=>choiceWhy(ge,B,x,true)).join("; ") : "every bundle fails: "+B.map(x=>choiceWhy(ge,B,x,false)).join("; ");
+      else { const bits=[]; mine.filter(x=>!C.includes(x)).forEach(x=>bits.push(choiceWhy(ge,B,x,false)));
+             C.filter(x=>!mine.includes(x)).forEach(x=>bits.push(choiceWhy(ge,B,x,true))); text=bits.join("; "); }
+      rows.push({ok, head:'<i>C</i>('+setH(B)+') = '+setH(C)+'.', text});
+    });
+    return rows;
+  }
+  function checkP(it,k){
+    const rows=pRows(it,{comp:st.ans.comp, trans:st.ans.trans, menus:st.menus, ...Object.fromEntries(it.stmts.map((_,i)=>["s"+i,st.ans["s"+i]]))});
+    const nQ=2+it.stmts.length;
+    document.querySelectorAll("#ex .stmt").forEach((row,i)=>row.classList.add(rows[i].ok?"right":"wrong"));
+    const {html,right}=listFeedback(rows), all=right===rows.length; if(all) markSolved(k);
+    setFB('<p class="verdict '+(all?'ok':'bad')+'">'+right+' of '+rows.length+' correct.</p>'+html+(all?'<p class="moral">'+it.moral+'</p>':''));
+  }
+
+  function uFailures(it,u){
+    const ge=prefOf(it), out=[];
+    it.S.forEach(x=>it.S.forEach(y=>{ if(x===y) return;
+      if(ge(x,y) && !(u[x]>=u[y])) out.push(pw(x,y)+", but u("+elH(x)+") = "+u[x]+" &lt; u("+elH(y)+") = "+u[y]);
+      if(!ge(x,y) && u[x]>=u[y]) out.push(npw(x,y)+", but u("+elH(x)+") = "+u[x]+" ≥ u("+elH(y)+") = "+u[y]); }));
+    return out;
+  }
+  function checkU(it,k,saysImpossible){
+    const possible=rational(it);
+    if(saysImpossible){
+      if(!possible){ markSolved(k); setFB('<p class="verdict ok">Correct: no utility function represents these preferences.</p><p class="moral">'+it.proof+'</p>'); }
+      else setFB('<p class="verdict bad">Not so: these preferences have a utility representation. Keep looking.</p>');
+      return;
+    }
+    const f=uFailures(it,st.u);
+    if(!f.length){ markSolved(k); setFB('<p class="verdict ok">Correct: your utility function represents the preferences.</p><p class="moral">'+it.moral+'</p>'); return; }
+    setFB('<p class="verdict bad">Not a representation: '+f.length+' pair'+(f.length>1?'s disagree':' disagrees')+'.</p><ul class="notes">'+f.slice(0,4).map(t=>'<li>'+t+'.</li>').join("")+(f.length>4?'<li>… and '+(f.length-4)+' more.</li>':'')+
+      '</ul><p class="hint" style="margin-top:8px">If you think no utility function can represent these preferences, press Impossible.</p>');
+  }
+
+  function reveal(){
+    const it=item(), k=key();
+    stats.attempted.add(k); stats.revealed.add(k); stats.solved.delete(k);
+    const note='<p class="verdict warn">The answer is shown. It counts as revealed, not solved.</p>';
+    if(mode==="P"){ const ge=prefOf(it);
+      st.ans.comp=completeInfo(it.S,ge).val; st.ans.trans=transInfo(it.S,ge).val;
+      it.stmts.forEach((s,i)=>{ st.ans["s"+i]=prefStmtEval(ge,s).val; });
+      st.menus=it.menus.map(B=>new Set(choice(ge,B))); render();
+      setFB(note+listFeedback(pRows(it,null)).html+'<p class="moral">'+it.moral+'</p>'); }
+    else {
+      if(it.impossible){ st.u={}; render(); setFB(note+'<p class="words"><b>Impossible.</b> '+it.proof+'</p>'); }
+      else { st.u=Object.assign({},it.example); render(); setFB(note+'<p class="words">One representation is shown; any values in the same order work.</p><p class="moral">'+it.moral+'</p>'); } }
+    renderScore();
+  }
+
+  window.__t4={BANK,prefOf,completeInfo,transInfo,prefStmtEval,choice,rational,uFailures,graphSVG,state:()=>st};
+  load();
+})();
+</script>
+</body>
+</html>
