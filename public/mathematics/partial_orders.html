@@ -132,6 +132,8 @@
   table.ptab{margin:6px auto 0;}
   table.ptab td{color:var(--ink); background:#fff;}
   .constraint i{font-style:italic;}
+  .readnote{font-size:13.5px; color:var(--muted); margin:14px 0 0; padding:8px 12px; border-left:3px solid var(--sage); background:rgba(156,175,136,.12); border-radius:0 6px 6px 0;}
+  .readnote i{font-style:italic;}
 </style>
 </head>
 <body>
@@ -268,7 +270,7 @@
     H:"Decide whether each statement about the partial order is true or false. In a Hasse diagram, larger elements are drawn higher, and a line joins x below to y above when y covers x.",
     E:"Select the maximum, the minimum, the maximal elements and the minimal elements of B. For the maximum and minimum, choose None if there is none.",
     B:"Tap cells to declare pairs x < y. Pairs implied by transitivity are added automatically and the Hasse diagram is redrawn. Meet every requirement, or press Impossible.",
-    R:"Each relation R on an interval is given by its graph in the plane, by a set-builder description, or both. Decide which properties R has, and answer the questions on its special elements.",
+    R:"Each relation R on an interval is given by its graph in the plane, by a set-builder description, or both. Decide which properties R has. When R is a partial order, read x R y as “x lies below y”; the questions on special elements use this reading.",
     D:"Points are compared coordinate by coordinate. Select the maximum, the minimum, the Pareto-efficient points and the minimal points; for the maximum and minimum, choose None if there is none."
   };
   const FBHINT = {
@@ -696,7 +698,9 @@
       h+='<p class="setform">'+it.set+'</p>';
       h+='<ul class="stmts">';
       (it.ask||ALL_Q).forEach(q=>{ h+='<li class="stmt" data-row="'+q+'"><span class="fm">'+PROP_NAMES[q]+'</span>'+tfButtons(q,st.ans[q])+'</li>'; });
-      h+='</ul>'+mcqHTML(it.mcq);
+      h+='</ul>';
+      if(it.mcq.length) h+='<p class="readnote">Read <i>x</i> <i>R</i> <i>y</i> as “<i>x</i> lies below <i>y</i>”. So <i>m</i> is maximal when there is no <i>y</i> ≠ <i>m</i> with <i>m</i> <i>R</i> <i>y</i>, and <i>m</i> is the maximum when <i>y</i> <i>R</i> <i>m</i> for every <i>y</i>.</p>';
+      h+=mcqHTML(it.mcq);
     } else {
       h+='<div class="constraint"><p><i>x</i> ≥ <i>y</i> means <i>x</i><sub><i>i</i></sub> ≥ <i>y</i><sub><i>i</i></sub> in every coordinate <i>i</i>. <i>x</i> <b>Pareto dominates</b> <i>y</i> when <i>x</i> ≥ <i>y</i> and <i>x</i> ≠ <i>y</i>. A point is <b>Pareto efficient</b> when no point of the set Pareto dominates it.</p></div>';
       if(it.kind==="sets"){ h+=setsSVG()+'<p class="gcap">'+it.caption+'</p>'+mcqHTML(it.mcq); }
