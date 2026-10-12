@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The real numbers</title>
+<style>
+@font-face{font-family:'STIX Two Text';src:url('fonts/stix-two-text-latin-400-normal.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:'STIX Two Text';src:url('fonts/stix-two-text-latin-400-italic.woff2') format('woff2');font-weight:400;font-style:italic;font-display:swap;}
+@font-face{font-family:'STIX Two Text';src:url('fonts/stix-two-text-latin-500-normal.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap;}
+@font-face{font-family:'STIX Two Text';src:url('fonts/stix-two-text-latin-600-normal.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap;}
+@font-face{font-family:'IBM Plex Mono';src:url('fonts/ibm-plex-mono-latin-400-normal.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:'IBM Plex Mono';src:url('fonts/ibm-plex-mono-latin-500-normal.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap;}
+
+  :root{
+    --violet:#5A1BA6; --terra:#A03A2C; --sage:#9CAF88; --cream:#FAF7F2;
+    --muted:#6b6358; --charcoal:#3a3a3a; --ink:#2a2a2a; --rule:#e5e0d8; --soft:#8a8276;
+    --serif:'STIX Two Text',Georgia,serif; --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--cream); color:#221d16; font-family:var(--serif); line-height:1.5;}
+  .tool-head{border-bottom:2px solid #221d16; padding-bottom:14px; margin-bottom:18px;}
+  .eyebrow{font-family:var(--mono); font-size:10px; font-weight:500; letter-spacing:0.16em; text-transform:uppercase; color:#6b6358; margin-bottom:6px;}
+  .wrap{max-width:1080px; margin:0 auto; padding:28px 22px 40px;}
+  h1{color:var(--violet); font-size:26px; font-weight:600; margin:0 0 6px; letter-spacing:-0.01em;}
+  .sub{color:var(--muted); font-style:italic; font-size:14px; margin:0 0 8px; max-width:72ch;}
+
+  .seg{display:inline-flex; flex-wrap:wrap; border:1px solid var(--rule); border-radius:10px; overflow:hidden; margin:0 0 14px; background:#fff;}
+  .seg button{background:#fff; border:none; border-right:1px solid var(--rule); padding:9px 15px; font-family:var(--serif); font-size:14px; color:var(--muted); cursor:pointer; transition:background .12s,color .12s;}
+  .seg button:last-child{border-right:none;}
+  .seg button.active{background:var(--violet); color:#fff;}
+  .seg button:focus-visible{outline:2px solid var(--violet); outline-offset:-2px;}
+
+  .layout{display:grid; grid-template-columns:1.35fr 1fr; gap:26px; align-items:start;}
+  @media(max-width:860px){.layout{grid-template-columns:1fr;}}
+  .panel{background:#fff; border:1px solid var(--rule); border-radius:12px; padding:18px 18px 20px; min-width:0;}
+  .lbl{font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--soft); margin:0 0 8px;}
+  .lbl i{text-transform:none;}
+  .instr{font-style:italic; color:var(--muted); font-size:13.5px; margin:0 0 14px;}
+  .divider{height:1px; background:var(--sage); opacity:.6; margin:14px 0;}
+
+  .constraint{font-size:14px; color:#3f4d33; background:rgba(156,175,136,.22); border-radius:8px; padding:7px 12px; margin:6px 0 12px;}
+  .constraint p{margin:0;}
+  .constraint b{font-weight:500;}
+
+  .actions{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; align-items:center;}
+  .btn{background:none; border:1px solid var(--rule); color:var(--muted); padding:7px 14px; border-radius:8px; font-family:var(--mono); letter-spacing:.04em; font-size:11px; cursor:pointer;}
+  .btn:hover{border-color:var(--violet); color:var(--violet);}
+  .btn.primary{border-color:var(--violet); color:#fff; background:var(--violet); font-weight:500;}
+  .btn.primary:hover{background:#4a1690; color:#fff;}
+  .btn:disabled{opacity:.4; cursor:default;}
+  .nav{margin-left:auto; display:flex; gap:6px; align-items:center;}
+  .counter{font-family:var(--mono); font-size:11px; color:var(--soft); letter-spacing:.04em; padding:0 6px;}
+
+  .diagram{display:flex; justify-content:center;}
+  .diagram svg{width:100%; max-width:300px; height:auto; display:block;}
+  .diagram.small svg{max-width:250px;}
+  .gcap{font-size:13.5px; color:var(--muted); text-align:center; margin:6px 0 0;}
+  .gcap i{font-style:italic;}
+  .stmts{list-style:none; padding:0; margin:16px 0 0;}
+  .stmt{display:flex; align-items:center; gap:10px; padding:8px 6px; border-top:1px solid var(--rule); border-radius:4px;}
+  .stmt .let{font-family:var(--mono); font-size:11px; color:var(--soft); width:22px; flex:none;}
+  .stmt .fm{flex:1; font-size:16px; line-height:1.5; min-width:0;}
+  .stmt .fm i{font-style:italic;}
+  .stmt.right{background:rgba(156,175,136,.18);}
+  .stmt.wrong{background:rgba(160,58,44,.10);}
+  .tf{display:inline-flex; border:1px solid var(--rule); border-radius:8px; overflow:hidden; flex:none;}
+  .tf button{font-family:var(--mono); font-size:11px; letter-spacing:.04em; padding:6px 11px; background:#fff; border:none; color:var(--muted); cursor:pointer;}
+  .tf button + button{border-left:1px solid var(--rule);}
+  .tf button.on{background:var(--violet); color:#fff;}
+  .tf button:focus-visible{outline:2px solid var(--violet); outline-offset:-2px;}
+
+  .build-row{display:flex; flex-wrap:wrap; gap:18px; align-items:center; justify-content:center; margin-top:4px;}
+  table.grid{border-collapse:separate; border-spacing:5px; margin:0;}
+  table.grid th{font-family:var(--mono); font-size:11px; font-weight:500; color:var(--soft); padding:0 4px;}
+  .cell{font-family:var(--serif); font-size:14px; min-width:58px; height:40px; background:#fff; border:1px solid var(--rule); border-radius:8px; color:var(--soft); cursor:pointer;}
+  .cell:hover{border-color:var(--violet);}
+  .cell.on{background:var(--violet); border-color:var(--violet); color:#fff;}
+  .cell.imp{border:1.5px dashed var(--violet); color:var(--violet); background:rgba(90,27,166,0.05);}
+  .cell.dis{display:inline-flex; align-items:center; justify-content:center; background:transparent; border-color:transparent; cursor:default; color:var(--rule);}
+  .cell:focus-visible{outline:2px solid var(--violet); outline-offset:2px;}
+  .cyc{max-width:250px; font-size:14px; color:var(--terra); padding:10px 12px; border-left:3px solid var(--terra); background:rgba(160,58,44,.07); border-radius:0 6px 6px 0;}
+
+  table.mat{border-collapse:separate; border-spacing:3px; margin:4px auto 0; font-family:var(--mono); font-size:14px;}
+  table.mat th{font-family:var(--serif); font-size:16px; font-weight:400; color:var(--ink); padding:2px 8px;}
+  table.mat th i{font-style:italic;}
+  table.mat td{width:38px; height:34px; text-align:center; border:1px solid var(--rule); border-radius:6px; color:var(--soft); background:#fff;}
+  table.mat td.one{color:var(--violet); background:rgba(90,27,166,0.10); border-color:rgba(90,27,166,0.35); font-weight:500;}
+  .rows{margin-top:14px; display:flex; flex-direction:column; gap:10px;}
+  .qrow{display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding-top:8px; border-top:1px solid var(--rule);}
+  .qname{font-size:15px; min-width:150px;}
+  .qname i{font-style:italic;}
+  .chips{display:inline-flex; flex-wrap:wrap; gap:6px;}
+  .chip{font-family:var(--serif); font-size:15px; min-width:38px; height:34px; padding:0 10px; background:#fff; border:1px solid var(--rule); border-radius:8px; color:#221d16; cursor:pointer;}
+  .chip i{font-style:italic;}
+  .chip:hover{border-color:var(--violet);}
+  .chip.on{background:var(--violet); border-color:var(--violet); color:#fff;}
+  .chip.none{font-family:var(--mono); font-size:11px; letter-spacing:.04em; color:var(--muted);}
+  .chip.none.on{color:#fff;}
+  .chip:focus-visible{outline:2px solid var(--violet); outline-offset:2px;}
+  .empty-note{font-size:12.5px; color:var(--soft); font-style:italic;}
+
+  .verdict{font-size:15px; margin:0 0 10px;}
+  .verdict.ok{color:#2f3f24;}
+  .verdict.bad{color:var(--terra);}
+  .verdict.warn{color:var(--muted); font-style:italic;}
+  .hint{font-size:13.5px; color:var(--muted); font-style:italic; margin:0;}
+  .moral{font-size:14px; margin:12px 0 0; padding:8px 12px; background:rgba(156,175,136,.18); border-left:3px solid var(--sage); border-radius:0 6px 6px 0;}
+  .moral i{font-style:italic;}
+  .words{font-size:14px; color:var(--ink); margin:6px 0 0;}
+  .words i{font-style:italic;}
+  .notes{list-style:none; padding:0; margin:8px 0 0; font-size:14px;}
+  .notes li{padding:7px 0; border-top:1px solid var(--rule);}
+  .notes li b{font-weight:500; color:var(--terra); margin-right:4px;}
+  .notes li.ok b{color:#4a5a39;}
+  .notes i{font-style:italic;}
+  .score{font-family:var(--mono); font-size:11px; letter-spacing:.06em; color:var(--soft);}
+  .score b{color:var(--violet); font-weight:500;}
+
+  .backlink-block{margin-top:44px; padding-top:16px; border-top:1px solid #e5e0d8;}
+  .backlink-block a{font-family:var(--mono); font-size:12px; letter-spacing:.06em; color:#5A1BA6; text-decoration:none;}
+  .backlink-block a:hover{text-decoration:underline;}
+  .footer{margin-top:32px; padding-top:18px; border-top:2px solid #221d16; display:flex; justify-content:space-between; align-items:baseline; gap:16px; flex-wrap:wrap; font-family:var(--mono); font-size:11px; letter-spacing:.06em; color:#6b6358;}
+  .footer a{color:#5A1BA6; text-decoration:none;}
+  .footer a:hover{text-decoration:underline;}
+  .footer-axiom{font-family:var(--serif); font-style:italic; font-size:13px; color:#8a8276; letter-spacing:0;}
+  .ineq{font-size:19px; margin:2px 0 4px;} .ineq i{font-style:italic;}
+  .setnote{font-size:17px; color:var(--violet); margin:0 0 6px;}
+  .nline{width:100%; max-width:420px; height:auto; display:block;}
+  .pieces{display:flex; flex-direction:column; gap:8px; margin-top:8px; align-items:flex-start;}
+  .piece{display:flex; align-items:center; gap:6px; flex-wrap:wrap; padding:4px 6px; border-radius:8px;}
+  .piece.bad{background:rgba(160,58,44,.10);}
+  .brk{font-family:var(--serif); font-size:22px; line-height:1; width:34px; height:36px; background:#fff; border:1px solid var(--rule); border-radius:8px; color:var(--violet); cursor:pointer;}
+  .brk:hover:not(:disabled){border-color:var(--violet);}
+  .brk:disabled{color:var(--soft); cursor:default; background:transparent;}
+  .piece select{font-family:var(--serif); font-size:16px; height:36px; padding:0 8px; border:1px solid var(--rule); border-radius:8px; background:#fff; color:#221d16;}
+  .comma{font-size:18px;}
+  .rm{font-family:var(--mono); font-size:15px; width:30px; height:30px; border:none; background:none; color:var(--soft); cursor:pointer; border-radius:6px;}
+  .rm:hover{color:var(--terra); background:rgba(160,58,44,.08);}
+  .qrow.right, .qstmt.right{background:rgba(156,175,136,.18);}
+  .qrow.wrong, .qstmt.wrong{background:rgba(160,58,44,.10);}
+  .qrow{border-radius:4px; padding:8px 6px 6px;}
+  .wit{display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .wit label{font-size:16px;} .wit i{font-style:italic;}
+  .wit input{font-family:var(--mono); font-size:14px; width:110px; height:34px; padding:0 8px; border:1px solid var(--rule); border-radius:8px; background:#fff; color:#221d16;}
+  .wit input:focus{outline:2px solid var(--violet); outline-offset:1px;}
+  .wit input:disabled{background:transparent; color:var(--soft);}
+  .qstmt{padding:10px 6px; border-top:1px solid var(--rule); border-radius:4px;}
+  .stext{font-size:15.5px; margin-bottom:8px;} .stext i{font-style:italic;}
+  .qcols{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .qlab{font-family:var(--mono); font-size:11px; letter-spacing:.06em; color:var(--soft);}
+  .qname{min-width:0;}
+  .aval{font-size:15px; color:var(--violet);} .aval i{font-style:italic;}
+  .chip i{font-style:italic;}
+</style></head>
+<body>
+<div class="wrap">
+  <header class="tool-head">
+    <div class="eyebrow">Mathematics · Tool 05</div>
+    <h1>The real numbers</h1>
+    <p class="sub">Intervals, inequalities and absolute value; supremum and infimum; and completeness, the property that separates ℝ from ℚ. Answers are checked with exact arithmetic.</p>
+  </header>
+
+  <div class="seg" id="seg" role="tablist">
+    <button data-mode="I" class="active" role="tab">Solve an inequality</button>
+    <button data-mode="T" role="tab">True or false?</button>
+    <button data-mode="S" role="tab">Supremum and infimum</button>
+    <button data-mode="E" role="tab">The ε-test</button>
+    <button data-mode="Q" role="tab">ℚ versus ℝ</button>
+  </div>
+
+  <div class="layout">
+    <div class="panel">
+      <p class="instr" id="instr"></p>
+      <div id="ex"></div>
+      <div class="actions">
+        <button class="btn primary" id="check">Check</button>
+        <button class="btn" id="reveal">Show answer</button>
+        <button class="btn" id="clear">Clear</button>
+        <div class="nav">
+          <button class="btn" id="prev" aria-label="Previous exercise">&larr;</button>
+          <span class="counter" id="counter"></span>
+          <button class="btn" id="next" aria-label="Next exercise">&rarr;</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="lbl">Feedback</div>
+      <div id="fb"></div>
+      <div class="divider"></div>
+      <div class="score" id="score"></div>
+    </div>
+  </div>
+
+  <div class="backlink-block">
+    <a href="./">&larr; Back to Mathematics</a>
+  </div>
+  <div class="footer">
+    <div>Built with Claude &middot; Amit Goyal and Herv&eacute; Cr&egrave;s &middot; <a href="mailto:amit.goyal@nyu.edu">amit.goyal@nyu.edu</a></div>
+    <div class="footer-axiom">More is preferred to less.</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* =====================================================================
+     EXACT RATIONAL ARITHMETIC (BigInt numerator / positive denominator)
+     ===================================================================== */
+  const B=BigInt;
+  function gcd(a,b){ a=a<0n?-a:a; b=b<0n?-b:b; while(b){ [a,b]=[b,a%b]; } return a; }
+  function Q(n,d){ n=B(n); d=B(d===undefined?1:d); if(d<0n){ n=-n; d=-d; } const g=gcd(n,d)||1n; return [n/g,d/g]; }
+  const add=(x,y)=>Q(x[0]*y[1]+y[0]*x[1], x[1]*y[1]);
+  const sub=(x,y)=>Q(x[0]*y[1]-y[0]*x[1], x[1]*y[1]);
+  const mul=(x,y)=>Q(x[0]*y[0], x[1]*y[1]);
+  const cmp=(x,y)=>{ const l=x[0]*y[1], r=y[0]*x[1]; return l<r?-1:(l>r?1:0); };
+  function parseQ(s){
+    s=String(s).trim().replace(/[−–]/g,"-").replace(/\s+/g,""); let m;
+    if((m=s.match(/^(-?)(\d+)\/(\d+)$/))){ if(/^0+$/.test(m[3])) return null; return Q((m[1]?-1n:1n)*B(m[2]),B(m[3])); }
+    if((m=s.match(/^(-?)(\d*)(?:\.(\d+))?$/))){ if(!m[2]&&!m[3]) return null; const fr=m[3]||""; return Q((m[1]?-1n:1n)*B((m[2]||"0")+fr), 10n**B(fr.length)); }
+    return null;
+  }
+  function fmtQ(x){
+    let d=x[1], k2=0, k5=0; while(d%2n===0n){ d/=2n; k2++; } while(d%5n===0n){ d/=5n; k5++; }
+    const neg=x[0]<0n, a=neg?-x[0]:x[0];
+    if(d===1n){ const k=Math.max(k2,k5), sc=(a*10n**B(k)/x[1]).toString().padStart(k+1,"0");
+      return (neg?"−":"")+sc.slice(0,sc.length-k)+(k?"."+sc.slice(sc.length-k):""); }
+    return (neg?"−":"")+a+"/"+x[1];
+  }
+  const fmtN=x=>(x<0?"−":"")+String(Math.abs(x));
+
+  /* =====================================================================
+     MODE I: SOLVE AN INEQUALITY
+     f decides membership (false where the expression is undefined); every
+     endpoint of the solution set is among the candidates, so testing the
+     candidates, one point in each gap and one point beyond each end is
+     complete. Candidates are integers, so all test points are exact floats.
+     ===================================================================== */
+  const iv=x=>'<i>'+x+'</i>';
+  const BANK_I = [
+    { ineq:"|"+iv("x")+" − 2| &lt; 3", f:x=>Math.abs(x-2)<3, cand:[-5,-1,1,2,3,5],
+      ev:x=>"|"+fmtN(x)+" − 2| = "+fmtN(Math.abs(x-2)),
+      ans:[{l:-1,lc:false,r:5,rc:false}],
+      moral:"|"+iv("x")+" − 2| is the distance from "+iv("x")+" to 2. The inequality asks for the points within distance 3 of 2, the open interval centred at 2 with radius 3." },
+    { ineq:"|2"+iv("x")+" + 1| ≥ 3", f:x=>Math.abs(2*x+1)>=3, cand:[-3,-2,-1,0,1,2],
+      ev:x=>"|2·"+(x<0?"("+fmtN(x)+")":fmtN(x))+" + 1| = "+fmtN(Math.abs(2*x+1)),
+      ans:[{l:-Infinity,lc:false,r:-2,rc:true},{l:1,lc:true,r:Infinity,rc:false}],
+      moral:"|"+iv("u")+"| ≥ 3 means "+iv("u")+" ≤ −3 or "+iv("u")+" ≥ 3, so the solution set has two pieces. Both endpoints are included, because equality is allowed." },
+    { ineq:"("+iv("x")+" − 1)/("+iv("x")+" + 2) ≤ 0", f:x=>x!==-2&&(x-1)/(x+2)<=0, cand:[-3,-2,-1,0,1,2],
+      ev:x=> x===-2 ? "the expression is undefined at "+iv("x")+" = −2" : "("+fmtN(x)+" − 1)/("+fmtN(x)+" + 2) = "+fmtN(Math.round((x-1)/(x+2)*1000)/1000),
+      ans:[{l:-2,lc:false,r:1,rc:true}],
+      moral:"The quotient is negative exactly when numerator and denominator have opposite signs, and zero when the numerator is zero. The endpoint 1 is included; −2 is excluded because the expression is undefined there, not because of the inequality." },
+    { ineq:"1/"+iv("x")+" &lt; 1", f:x=>x!==0&&1/x<1, cand:[-2,-1,0,1,2],
+      ev:x=> x===0 ? "1/"+iv("x")+" is undefined at "+iv("x")+" = 0" : "1/"+(x<0?"("+fmtN(x)+")":fmtN(x))+" = "+fmtN(Math.round(1/x*1000)/1000),
+      ans:[{l:-Infinity,lc:false,r:0,rc:false},{l:1,lc:false,r:Infinity,rc:false}],
+      moral:"Multiplying both sides by "+iv("x")+" gives 1 &lt; "+iv("x")+", which is valid only for "+iv("x")+" &gt; 0. For "+iv("x")+" &lt; 0 the inequality reverses, and every negative "+iv("x")+" is a solution. Never multiply an inequality by a quantity of unknown sign." },
+    { ineq:"|"+iv("x")+" − 1| + |"+iv("x")+" + 1| ≤ 4", f:x=>Math.abs(x-1)+Math.abs(x+1)<=4, cand:[-4,-2,-1,0,1,2,4],
+      ev:x=>"|"+fmtN(x)+" − 1| + |"+fmtN(x)+" + 1| = "+fmtN(Math.abs(x-1)+Math.abs(x+1)),
+      ans:[{l:-2,lc:true,r:2,rc:true}],
+      moral:"The sum is the total distance from "+iv("x")+" to 1 and to −1. Between −1 and 1 it equals 2; outside, it is 2|"+iv("x")+"|. Split into these three cases, and solve in each." }
+  ];
+
+  /* =====================================================================
+     MODE T: TRUE OR FALSE?  cx: the counterexample quoted in why (tested).
+     ===================================================================== */
+  const a_=iv("a"), b_=iv("b"), c_=iv("c"), d_=iv("d"), x_=iv("x"), y_=iv("y"), e_="ε";
+  const BANK_T = [
+    { title:"Order and squares. All letters are real numbers.", stmts:[
+      {t:"If "+a_+" &lt; "+b_+", then "+a_+"² &lt; "+b_+"².", ans:false, cx:{a:-2,b:1},
+       why:"Take "+a_+" = −2 and "+b_+" = 1: then "+a_+" &lt; "+b_+", but "+a_+"² = 4 &gt; 1 = "+b_+"²"},
+      {t:"If 0 ≤ "+a_+" &lt; "+b_+", then "+a_+"² &lt; "+b_+"².", ans:true,
+       why:b_+"² − "+a_+"² = ("+b_+" − "+a_+")("+b_+" + "+a_+"), and both factors are positive"},
+      {t:"If "+a_+"² &lt; "+b_+"², then "+a_+" &lt; "+b_+".", ans:false, cx:{a:1,b:-2},
+       why:"Take "+a_+" = 1 and "+b_+" = −2: then "+a_+"² = 1 &lt; 4 = "+b_+"², but "+a_+" &gt; "+b_},
+      {t:"If "+a_+"² &lt; "+b_+"², then |"+a_+"| &lt; |"+b_+"|.", ans:true,
+       why:a_+"² = |"+a_+"|² and "+b_+"² = |"+b_+"|²; if |"+a_+"| ≥ |"+b_+"| ≥ 0, squaring would give "+a_+"² ≥ "+b_+"²"} ],
+      moral:"Squaring preserves strict inequalities between non-negative numbers, and only between them. Squares compare absolute values, not the numbers themselves." },
+    { title:"Products and reciprocals. All letters are real numbers.", stmts:[
+      {t:"If "+a_+" &lt; "+b_+" and "+c_+" &lt; "+d_+", then "+a_+c_+" &lt; "+b_+d_+".", ans:false, cx:{a:-3,b:-1,c:-3,d:-1},
+       why:"Take "+a_+" = "+c_+" = −3 and "+b_+" = "+d_+" = −1: then "+a_+c_+" = 9 &gt; 1 = "+b_+d_},
+      {t:"If 0 &lt; "+a_+" &lt; "+b_+" and 0 &lt; "+c_+" &lt; "+d_+", then "+a_+c_+" &lt; "+b_+d_+".", ans:true,
+       why:a_+c_+" &lt; "+b_+c_+" because "+c_+" &gt; 0, and "+b_+c_+" &lt; "+b_+d_+" because "+b_+" &gt; 0"},
+      {t:"If "+a_+" &lt; "+b_+", with "+a_+", "+b_+" ≠ 0, then 1/"+a_+" &gt; 1/"+b_+".", ans:false, cx:{a:-1,b:1},
+       why:"Take "+a_+" = −1 and "+b_+" = 1: then 1/"+a_+" = −1 &lt; 1 = 1/"+b_},
+      {t:"If 0 &lt; "+a_+" &lt; "+b_+", then 1/"+a_+" &gt; 1/"+b_+".", ans:true,
+       why:"1/"+a_+" − 1/"+b_+" = ("+b_+" − "+a_+")/("+a_+b_+"), and both "+b_+" − "+a_+" and "+a_+b_+" are positive"} ],
+      moral:"Inequalities can be multiplied together, or inverted, safely only when every quantity involved is positive." },
+    { title:"Absolute value. All letters are real numbers.", stmts:[
+      {t:"|"+a_+" + "+b_+"| = |"+a_+"| + |"+b_+"|.", ans:false, cx:{a:1,b:-1},
+       why:"Take "+a_+" = 1 and "+b_+" = −1: then |"+a_+" + "+b_+"| = 0, but |"+a_+"| + |"+b_+"| = 2"},
+      {t:"|"+a_+" + "+b_+"| ≤ |"+a_+"| + |"+b_+"| (the triangle inequality).", ans:true,
+       why:"−|"+a_+"| ≤ "+a_+" ≤ |"+a_+"| and −|"+b_+"| ≤ "+b_+" ≤ |"+b_+"|; adding gives −(|"+a_+"| + |"+b_+"|) ≤ "+a_+" + "+b_+" ≤ |"+a_+"| + |"+b_+"|"},
+      {t:"|"+a_+" − "+b_+"| ≥ |"+a_+"| − |"+b_+"|.", ans:true,
+       why:"By the triangle inequality, |"+a_+"| = |("+a_+" − "+b_+") + "+b_+"| ≤ |"+a_+" − "+b_+"| + |"+b_+"|"},
+      {t:"√("+a_+"²) = "+a_+".", ans:false, cx:{a:-1},
+       why:"Take "+a_+" = −1: then √("+a_+"²) = √1 = 1 ≠ "+a_+". In general √("+a_+"²) = |"+a_+"|"} ],
+      moral:"The triangle inequality and its reverse form are the main tools for estimating |"+x_+" − "+a_+"| in limit arguments. Equality in the triangle inequality holds exactly when "+a_+b_+" ≥ 0." },
+    { title:"Distance and intervals. All letters are real numbers, and "+iv("r")+" &gt; 0.", stmts:[
+      {t:"|"+x_+" − "+a_+"| &lt; "+iv("r")+" if and only if "+a_+" − "+iv("r")+" &lt; "+x_+" &lt; "+a_+" + "+iv("r")+".", ans:true,
+       why:"|"+iv("u")+"| &lt; "+iv("r")+" means −"+iv("r")+" &lt; "+iv("u")+" &lt; "+iv("r")+"; apply this to "+iv("u")+" = "+x_+" − "+a_+", and add "+a_},
+      {t:"|"+x_+"| &gt; 2 if and only if "+x_+" &gt; 2.", ans:false, cx:{x:-3},
+       why:"Take "+x_+" = −3: then |"+x_+"| = 3 &gt; 2, but "+x_+" &lt; 2. In fact |"+x_+"| &gt; 2 means "+x_+" &lt; −2 or "+x_+" &gt; 2"},
+      {t:"If |"+x_+" − 3| ≤ 1, then 2 ≤ "+x_+" ≤ 4.", ans:true,
+       why:"|"+x_+" − 3| ≤ 1 means −1 ≤ "+x_+" − 3 ≤ 1; add 3"},
+      {t:"If |"+x_+"| &lt; 1 and |"+y_+"| &lt; 1, then |"+x_+" − "+y_+"| &lt; 1.", ans:false, cx:{x:0.9,y:-0.9},
+       why:"Take "+x_+" = 0.9 and "+y_+" = −0.9: then |"+x_+" − "+y_+"| = 1.8. The triangle inequality only gives |"+x_+" − "+y_+"| ≤ |"+x_+"| + |"+y_+"| &lt; 2"} ],
+      moral:"|"+x_+" − "+a_+"| is the distance between "+x_+" and "+a_+", so “|"+x_+" − "+a_+"| &lt; "+iv("r")+"” describes the open interval of radius "+iv("r")+" centred at "+a_+"." },
+    { title:"Arguments with ε. All letters are real numbers.", stmts:[
+      {t:"If |"+a_+"| &lt; ε for every ε &gt; 0, then "+a_+" = 0.", ans:true,
+       why:"If "+a_+" ≠ 0, then ε = |"+a_+"| is positive, and |"+a_+"| &lt; ε fails"},
+      {t:"If "+a_+" &lt; "+b_+" + ε for every ε &gt; 0, then "+a_+" ≤ "+b_+".", ans:true,
+       why:"If "+a_+" &gt; "+b_+", then ε = "+a_+" − "+b_+" is positive, and "+a_+" &lt; "+b_+" + ε fails"},
+      {t:"If "+a_+" &lt; "+b_+" + ε for every ε &gt; 0, then "+a_+" &lt; "+b_+".", ans:false, cx:{a:0,b:0},
+       why:"Take "+a_+" = "+b_+" = 0: then "+a_+" &lt; "+b_+" + ε for every ε &gt; 0, but "+a_+" &lt; "+b_+" fails. The strict inequalities only give "+a_+" ≤ "+b_},
+      {t:"If "+a_+" ≤ ε for every ε &gt; 0, then "+a_+" &lt; 0.", ans:false, cx:{a:0},
+       why:"Take "+a_+" = 0: then "+a_+" ≤ ε for every ε &gt; 0, but "+a_+" &lt; 0 fails. The correct conclusion is "+a_+" ≤ 0"} ],
+      moral:"To show that two numbers are equal, or that one is at most the other, it is enough to show it up to every ε &gt; 0. But a strict inequality for every ε yields only a weak inequality in the limit." }
+  ];
+
+  /* =====================================================================
+     MODE S: SUPREMUM AND INFIMUM (multiple choice per question)
+     ===================================================================== */
+  const DNE="does not exist";
+  const BANK_S = [
+    { set:iv("A")+" = (0, 1]",
+      mcq:[ {q:"sup "+iv("A"), opts:[{t:"1",why:"1 is an upper bound, and no smaller number is: if "+iv("u")+" &lt; 1, some element of (0, 1] exceeds "+iv("u")},{t:"0",why:"0 is not an upper bound: 1 ∈ "+iv("A")+" and 1 &gt; 0"},{t:DNE,why:iv("A")+" is nonempty and bounded above, so by completeness it has a supremum"}], ans:0},
+            {q:"inf "+iv("A"), opts:[{t:"0",why:"0 is a lower bound, and no larger number is: if "+iv("l")+" &gt; 0, the element min("+iv("l")+", 1)/2 lies below "+iv("l")},{t:"1",why:"1 is not a lower bound: ½ ∈ "+iv("A")+" and ½ &lt; 1"},{t:DNE,why:iv("A")+" is nonempty and bounded below, so it has an infimum"}], ans:0},
+            {q:"max "+iv("A"), opts:[{t:"1",why:"1 ∈ "+iv("A")+" and 1 is an upper bound"},{t:DNE,why:"1 belongs to "+iv("A")+" and is an upper bound, so it is the maximum"}], ans:0},
+            {q:"min "+iv("A"), opts:[{t:"0",why:"0 ∉ (0, 1], and a minimum must belong to the set"},{t:DNE,why:"the infimum 0 is not in "+iv("A")+"; for any "+iv("x")+" ∈ "+iv("A")+", the element "+iv("x")+"/2 is smaller"}], ans:1},
+            {q:"Set of upper bounds of "+iv("A"), opts:[{t:"[1, ∞)",why:"every "+iv("u")+" ≥ 1 is an upper bound, and no "+iv("u")+" &lt; 1 is, since 1 ∈ "+iv("A")},{t:"(1, ∞)",why:"1 itself is an upper bound, since every element of "+iv("A")+" is at most 1"},{t:"{1}",why:"2 is also an upper bound; the supremum is the least of them"}], ans:0} ],
+      moral:"The supremum is the least element of the set of upper bounds. It is the maximum exactly when it belongs to the set, as 1 does here; the infimum 0 does not, so there is no minimum." },
+    { set:iv("A")+" = {1/"+iv("n")+" : "+iv("n")+" ∈ ℕ} = {1, ½, ⅓, …}",
+      mcq:[ {q:"sup "+iv("A"), opts:[{t:"1",why:"1 ∈ "+iv("A")+" and 1/"+iv("n")+" ≤ 1 for every "+iv("n")},{t:"0",why:"0 is not an upper bound: 1 ∈ "+iv("A")},{t:DNE,why:iv("A")+" is bounded above by 1"}], ans:0},
+            {q:"inf "+iv("A"), opts:[{t:"0",why:"0 is a lower bound, and for any "+iv("l")+" &gt; 0 the Archimedean property gives "+iv("n")+" with 1/"+iv("n")+" &lt; "+iv("l")},{t:"1",why:"1 is not a lower bound: ½ ∈ "+iv("A")},{t:"½",why:"½ is not a lower bound: ⅓ ∈ "+iv("A")},{t:DNE,why:iv("A")+" is bounded below by 0"}], ans:0},
+            {q:"max "+iv("A"), opts:[{t:"1",why:"1 ∈ "+iv("A")+" and it is an upper bound"},{t:DNE,why:"1 = 1/1 belongs to "+iv("A")+" and is an upper bound"}], ans:0},
+            {q:"min "+iv("A"), opts:[{t:"0",why:"0 ∉ "+iv("A")+": 1/"+iv("n")+" &gt; 0 for every "+iv("n")},{t:DNE,why:"inf "+iv("A")+" = 0 is not attained; every 1/"+iv("n")+" is beaten by 1/("+iv("n")+" + 1)"}], ans:1} ],
+      moral:"That inf "+iv("A")+" = 0 is the Archimedean property in disguise: no positive number lies below every 1/"+iv("n")+"." },
+    { set:iv("A")+" = {(−1)<sup>"+iv("n")+"</sup>(1 − 1/"+iv("n")+") : "+iv("n")+" ∈ ℕ} = {0, ½, −⅔, ¾, −⅘, …}",
+      mcq:[ {q:"sup "+iv("A"), opts:[{t:"1",why:"every element is less than 1, and the even terms 1 − 1/"+iv("n")+" come arbitrarily close to 1"},{t:"½",why:"½ is not an upper bound: ¾ ∈ "+iv("A")},{t:DNE,why:iv("A")+" is bounded above by 1"}], ans:0},
+            {q:"inf "+iv("A"), opts:[{t:"−1",why:"every element is greater than −1, and the odd terms −(1 − 1/"+iv("n")+") come arbitrarily close to −1"},{t:"0",why:"0 is not a lower bound: −⅔ ∈ "+iv("A")},{t:"−⅔",why:"−⅔ is not a lower bound: −⅘ ∈ "+iv("A")},{t:DNE,why:iv("A")+" is bounded below by −1"}], ans:0},
+            {q:"max "+iv("A"), opts:[{t:"1",why:"1 ∉ "+iv("A")+": every element has absolute value 1 − 1/"+iv("n")+" &lt; 1"},{t:DNE,why:"sup "+iv("A")+" = 1 is not attained"}], ans:1},
+            {q:"min "+iv("A"), opts:[{t:"−1",why:"−1 ∉ "+iv("A")},{t:DNE,why:"inf "+iv("A")+" = −1 is not attained"}], ans:1} ],
+      moral:"Neither bound is attained, so neither a maximum nor a minimum exists, although the supremum and infimum both do." },
+    { set:iv("A")+" = {"+iv("x")+" ∈ ℚ : "+iv("x")+"² &lt; 2}, viewed as a subset of ℝ",
+      mcq:[ {q:"sup "+iv("A"), opts:[{t:"√2",why:"√2 is an upper bound, and between any "+iv("u")+" &lt; √2 and √2 lies a rational number, which belongs to "+iv("A")},{t:"1.5",why:"1.5 is an upper bound, but not the least: 1.45 is also one, since 1.45² = 2.1025 &gt; 2"},{t:"2",why:"2 is an upper bound, but not the least: 1.5 is also one"},{t:DNE,why:"in ℝ every nonempty set bounded above has a supremum"}], ans:0},
+            {q:"inf "+iv("A"), opts:[{t:"−√2",why:"by symmetry: "+iv("x")+" ∈ "+iv("A")+" exactly when −"+iv("x")+" ∈ "+iv("A")},{t:"0",why:"0 is not a lower bound: −1 ∈ "+iv("A")},{t:DNE,why:iv("A")+" is bounded below by −2"}], ans:0},
+            {q:"max "+iv("A"), opts:[{t:"√2",why:"√2 ∉ "+iv("A")+": it is irrational, and √2² &lt; 2 fails anyway"},{t:DNE,why:"for any "+iv("x")+" ∈ "+iv("A")+", there is a larger rational "+iv("y")+" with "+iv("y")+"² &lt; 2"}], ans:1},
+            {q:"min "+iv("A"), opts:[{t:"−√2",why:"−√2 ∉ "+iv("A")},{t:DNE,why:"the infimum −√2 is not attained"}], ans:1} ],
+      moral:"Inside ℚ this set has no least upper bound at all: every rational upper bound can be lowered. In ℝ its supremum exists and equals √2. That gap is exactly what completeness fills." },
+    { set:"ℕ = {1, 2, 3, …}",
+      mcq:[ {q:"sup ℕ", opts:[{t:DNE,why:"ℕ is not bounded above, by the Archimedean property, so it has no supremum in ℝ. Some texts write sup ℕ = +∞ as a convention"},{t:"∞",why:"∞ is not a real number. Some texts write sup ℕ = +∞, but in ℝ the supremum does not exist"}], ans:0},
+            {q:"inf ℕ", opts:[{t:"1",why:"1 ∈ ℕ and 1 ≤ "+iv("n")+" for every "+iv("n")+" ∈ ℕ"},{t:"0",why:"0 is a lower bound, but not the greatest: 1 is also one"},{t:DNE,why:"ℕ is bounded below by 1"}], ans:0},
+            {q:"max ℕ", opts:[{t:DNE,why:"for every "+iv("n")+", "+iv("n")+" + 1 ∈ ℕ is larger"},{t:"∞",why:"∞ is not an element of ℕ"}], ans:0},
+            {q:"min ℕ", opts:[{t:"1",why:"1 ∈ ℕ and it is a lower bound"},{t:"0",why:"0 ∉ ℕ under our convention ℕ = {1, 2, 3, …}"},{t:DNE,why:"1 is the minimum"}], ans:0},
+            {q:"Set of lower bounds of ℕ", opts:[{t:"(−∞, 1]",why:"every "+iv("l")+" ≤ 1 is a lower bound, and no "+iv("l")+" &gt; 1 is, since 1 ∈ ℕ"},{t:"(−∞, 1)",why:"1 itself is a lower bound"},{t:"∅",why:"0 is a lower bound, for instance"}], ans:0} ],
+      moral:"Completeness guarantees a supremum only for sets that are bounded above. ℕ is not, so it has none in ℝ; its infimum exists and is attained." }
+  ];
+
+  /* =====================================================================
+     MODE E: THE ε-TEST FOR SUPREMA
+     s is sup A iff (i) s is an upper bound and (ii) for every ε > 0 some
+     a ∈ A has a > s − ε. Witnesses are checked with exact rationals.
+     ===================================================================== */
+  const isPosInt=s=>/^\d+$/.test(String(s).trim())&&B(String(s).trim())>0n;
+  const BANK_E = [
+    { set:iv("A")+" = {1 − 1/"+iv("n")+" : "+iv("n")+" ∈ ℕ}", sLab:"1", s:{q:Q(1)}, w:"n",
+      elem:n=>sub(Q(1),Q(1,n)), eps:[Q(1,10),Q(1,100),Q(3,1000)], exists:[true,true,true], ref:["11","101","334"],
+      form:"1 − 1/"+iv("n"),
+      ub:[true,"1 − 1/"+iv("n")+" &lt; 1 for every "+iv("n")+" ∈ ℕ"],
+      gen:{opts:[
+        {t:"any "+iv("n")+" &gt; 1/ε", why:"for "+iv("n")+" &gt; 1/ε we have 1/"+iv("n")+" &lt; ε, so "+iv("a")+" = 1 − 1/"+iv("n")+" &gt; 1 − ε"},
+        {t:iv("n")+" = 1/ε", why:"1/ε need not be a natural number, and when it is, "+iv("a")+" = 1 − ε is not greater than 1 − ε"},
+        {t:"any "+iv("n")+" &gt; ε", why:"for ε = ½, "+iv("n")+" = 1 gives "+iv("a")+" = 0, which is not greater than ½"},
+        {t:"(ii) fails for some ε", why:"every ε has a witness: any "+iv("n")+" &gt; 1/ε"}], ans:0},
+      concl:[true,"1 is an upper bound by (i), and the rule “any "+iv("n")+" &gt; 1/ε” gives a witness for every ε, so (ii) holds"],
+      moral:"The witness must depend on ε: smaller ε needs larger "+iv("n")+". Condition (ii) is a ∀ε ∃"+iv("n")+" statement, like the definition of convergence." },
+    { set:iv("A")+" = [0, 1]", sLab:"0.9", s:{q:Q(9,10)}, w:"x",
+      member:x=>cmp(x,Q(0))>=0&&cmp(x,Q(1))<=0, memberWhy:"it must lie in [0, 1]",
+      eps:[Q(1,10),Q(1,100)], exists:[true,true], ref:["1","1"],
+      ub:[false,"1 ∈ "+iv("A")+" and 1 &gt; 0.9"],
+      gen:{opts:[
+        {t:iv("a")+" = 1 works for every ε", why:"1 ∈ "+iv("A")+", and 1 &gt; 0.9 − ε for every ε &gt; 0"},
+        {t:iv("a")+" = 0.9 − ε/2 works for every ε", why:"for ε = 2 this gives "+iv("a")+" = −0.1, which is not in [0, 1]"},
+        {t:"(ii) fails for some ε", why:iv("a")+" = 1 is a witness for every ε"}], ans:0},
+      concl:[false,"(ii) holds, but (i) fails: 0.9 is not an upper bound, so it is not the supremum, which is 1"],
+      moral:"Condition (ii) alone says only that "+iv("s")+" is not too large compared with the elements of "+iv("A")+". Without condition (i) it proves nothing: every number below the supremum also passes (ii)." },
+    { set:iv("A")+" = {"+iv("x")+" ∈ ℚ : "+iv("x")+"² &lt; 3}", sLab:"√3", s:{sqrt:3}, w:"x",
+      member:x=>cmp(mul(x,x),Q(3))<0, memberWhy:"its square must be less than 3",
+      eps:[Q(1,10),Q(1,100),Q(3,1000)], exists:[true,true,true], ref:["1.7","1.73","1.731"],
+      ub:[true,"if "+iv("x")+"² &lt; 3, then |"+iv("x")+"| &lt; √3, so "+iv("x")+" &lt; √3"],
+      gen:{opts:[
+        {t:"a rational "+iv("a")+" with max(0, √3 − ε) &lt; "+iv("a")+" &lt; √3, which exists because ℚ is dense in ℝ", why:"such an "+iv("a")+" is rational with 0 &lt; "+iv("a")+" &lt; √3, so "+iv("a")+"² &lt; 3 and "+iv("a")+" ∈ "+iv("A")+"; and "+iv("a")+" &gt; √3 − ε"},
+        {t:iv("a")+" = √3 − ε/2", why:"for rational ε this number is irrational, so it is not in "+iv("A")},
+        {t:iv("a")+" = 1.731 works for every ε", why:"for ε = 0.0001, √3 − ε ≈ 1.73195 exceeds 1.731"},
+        {t:"(ii) fails for some ε", why:"every ε has a rational witness, by the density of ℚ"}], ans:0},
+      concl:[true,"√3 is an upper bound by (i), and density of ℚ gives a witness for every ε, so (ii) holds"],
+      moral:"The witnesses are rational, as they must be, yet they approach the irrational supremum √3. A witness "+iv("a")+" works when "+iv("a")+"² &lt; 3 and ("+iv("a")+" + ε)² &gt; 3." },
+    { set:iv("A")+" = {"+iv("n")+"/("+iv("n")+" + 1) : "+iv("n")+" ∈ ℕ} = {½, ⅔, ¾, …}", sLab:"2", s:{q:Q(2)}, w:"n",
+      elem:n=>Q(n,n+1n), eps:[Q(1,2),Q(1,10)], exists:[false,false], ref:[null,null],
+      none:"every element is less than 1, while "+iv("s")+" − ε ≥ 1.5 here",
+      form:iv("n")+"/("+iv("n")+" + 1)",
+      ub:[true,iv("n")+"/("+iv("n")+" + 1) &lt; 1 &lt; 2"],
+      gen:{opts:[
+        {t:"(ii) fails for some ε: for ε = ½, no element exceeds 1.5", why:"every element is less than 1. One ε without a witness is enough to refute (ii)"},
+        {t:"any "+iv("n")+" &gt; 1/ε", why:"for ε = ½, "+iv("n")+" = 3 gives "+iv("a")+" = ¾, which is not greater than 1.5"}], ans:0},
+      concl:[false,"(i) holds, but (ii) fails for ε = ½, so 2 is not the supremum, which is 1"],
+      moral:"An upper bound that is too large fails condition (ii) for some ε. Here any ε ≤ 1 already defeats "+iv("s")+" = 2." },
+    { set:iv("A")+" = {(−1)<sup>"+iv("n")+"</sup>(1 − 1/"+iv("n")+") : "+iv("n")+" ∈ ℕ}", sLab:"1", s:{q:Q(1)}, w:"n",
+      elem:n=>{ const v=sub(Q(1),Q(1,n)); return n%2n===0n ? v : Q(-v[0],v[1]); },
+      eps:[Q(1,10),Q(1,100)], exists:[true,true], ref:["12","102"],
+      form:"(−1)<sup>"+iv("n")+"</sup>(1 − 1/"+iv("n")+")",
+      ub:[true,"every element has absolute value 1 − 1/"+iv("n")+" &lt; 1"],
+      gen:{opts:[
+        {t:"any even "+iv("n")+" &gt; 1/ε", why:"for even "+iv("n")+", "+iv("a")+" = 1 − 1/"+iv("n")+" &gt; 1 − ε"},
+        {t:"any "+iv("n")+" &gt; 1/ε", why:"for ε = 0.1, "+iv("n")+" = 11 gives "+iv("a")+" = −10/11, which is not greater than 0.9"},
+        {t:"(ii) fails for some ε", why:"every ε has a witness: any even "+iv("n")+" &gt; 1/ε"}], ans:0},
+      concl:[true,"1 is an upper bound by (i), and the rule “any even "+iv("n")+" &gt; 1/ε” gives a witness for every ε, so (ii) holds"],
+      moral:"Only even "+iv("n")+" give elements near 1; odd "+iv("n")+" give elements near −1. A witness must belong to the set and be close to "+iv("s")+", and here that forces "+iv("n")+" to be even." }
+  ];
+  function sMinusEps(it,e){ return it.s.sqrt ? "√"+it.s.sqrt+" − "+fmtQ(e) : fmtQ(sub(it.s.q,e)); }
+  function beats(it,a,e){ // a > s − ε, exactly
+    const t=add(a,e);
+    if(it.s.sqrt) return t[0]>0n && cmp(mul(t,t),Q(it.s.sqrt))>0;
+    return cmp(t,it.s.q)>0;
+  }
+  // Judge a witness string: {ok, text}
+  function judgeWitness(it,i,str){
+    const e=it.eps[i];
+    if(it.w==="n"){
+      if(!isPosInt(str)) return {ok:false, text:"“"+str+"” is not a natural number"};
+      const n=B(String(str).trim()), a=it.elem(n);
+      return beats(it,a,e) ? {ok:true, text:iv("n")+" = "+n+" gives "+iv("a")+" = "+fmtQ(a)+", and "+iv("a")+" &gt; "+iv("s")+" − ε = "+sMinusEps(it,e)}
+                           : {ok:false, text:iv("n")+" = "+n+" gives "+iv("a")+" = "+fmtQ(a)+", which is not greater than "+iv("s")+" − ε = "+sMinusEps(it,e)};
+    }
+    const x=parseQ(str);
+    if(!x) return {ok:false, text:"“"+str+"” is not a number; write a decimal such as 1.73 or a fraction such as 173/100"};
+    if(!it.member(x)) return {ok:false, text:iv("a")+" = "+fmtQ(x)+" is not in "+iv("A")+": "+it.memberWhy};
+    const t=add(x,e);
+    if(it.s.sqrt){
+      const sq=mul(t,t), ok=t[0]>0n&&cmp(sq,Q(it.s.sqrt))>0;
+      return {ok, text: iv("a")+" = "+fmtQ(x)+": "+iv("a")+" + ε = "+fmtQ(t)+" and ("+iv("a")+" + ε)² = "+fmtQ(sq)+(ok?" &gt; ":" ≤ ")+it.s.sqrt+", so "+iv("a")+(ok?" &gt; ":" ≤ ")+"√"+it.s.sqrt+" − ε"};
+    }
+    const ok=beats(it,x,e);
+    return {ok, text: iv("a")+" = "+fmtQ(x)+(ok?" &gt; ":" ≤ ")+iv("s")+" − ε = "+sMinusEps(it,e)};
+  }
+
+  /* =====================================================================
+     MODE Q: ℚ VERSUS ℝ
+     ===================================================================== */
+  const BANK_Q = [
+    { stmts:[
+      {t:"Every nonempty set that is bounded above has a least upper bound.", q:false, r:true,
+       why:"In ℚ: the set {"+iv("x")+" ∈ ℚ : "+iv("x")+"² &lt; 2} is bounded above, but every rational upper bound can be lowered, because its least upper bound would be √2. In ℝ: this is the completeness axiom"},
+      {t:"Every nonempty set that is bounded below has a greatest lower bound.", q:false, r:true,
+       why:"In ℚ: the same set fails, with −√2 in place of √2. In ℝ: apply completeness to the set of negatives, −"+iv("A")+" = {−"+iv("x")+" : "+iv("x")+" ∈ "+iv("A")+"}; then inf "+iv("A")+" = −sup(−"+iv("A")+")"} ],
+      moral:"The completeness axiom is the only one of the axioms of ℝ that ℚ fails. Every other difference on this page traces back to it." },
+    { stmts:[
+      {t:"Every positive number has a square root.", q:false, r:true,
+       why:"In ℚ: 2 has no rational square root. In ℝ: for "+iv("a")+" &gt; 0, the supremum of {"+iv("x")+" : "+iv("x")+"² &lt; "+iv("a")+"} is a square root of "+iv("a")},
+      {t:"The equation "+iv("x")+"² = −1 has a solution.", q:false, r:false,
+       why:"In both: "+iv("x")+"² ≥ 0 for every number "+iv("x")+" in an ordered field. Completeness fills gaps; it does not add solutions that the order forbids"} ],
+      moral:"Completeness gives existence results such as square roots of positive numbers, but only those consistent with the order." },
+    { stmts:[
+      {t:"Every bounded increasing sequence converges to a number in the set.", q:false, r:true,
+       why:"In ℚ: the decimal truncations 1, 1.4, 1.41, 1.414, … of √2 are rational, increasing and bounded by 2, but their limit √2 is not rational. In ℝ: such a sequence converges to the supremum of its terms"},
+      {t:"If [<i>a</i><sub>1</sub>, <i>b</i><sub>1</sub>] ⊇ [<i>a</i><sub>2</sub>, <i>b</i><sub>2</sub>] ⊇ … are nonempty closed intervals, then they have a common point.", q:false, r:true,
+       why:"In ℚ: take the rational intervals whose endpoints are the decimal truncations of √2 and those truncations plus 10<sup>−"+iv("n")+"</sup>; their only common real point is √2, so they share no rational point. In ℝ: sup{"+iv("a")+"<sub>"+iv("n")+"</sub>} lies in every interval (the nested interval property)"} ],
+      moral:"Monotone convergence and nested intervals are two further forms of completeness. In ℚ both fail at √2." },
+    { stmts:[
+      {t:"For every number "+iv("x")+" there is "+iv("n")+" ∈ ℕ with "+iv("n")+" &gt; "+iv("x")+".", q:true, r:true,
+       why:"In ℚ: for "+iv("x")+" = "+iv("p")+"/"+iv("q")+" with "+iv("q")+" ≥ 1, take "+iv("n")+" = |"+iv("p")+"| + 1. In ℝ: if ℕ were bounded above, "+iv("s")+" = sup ℕ would exist, and some "+iv("n")+" &gt; "+iv("s")+" − 1 would give "+iv("n")+" + 1 &gt; "+iv("s")+", a contradiction"},
+      {t:"Between any two distinct numbers there is a third.", q:true, r:true,
+       why:"In both: if "+iv("a")+" &lt; "+iv("b")+", then "+iv("a")+" &lt; ("+iv("a")+" + "+iv("b")+")/2 &lt; "+iv("b")+", and the midpoint of two rationals is rational"} ],
+      moral:"Not every property of ℝ needs completeness: density and the Archimedean property also hold in ℚ. In ℝ, though, the Archimedean property is usually proved from completeness, as above." }
+  ];
+
+  const BANK = {I:BANK_I, T:BANK_T, S:BANK_S, E:BANK_E, Q:BANK_Q};
+  const INSTR = {
+    I:"Build the solution set as a union of intervals: add an interval, choose its endpoints, and tap a bracket to switch between open and closed. The number line shows your set.",
+    T:"Decide whether each statement is true for all values of the letters. One counterexample makes a statement false.",
+    S:"Choose the supremum, infimum, maximum and minimum of the set; choose “does not exist” where there is none.",
+    E:"A number s is the supremum of A when (i) s is an upper bound of A, and (ii) for every ε > 0 there is a ∈ A with a > s − ε. Answer (i); find a witness for each sample ε, or say that none exists; choose a rule that works for every ε > 0, or say that (ii) fails; then decide. Sample values of ε can refute (ii), but they cannot establish it.",
+    Q:"For each statement, decide whether it holds in the rational numbers ℚ and whether it holds in the real numbers ℝ."
+  };
+  const FBHINT = {
+    I:"Press Check when your set is complete. A wrong set is shown a point where it differs from the solution set.",
+    T:"Answer every statement and press Check. Each answer is justified, with a counterexample for each false statement.",
+    S:"Answer every question and press Check. Each wrong choice is explained.",
+    E:"Complete every row and press Check. Witnesses are checked with exact arithmetic, so 1.73 and 173/100 are treated alike.",
+    Q:"Answer both columns for each statement and press Check. Where ℚ fails, the counterexample is given."
+  };
+
+  /* =====================================================================
+     UI
+     ===================================================================== */
+  const $=id=>document.getElementById(id);
+  const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+  const LETTERS="abcdefgh";
+  let mode="I";
+  const idx={I:0,T:0,S:0,E:0,Q:0};
+  let st={};
+  const stats={attempted:new Set(), solved:new Set(), revealed:new Set()};
+  const key=()=>mode+idx[mode];
+  const item=()=>BANK[mode][idx[mode]];
+  const markSolved=k=>{ if(!stats.revealed.has(k)) stats.solved.add(k); };
+
+  function fresh(){
+    const it=item();
+    if(mode==="I") st={pieces:[]};
+    else if(mode==="T") st={ans:{}};
+    else if(mode==="S") st={mcq:{}};
+    else if(mode==="E") st={ub:undefined, w:it.eps.map(()=>""), none:it.eps.map(()=>false), gen:undefined, concl:undefined};
+    else st={q:{}, r:{}};
+  }
+  function tf(name,cur,lab){ lab=lab||["True","False"]; return '<span class="tf"><button data-tf="'+name+'" data-val="1" class="'+(cur===true?'on':'')+'">'+lab[0]+'</button><button data-tf="'+name+'" data-val="0" class="'+(cur===false?'on':'')+'">'+lab[1]+'</button></span>'; }
+
+  /* ---------- intervals ---------- */
+  const endLab=v=> v===-Infinity ? "−∞" : v===Infinity ? "∞" : fmtN(v);
+  const pieceStr=p=>(p.lc?"[":"(")+endLab(p.l)+", "+endLab(p.r)+(p.rc?"]":")");
+  const setStr=ps=>ps.length ? ps.slice().sort((p,q)=>p.l-q.l||p.r-q.r).map(pieceStr).join(" ∪ ") : "∅";
+  const inPiece=(p,x)=>(p.l<x||(p.lc&&p.l===x))&&(x<p.r||(p.rc&&x===p.r));
+  const inSet=(ps,x)=>ps.some(p=>inPiece(p,x));
+  function badPiece(p){ return p.l>p.r || (p.l===p.r && !(p.lc&&p.rc)); }
+  function testPoints(c){
+    const pts=c.slice(); for(let i=0;i+1<c.length;i++) pts.push((c[i]+c[i+1])/2);
+    pts.push(c[0]-1, c[c.length-1]+1); return pts;
+  }
+  function numberLine(it,ps){
+    const c=it.cand, lo=c[0]-1, hi=c[c.length-1]+1, W=320, L=18, R=W-18, y=34;
+    const X=v=> v===-Infinity ? L : v===Infinity ? R : L+(v-lo)/(hi-lo)*(R-L);
+    let g='<line x1="'+L+'" y1="'+y+'" x2="'+R+'" y2="'+y+'" stroke="#221d16" stroke-width="1.4"/>'+
+      '<path d="M'+(R+6)+' '+y+' l-8 -4 v8 z" fill="#221d16"/><path d="M'+(L-6)+' '+y+' l8 -4 v8 z" fill="#221d16"/>';
+    c.forEach(v=>{ g+='<line x1="'+X(v)+'" y1="'+(y-4)+'" x2="'+X(v)+'" y2="'+(y+4)+'" stroke="#221d16" stroke-width="1.2"/><text x="'+X(v)+'" y="'+(y+20)+'" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#6b6358">'+endLab(v)+'</text>'; });
+    ps.filter(p=>!badPiece(p)).forEach(p=>{
+      g+='<line x1="'+X(p.l)+'" y1="'+y+'" x2="'+X(p.r)+'" y2="'+y+'" stroke="#5A1BA6" stroke-width="5" stroke-linecap="butt" opacity="0.85"/>';
+      [[p.l,p.lc],[p.r,p.rc]].forEach(([v,cl])=>{ if(Math.abs(v)!==Infinity) g+='<circle cx="'+X(v)+'" cy="'+y+'" r="5.5" fill="'+(cl?'#5A1BA6':'#fffdf9')+'" stroke="#5A1BA6" stroke-width="2"/>'; });
+    });
+    return '<svg xmlns="http://www.w3.org/2000/svg" class="nline" viewBox="0 0 '+W+' 62" role="img" aria-label="Number line showing your set">'+g+'</svg>';
+  }
+
+  /* ---------- multiple choice (as in Tool 03) ---------- */
+  function mcqHTML(list){
+    return '<div class="rows">'+list.map((m,i)=>{
+      const order=m.opts.map((_,j)=>j).sort((a,b)=>m.opts[a].t.localeCompare(m.opts[b].t));
+      return '<div class="qrow"><span class="qname">'+m.q+'</span><span class="chips">'+order.map(j=>'<button class="chip'+(st.mcq[i]===j?' on':'')+'" data-mcq="'+i+'" data-opt="'+j+'">'+m.opts[j].t+'</button>').join("")+'</span></div>'; }).join("")+'</div>';
+  }
+
+  function avalText(it,str,none){
+    if(none||!String(str).trim()) return "";
+    return isPosInt(str) ? "→ <i>a</i> = "+fmtQ(it.elem(B(String(str).trim()))) : "→ not a natural number";
+  }
+  function render(){
+    $("instr").textContent=INSTR[mode];
+    const it=item(); let h="";
+    if(mode==="I"){
+      h+='<div class="lbl">Solve</div><div class="ineq">'+it.ineq+'</div>';
+      h+='<div class="lbl" style="margin-top:12px;">Your solution set</div><div class="setnote">'+setStr(st.pieces)+'</div>';
+      h+='<div class="diagram">'+numberLine(it,st.pieces)+'</div><div class="pieces">';
+      st.pieces.forEach((p,i)=>{
+        const opt=(v,cur)=>'<option value="'+v+'"'+(v===cur?' selected':'')+'>'+endLab(v)+'</option>';
+        h+='<div class="piece'+(badPiece(p)?' bad':'')+'"><button class="brk" data-brk="l'+i+'"'+(p.l===-Infinity?' disabled':'')+'>'+(p.lc?'[':'(')+'</button>'+
+          '<select data-end="l'+i+'" aria-label="left endpoint">'+[-Infinity].concat(it.cand).map(v=>opt(v,p.l)).join("")+'</select><span class="comma">,</span>'+
+          '<select data-end="r'+i+'" aria-label="right endpoint">'+it.cand.concat([Infinity]).map(v=>opt(v,p.r)).join("")+'</select>'+
+          '<button class="brk" data-brk="r'+i+'"'+(p.r===Infinity?' disabled':'')+'>'+(p.rc?']':')')+'</button>'+
+          '<button class="rm" data-rm="'+i+'" aria-label="remove this interval">×</button></div>';
+      });
+      h+='<button class="btn" data-addpiece="1">+ Add an interval</button></div>';
+      if(!st.pieces.length) h+='<p class="empty-note" style="margin-top:6px">With no intervals, your set is empty.</p>';
+    } else if(mode==="T"){
+      h+='<p class="gcap" style="text-align:left;margin:0">'+it.title+'</p><ul class="stmts">';
+      it.stmts.forEach((s,i)=>{ h+='<li class="stmt" data-row="'+i+'"><span class="let">('+LETTERS[i]+')</span><span class="fm">'+s.t+'</span>'+tf(String(i),st.ans[i])+'</li>'; });
+      h+='</ul>';
+    } else if(mode==="S"){
+      h+='<div class="lbl">The set</div><div class="ineq">'+it.set+'</div>'+mcqHTML(it.mcq);
+    } else if(mode==="E"){
+      h+='<div class="lbl">The set and the candidate</div><div class="ineq">'+it.set+', &ensp;<i>s</i> = '+it.sLab+'</div><div class="rows">';
+      h+='<div class="qrow" data-row="ub"><span class="qname">(i) <i>s</i> is an upper bound of <i>A</i></span>'+tf("ub",st.ub)+'</div>';
+      it.eps.forEach((e,i)=>{
+        h+='<div class="qrow" data-row="e'+i+'"><span class="qname">(ii) ε = '+fmtQ(e)+': find <i>a</i> ∈ <i>A</i> with <i>a</i> &gt; '+sMinusEps(it,e)+'</span>'+
+           '<span class="wit"><label>'+(it.w==="n"?'<i>a</i> = '+it.form+', with <i>n</i> =':'<i>a</i> =')+' <input type="text" inputmode="'+(it.w==="n"?'numeric':'decimal')+'" data-w="'+i+'" value="'+esc(st.w[i])+'" '+(st.none[i]?'disabled':'')+' autocomplete="off"></label>'+
+           (it.w==="n"?'<span class="aval" data-aval="'+i+'">'+avalText(it,st.w[i],st.none[i])+'</span>':'')+
+           '<button class="chip none'+(st.none[i]?' on':'')+'" data-none="'+i+'">None exists</button></span></div>';
+      });
+      const order=it.gen.opts.map((_,j)=>j).sort((p,q)=>it.gen.opts[p].t.replace(/<[^>]+>/g,"").localeCompare(it.gen.opts[q].t.replace(/<[^>]+>/g,"")));
+      h+='<div class="qrow" data-row="gen"><span class="qname">(ii) for every ε &gt; 0: choose the rule that always gives a witness, or say that (ii) fails</span><span class="chips">'+order.map(j=>'<button class="chip'+(st.gen===j?' on':'')+'" data-gen="'+j+'">'+it.gen.opts[j].t+'</button>').join("")+'</span></div>';
+      h+='<div class="qrow" data-row="concl"><span class="qname">So, by (i) and (ii): <i>s</i> = sup <i>A</i></span>'+tf("concl",st.concl)+'</div></div>';
+      if(it.w==="n") h+='<p class="gcap" style="text-align:left">Choose an index <i>n</i>; the element <i>a</i> it gives is shown beside it.</p>';
+      else h+='<p class="gcap" style="text-align:left">Enter <i>a</i> as a decimal, such as 1.73, or a fraction, such as 173/100.</p>';
+    } else {
+      it.stmts.forEach((s,i)=>{
+        h+='<div class="qstmt" data-row="'+i+'"><div class="stext">'+s.t+'</div><div class="qcols"><span class="qlab">In ℚ</span>'+tf("q"+i,st.q[i],["Holds","Fails"])+'<span class="qlab">In ℝ</span>'+tf("r"+i,st.r[i],["Holds","Fails"])+'</div></div>';
+      });
+    }
+    $("ex").innerHTML=h;
+    $("counter").textContent=(idx[mode]+1)+" / "+BANK[mode].length;
+    $("prev").disabled=idx[mode]===0;
+    $("next").disabled=idx[mode]===BANK[mode].length-1;
+    renderScore();
+  }
+  function renderScore(){
+    const a=stats.attempted.size, s=stats.solved.size;
+    $("score").innerHTML = a===0 ? "No exercises attempted yet." : "Solved <b>"+s+"</b> of "+a+" attempted this session.";
+  }
+  const setFB=h=>{ $("fb").innerHTML=h; };
+  const resetFB=()=>setFB('<p class="hint">'+FBHINT[mode]+'</p>');
+
+  $("ex").addEventListener("click",e=>{
+    const b=e.target.closest("button"); if(!b||b.disabled) return;
+    const it=item();
+    if(b.dataset.addpiece){ const c=it.cand; st.pieces.push({l:c[0],lc:false,r:c[c.length-1],rc:false}); }
+    else if(b.dataset.rm!==undefined) st.pieces.splice(+b.dataset.rm,1);
+    else if(b.dataset.brk){ const p=st.pieces[+b.dataset.brk.slice(1)]; if(b.dataset.brk[0]==="l") p.lc=!p.lc; else p.rc=!p.rc; }
+    else if(b.dataset.tf){ const n=b.dataset.tf, v=b.dataset.val==="1";
+      if(mode==="T") st.ans[n]=v; else if(mode==="E") st[n]=v; else st[n[0]][n.slice(1)]=v; }
+    else if(b.dataset.mcq!==undefined) st.mcq[b.dataset.mcq]=+b.dataset.opt;
+    else if(b.dataset.none!==undefined){ const i=+b.dataset.none; st.none[i]=!st.none[i]; }
+    else if(b.dataset.gen!==undefined) st.gen=+b.dataset.gen;
+    else return;
+    render();
+  });
+  $("ex").addEventListener("change",e=>{
+    const s=e.target.closest("select"); if(!s) return;
+    const p=st.pieces[+s.dataset.end.slice(1)], v=Number(s.value);
+    if(s.dataset.end[0]==="l"){ p.l=v; if(v===-Infinity) p.lc=false; } else { p.r=v; if(v===Infinity) p.rc=false; }
+    render();
+  });
+  $("ex").addEventListener("input",e=>{ const t=e.target.closest("input[data-w]"); if(!t) return; const i=+t.dataset.w; st.w[i]=t.value;
+    const sp=document.querySelector('[data-aval="'+i+'"]'); if(sp) sp.innerHTML=avalText(item(),t.value,st.none[i]); });
+  $("seg").addEventListener("click",e=>{
+    const b=e.target.closest("button[data-mode]"); if(!b) return;
+    mode=b.dataset.mode;
+    $("seg").querySelectorAll("button").forEach(x=>x.classList.toggle("active",x===b));
+    load();
+  });
+  $("prev").addEventListener("click",()=>{ if(idx[mode]>0){ idx[mode]--; load(); } });
+  $("next").addEventListener("click",()=>{ if(idx[mode]<BANK[mode].length-1){ idx[mode]++; load(); } });
+  $("clear").addEventListener("click",()=>{ fresh(); resetFB(); render(); });
+  $("check").addEventListener("click",check);
+  $("reveal").addEventListener("click",reveal);
+  function load(){ fresh(); resetFB(); render(); }
+
+  /* =====================================================================
+     CHECKING
+     ===================================================================== */
+  function listFeedback(rows){
+    let h='<ul class="notes">', right=0;
+    rows.forEach(r=>{ if(r.ok) right++; h+='<li class="'+(r.ok?'ok':'')+'"><b>'+r.head+'</b> '+cap(r.text)+'.</li>'; });
+    return {html:h+'</ul>', right};
+  }
+  const verdict=(right,n)=>'<p class="verdict '+(right===n?'ok':'bad')+'">'+right+' of '+n+' correct.</p>';
+
+  // First point where the student's set and the solution set differ (endpoints first).
+  function intervalDiff(it,ps){
+    const c=it.cand, gaps=testPoints(c).slice(c.length);
+    for(const x of c.concat(gaps)){ const s=it.f(x), m=inSet(ps,x); if(s!==m) return {x, inSol:s}; }
+    return null;
+  }
+  function checkI(it,k){
+    const bad=st.pieces.findIndex(badPiece);
+    if(bad>=0){ setFB('<p class="verdict warn">The interval '+pieceStr(st.pieces[bad])+' is empty. Check its endpoints and brackets.</p>'); return; }
+    stats.attempted.add(k);
+    const d=intervalDiff(it,st.pieces);
+    if(!d){ markSolved(k); setFB('<p class="verdict ok">Correct: the solution set is '+setStr(it.ans)+'.</p><p class="moral">'+it.moral+'</p>'); return; }
+    const xs=fmtN(d.x);
+    setFB('<p class="verdict bad">Not the solution set.</p><p class="words">'+(d.inSol
+      ? iv("x")+" = "+xs+" satisfies the inequality ("+it.ev(d.x)+"), but it is not in your set."
+      : iv("x")+" = "+xs+" is in your set, but it does not satisfy the inequality: "+it.ev(d.x)+".")+'</p>');
+  }
+  function tRows(it,judged){
+    return it.stmts.map((s,i)=>{ const ok=!judged||judged[i]===s.ans;
+      return {ok, head:'('+LETTERS[i]+') '+(s.ans?'True':'False')+(ok?'':', not '+(judged[i]?'true':'false'))+'.', text:s.why}; });
+  }
+  function checkT(it,k){
+    if(it.stmts.some((_,i)=>st.ans[i]===undefined)){ setFB('<p class="verdict warn">Answer every statement first.</p>'); return; }
+    stats.attempted.add(k);
+    const rows=tRows(it,st.ans);
+    document.querySelectorAll("#ex .stmt").forEach((r,i)=>{ r.classList.remove("right","wrong"); r.classList.add(rows[i].ok?"right":"wrong"); });
+    const {html,right}=listFeedback(rows); if(right===rows.length) markSolved(k);
+    setFB(verdict(right,rows.length)+html+(right===rows.length?'<p class="moral">'+it.moral+'</p>':''));
+  }
+  function mcqRows(list,judged){
+    return list.map((m,i)=>{ const a=m.opts[m.ans], c=judged?judged[i]:m.ans, ok=c===m.ans;
+      return {ok, head:m.q+' '+(m.q.indexOf("Set of")===0?'is ':'')+(m.q.indexOf("Set of")===0?a.t:(a.t===DNE?'does not exist':'= '+a.t))+'.', text: ok ? a.why : 'not “'+m.opts[c].t+'”: '+m.opts[c].why+'. '+cap(a.why)}; });
+  }
+  function checkS(it,k){
+    if(it.mcq.some((_,i)=>st.mcq[i]===undefined)){ setFB('<p class="verdict warn">Answer every question first.</p>'); return; }
+    stats.attempted.add(k);
+    const rows=mcqRows(it.mcq,st.mcq), {html,right}=listFeedback(rows); if(right===rows.length) markSolved(k);
+    setFB(verdict(right,rows.length)+html+(right===rows.length?'<p class="moral">'+it.moral+'</p>':''));
+  }
+  function eRows(it,judged){
+    const rows=[];
+    { const ok=!judged||judged.ub===it.ub[0];
+      rows.push({ok, head:'(i) '+(it.ub[0]?'Yes':'No')+', '+iv("s")+' is '+(it.ub[0]?'':'not ')+'an upper bound'+(ok?'':' (you said '+(judged.ub?'yes':'no')+')')+'.', text:it.ub[1]}); }
+    it.eps.forEach((e,i)=>{
+      const head='(ii) ε = '+fmtQ(e)+':';
+      if(!judged){ rows.push({ok:true, head, text: it.exists[i] ? "for example, "+judgeWitness(it,i,it.ref[i]).text : "no witness exists: "+it.none}); return; }
+      if(judged.none[i]){
+        rows.push(it.exists[i] ? {ok:false, head, text:"a witness exists: for example, "+judgeWitness(it,i,it.ref[i]).text}
+                               : {ok:true, head, text:"right, no witness exists: "+it.none});
+      } else {
+        const j=judgeWitness(it,i,judged.w[i]);
+        rows.push(j.ok ? {ok:true, head, text:"valid: "+j.text}
+                       : {ok:false, head, text:j.text+(it.exists[i] ? "; try another witness" : "; in fact no witness exists: "+it.none)});
+      }
+    });
+    { const g=it.gen, c=judged?judged.gen:g.ans, ok=c===g.ans, a=g.opts[g.ans];
+      rows.push({ok, head:'(ii) for every ε: '+a.t+'.', text: ok ? a.why : 'not “'+g.opts[c].t+'”: '+g.opts[c].why+'. '+cap(a.why)}); }
+    { const ok=!judged||judged.concl===it.concl[0];
+      rows.push({ok, head:iv("s")+(it.concl[0]?' = ':' ≠ ')+'sup '+iv("A")+(ok?'':' (you said the opposite)')+'.', text:it.concl[1]}); }
+    return rows;
+  }
+  function checkE(it,k){
+    if(st.ub===undefined||st.gen===undefined||st.concl===undefined||it.eps.some((_,i)=>!st.none[i]&&!String(st.w[i]).trim())){ setFB('<p class="verdict warn">Complete every row first: answer (i), give a witness or choose “None exists” for each ε, choose a rule for every ε, and decide.</p>'); return; }
+    stats.attempted.add(k);
+    const rows=eRows(it,st);
+    document.querySelectorAll("#ex .qrow").forEach((r,i)=>{ r.classList.remove("right","wrong"); r.classList.add(rows[i].ok?"right":"wrong"); });
+    const {html,right}=listFeedback(rows); if(right===rows.length) markSolved(k);
+    setFB(verdict(right,rows.length)+html+(right===rows.length?'<p class="moral">'+it.moral+'</p>':''));
+  }
+  function qRows(it,judged){
+    const w=b=>b?'holds':'fails';
+    return it.stmts.map((s,i)=>{ const ok=!judged||(judged.q[i]===s.q&&judged.r[i]===s.r);
+      return {ok, head:'('+LETTERS[i]+') In ℚ it '+w(s.q)+'; in ℝ it '+w(s.r)+'.', text:s.why}; });
+  }
+  function checkQ(it,k){
+    if(it.stmts.some((_,i)=>st.q[i]===undefined||st.r[i]===undefined)){ setFB('<p class="verdict warn">Answer both columns for every statement first.</p>'); return; }
+    stats.attempted.add(k);
+    const rows=qRows(it,st);
+    document.querySelectorAll("#ex .qstmt").forEach((r,i)=>{ r.classList.remove("right","wrong"); r.classList.add(rows[i].ok?"right":"wrong"); });
+    const {html,right}=listFeedback(rows); if(right===rows.length) markSolved(k);
+    setFB(verdict(right,rows.length)+html+(right===rows.length?'<p class="moral">'+it.moral+'</p>':''));
+  }
+  function check(){ const it=item(), k=key(); ({I:checkI,T:checkT,S:checkS,E:checkE,Q:checkQ})[mode](it,k); renderScore(); }
+
+  function reveal(){
+    const it=item(), k=key();
+    stats.attempted.add(k); stats.revealed.add(k); stats.solved.delete(k);
+    const note='<p class="verdict warn">The answer is shown. It counts as revealed, not solved.</p>';
+    if(mode==="I"){ st.pieces=it.ans.map(p=>Object.assign({},p)); render(); setFB(note+'<p class="words">The solution set is '+setStr(it.ans)+'.</p><p class="moral">'+it.moral+'</p>'); }
+    else if(mode==="T"){ it.stmts.forEach((s,i)=>{ st.ans[i]=s.ans; }); render(); setFB(note+listFeedback(tRows(it,null)).html+'<p class="moral">'+it.moral+'</p>'); }
+    else if(mode==="S"){ it.mcq.forEach((m,i)=>{ st.mcq[i]=m.ans; }); render(); setFB(note+listFeedback(mcqRows(it.mcq,null)).html+'<p class="moral">'+it.moral+'</p>'); }
+    else if(mode==="E"){ st.ub=it.ub[0]; st.gen=it.gen.ans; st.concl=it.concl[0]; st.w=it.ref.map(r=>r||""); st.none=it.exists.map(x=>!x); render(); setFB(note+listFeedback(eRows(it,null)).html+'<p class="moral">'+it.moral+'</p>'); }
+    else { it.stmts.forEach((s,i)=>{ st.q[i]=s.q; st.r[i]=s.r; }); render(); setFB(note+listFeedback(qRows(it,null)).html+'<p class="moral">'+it.moral+'</p>'); }
+    renderScore();
+  }
+
+  window.__t5={BANK,Q,parseQ,fmtQ,cmp,mul,add,sub,judgeWitness,beats,intervalDiff,inSet,testPoints,setStr,state:()=>st};
+  load();
+})();
+</script>
+</body>
+</html>
