@@ -23,4 +23,6 @@ export const collections = {
   micro_exercises: col('./src/content/microeconomics/exercises'),
   math_notes: col('./src/content/mathematics/notes'),
   math_exercises: col('./src/content/mathematics/exercises'),
+  calc_notes: col('./src/content/calculus-optimisation/notes'),
+  calc_exercises: col('./src/content/calculus-optimisation/exercises'),
 };
